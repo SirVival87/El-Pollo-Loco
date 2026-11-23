@@ -16,10 +16,12 @@ class ThrowableObject extends MovableObject {
     velocityY = -380;
     gravity = 1350;
 
+    /** Lädt die Bilder für Rotation und Splash vor. */
     static preloadSprites() {
         DrawableObject.preloadImages([...this.rotationImages, ...this.splashImages]);
     }
 
+    /** Erstellt das Projektil aus einer eingesammelten Flasche. */
     constructor(x, y, direction, bottle) {
         super();
         this.x = x;
@@ -29,15 +31,18 @@ class ThrowableObject extends MovableObject {
         this.damage = bottle.damage;
     }
 
+    /** Prüft, ob die Flasche gerade zerplatzt. */
     get isSplashing() {
         return this.splashTime !== null;
     }
 
+    /** Prüft, ob das letzte Splash-Bild beendet ist. */
     get hasFinishedSplash() {
         return this.isSplashing &&
             this.splashTime >= ThrowableObject.splashImages.length * ThrowableObject.frameDuration;
     }
 
+    /** Aktualisiert Flugbahn oder Splash-Zeit. */
     update(deltaTime) {
         if (this.isSplashing) {
             this.splashTime += deltaTime;
@@ -50,6 +55,7 @@ class ThrowableObject extends MovableObject {
         this.velocityY += this.gravity * deltaTime;
     }
 
+    /** Berechnet die Flugbahn zurück zu Pepes aktueller Position. */
     reflect(target) {
         this.isReflected = true;
         this.velocityX *= -1;
@@ -64,29 +70,38 @@ class ThrowableObject extends MovableObject {
         this.velocityY = distanceY / travelTime - 0.5 * this.gravity * travelTime;
     }
 
+    /** Startet die Splash-Animation. */
     splash() {
         this.splashTime = 0;
     }
 
+    /** Prüft, ob die Flasche im Fallen den Boden erreicht hat. */
     hasLanded() {
         return this.velocityY >= 0 && this.y + this.height >= SalsaBottle.groundY;
     }
 
+    /** Zeichnet das aktuelle Rotationsbild der Flasche oder den Splash. */
     draw(ctx) {
-        const { frameDuration, rotationImages, splashImages } = ThrowableObject;
         if (this.isSplashing) {
-            const index = Math.min(Math.floor(this.splashTime / frameDuration), splashImages.length - 1);
-            const image = DrawableObject.getImage(splashImages[index]);
-            if (image.naturalWidth > 0) {
-                ctx.drawImage(image, 70, 29, 354, 355, this.x - 18, this.y - 18, 80, 80);
-            }
+            this.drawSplash(ctx);
             return;
         }
 
+        const { frameDuration, rotationImages } = ThrowableObject;
         const index = Math.floor(this.flightTime / frameDuration) % rotationImages.length;
         const image = DrawableObject.getImage(rotationImages[index]);
         if (image.naturalWidth > 0) {
             ctx.drawImage(image, 54, 54, 292, 300, this.x, this.y, this.width, this.height);
+        }
+    }
+
+    /** Zeichnet das Splash-Bild für die aktuelle Animationszeit. */
+    drawSplash(ctx) {
+        const { frameDuration, splashImages } = ThrowableObject;
+        const index = Math.min(Math.floor(this.splashTime / frameDuration), splashImages.length - 1);
+        const image = DrawableObject.getImage(splashImages[index]);
+        if (image.naturalWidth > 0) {
+            ctx.drawImage(image, 70, 29, 354, 355, this.x - 18, this.y - 18, 80, 80);
         }
     }
 }

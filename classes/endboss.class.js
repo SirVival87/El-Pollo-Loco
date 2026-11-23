@@ -61,6 +61,7 @@ class Endboss extends MovableObject {
         'img/4_enemie_boss_chicken/5_dead/G26.png',
     ]
 
+    /** Setzt die Startposition des Bosses und lädt seine Sprites. */
     constructor(x = 720) {
         super();
         this.x = x;
@@ -75,6 +76,7 @@ class Endboss extends MovableObject {
         this.loadImage(this.WALKING_IMAGES[0]);
     }
 
+    /** Aktualisiert den Wechsel zwischen Patrouille und Sprungangriff. */
     updateJump(deltaTime) {
         const previousElapsed = this.jumpElapsed;
         this.jumpElapsed += deltaTime;
@@ -86,7 +88,11 @@ class Endboss extends MovableObject {
 
         this.attackStartX ??= this.x;
         this.otherDirection = false;
+        this.updateAttackPose();
+    }
 
+    /** Steuert den Sprung nach vorne und das Warten auf den Rücksprung. */
+    updateAttackPose() {
         if (this.jumpElapsed < this.jumpDuration) {
             this.setJumpPose(this.jumpElapsed / this.jumpDuration, this.attackStartX, -this.jumpDistance);
             return;
@@ -95,9 +101,13 @@ class Endboss extends MovableObject {
         const forwardX = this.attackStartX - this.jumpDistance;
         if (this.jumpElapsed < this.returnJumpAt) {
             this.setGroundPose(forwardX);
-            return;
+        } else {
+            this.updateReturnJump(forwardX);
         }
+    }
 
+    /** Steuert die Rückkehr zum Startpunkt des Angriffs. */
+    updateReturnJump(forwardX) {
         const returnElapsed = this.jumpElapsed - this.returnJumpAt;
         if (returnElapsed < this.jumpDuration) {
             this.setJumpPose(returnElapsed / this.jumpDuration, forwardX, this.jumpDistance);
@@ -110,6 +120,7 @@ class Endboss extends MovableObject {
         this.jumpElapsed = -this.getJumpDelay();
     }
 
+    /** Bewegt den Boss auf seiner Patrouillenstrecke hin und zurück. */
     updatePatrol(deltaTime) {
         const roundTrip = this.patrolDistance * 2;
         this.patrolTravel = (this.patrolTravel + this.patrolSpeed * deltaTime) % roundTrip;
@@ -118,34 +129,34 @@ class Endboss extends MovableObject {
         this.x = this.homeX - distanceFromHome;
     }
 
+    /** Gibt die zufällige Wartezeit bis zum nächsten Angriff in Sekunden zurück. */
     getJumpDelay() {
         return 2 + Math.random() * 3;
     }
 
+    /** Positioniert den Boss auf seinem Sprungbogen. */
     setJumpPose(progress, startX, distance) {
         this.isJumping = true;
         this.x = startX + distance * progress;
         this.y = this.groundY - Math.sin(progress * Math.PI) * this.jumpHeight;
     }
 
+    /** Setzt den Boss an der angegebenen Stelle auf den Boden. */
     setGroundPose(x) {
         this.isJumping = false;
         this.x = x;
         this.y = this.groundY;
     }
 
+    /** Zeigt abhängig vom Zustand die passende Animation des Bosses. */
     updateAnimation(deltaTime) {
         if (this.isDead()) {
-            this.deathElapsed = this.deathElapsed === null ? 0 : this.deathElapsed + deltaTime;
-            const frameDuration = this.deathDuration / this.DEAD_IMAGES.length;
-            this.showAnimationFrame(this.DEAD_IMAGES, this.deathElapsed, frameDuration);
+            this.updateDeathAnimation(deltaTime);
         } else if (this.isHurt()) {
             const sinceHit = (performance.now() - this.lastHit) / 1000;
             this.showAnimationFrame(this.HURT_IMAGES, sinceHit, 0.2);
         } else if (this.isJumping) {
-            const jumpTime = this.jumpElapsed < this.returnJumpAt ?
-                this.jumpElapsed : this.jumpElapsed - this.returnJumpAt;
-            this.showAnimationFrame(this.ATTACK_IMAGES, jumpTime, this.jumpDuration / this.ATTACK_IMAGES.length);
+            this.updateAttackAnimation();
         } else if (this.jumpElapsed >= 0) {
             this.showAnimationFrame(this.ALERT_IMAGES, this.jumpElapsed - this.jumpDuration, 0.12, true);
         } else {
@@ -153,12 +164,28 @@ class Endboss extends MovableObject {
         }
     }
 
+    /** Spielt die Todesbilder bis zum letzten Bild einmal ab. */
+    updateDeathAnimation(deltaTime) {
+        this.deathElapsed = this.deathElapsed === null ? 0 : this.deathElapsed + deltaTime;
+        const frameDuration = this.deathDuration / this.DEAD_IMAGES.length;
+        this.showAnimationFrame(this.DEAD_IMAGES, this.deathElapsed, frameDuration);
+    }
+
+    /** Wählt das Bild für die aktuelle Phase des Sprungs. */
+    updateAttackAnimation() {
+        const jumpTime = this.jumpElapsed < this.returnJumpAt ?
+            this.jumpElapsed : this.jumpElapsed - this.returnJumpAt;
+        this.showAnimationFrame(this.ATTACK_IMAGES, jumpTime, this.jumpDuration / this.ATTACK_IMAGES.length);
+    }
+
+    /** Berechnet das Sprite aus der verstrichenen Animationszeit. */
     showAnimationFrame(images, elapsed, frameDuration, loop = false) {
         const frame = Math.floor(elapsed / frameDuration);
         const index = loop ? frame % images.length : Math.min(frame, images.length - 1);
         this.loadImage(images[index]);
     }
 
+    /** Prüft, ob die vorgesehene Dauer der Todesanimation abgelaufen ist. */
     hasFinishedDeathAnimation() {
         return this.deathElapsed >= this.deathDuration;
     }

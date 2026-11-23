@@ -1,0 +1,74 @@
+.game-dialog {
+    box-sizing: border-box;
+    width: min(440px, calc(100% - 24px));
+    max-height: calc(var(--viewport-height) - var(--safe-top) - var(--safe-bottom) - 24px);
+    margin: auto;
+    padding: 20px;
+    border: 2px solid #ffd061;
+    border-radius: 14px;
+    background: #3e2519;
+    color: #fff2c4;
+    box-shadow: 0 12px 38px #0009;
+    font: 1.08rem / 1.35 Boogaloo, sans-serif;
+}
+
+.game-dialog::backdrop {
+    background: #160d08b5;
+}
+
+.game-dialog h2 {
+    margin: 0 50px 10px 0;
+    color: #ffda71;
+    font-weight: normal;
+}
+
+.game-dialog a {
+    color: #ffdc7f;
+}
+
+.dialog-close-form {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin: 0;
+}
+
+.dialog-close-form .dialog-close {
+    width: 44px;
+    padding: 0;
+}
+
+.game-instructions {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.controls-guide {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 3px 12px;
+    margin: 14px 0;
+}
+
+.controls-guide dd {
+    margin: 0;
+}
+
+.volume-label,
+.settings-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+#volume-input {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0 0 12px;
+    accent-color: #ffd061;
+}
+
+.settings-actions {
+    justify-content: flex-end;
+}

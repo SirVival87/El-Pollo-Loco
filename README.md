@@ -12,9 +12,18 @@ Ein 2D-Jump-and-Run als JavaScript-Portfolio-Projekt mit HTML5 Canvas, responsiv
 | Springen | W, Pfeil nach oben oder Leertaste |
 | Flasche werfen | E oder F |
 
-Die Bildschirmtasten unterstützen Maus und Touch. Im mobilen Querformat liegen die Laufpfeile links neben der Leinwand und die Aktionstasten rechts. Ton und Vollbild lassen sich oben rechts umschalten.
+Die Bildschirmtasten erscheinen auf Geräten mit Touch-Eingabe. Im mobilen Querformat liegen die Laufpfeile links neben der Leinwand und die Aktionstasten rechts. Ton und Vollbild lassen sich oben rechts umschalten.
 
-Sammle Münzen und Flaschen. Normale Hühner kannst du durch einen Sprung von oben besiegen. Der Endboss ist am Ende des Levels. Triff ihn mit Flaschen, wenn er am Boden ist.
+Sammle Münzen und Flaschen. Normale Hühner lassen sich mit einer Flasche oder einem Sprung von oben besiegen. Der Endboss ist am Ende des Levels. Triff ihn mit Flaschen, wenn er am Boden ist.
+
+## Projektstruktur
+
+- **script.js** startet und beendet Spielrunden und koordiniert die Pause.
+- **classes/** enthält Spielfiguren, Spielwelt, Rendering, Flaschen und Audio.
+- **levels/** enthält den Aufbau und die Platzierungsdaten des Levels.
+- **js/** enthält die Einstellungen und die Bildschirmsteuerung.
+- **styles/** enthält die Stylesheets für Spielfläche, Steuerung und Dialoge.
+- **img/** und **fonts/** enthalten die Grafiken und Schriften.
 
 ## Grafiken und Schriften
 

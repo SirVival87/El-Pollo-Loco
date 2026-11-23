@@ -61,10 +61,12 @@ class Character extends MovableObject {
     bottles = [];
     coinCount = 0;
 
+    /** Gibt die Anzahl der verfügbaren Flaschen zurück. */
     get bottleCount() {
         return this.bottles.length;
     }
 
+    /** Lädt Pepes Sprites für Bewegung, Schaden und Tod vor. */
     constructor() {
         super();
         DrawableObject.preloadImages([
@@ -78,32 +80,42 @@ class Character extends MovableObject {
         this.loadImage(this.WALKING_IMAGES[0]);
     }
 
+    /** Verarbeitet Pepes Eingabe und führt die Kamera nach. */
     updateMovement() {
         if (!this.world || this.world.win !== null || this.isDead()) return;
 
-        const { keyboard, level, audio } = this.world;
         const previousX = this.x;
+        this.updateHorizontalMovement();
+        this.world.cameraX = -this.x + 125;
+        const moved = this.x !== previousX;
+        if (moved) this.idleElapsed = 0;
+        this.updateJumpInput(moved);
+    }
 
-        if ((keyboard.consumeTap("right") || keyboard.isPressed("right")) && this.x < level.level_end_x) {
+    /** Bewegt Pepe bis zur jeweiligen Levelgrenze. */
+    updateHorizontalMovement() {
+        const { keyboard, level } = this.world;
+        if ((keyboard.consumeTap('right') || keyboard.isPressed('right')) && this.x < level.levelEndX) {
             this.moveRight();
         }
-
-        if ((keyboard.consumeTap("left") || keyboard.isPressed("left")) && this.x > this.leftBoundary) {
+        if ((keyboard.consumeTap('left') || keyboard.isPressed('left')) && this.x > this.leftBoundary) {
             this.moveLeft();
         }
+    }
 
-        this.world.camera_x = -this.x + 125;
-        if (this.x !== previousX) this.idleElapsed = 0;
-
-        if (keyboard.isPressedOnce("up") && !this.isAboveGround()) {
+    /** Verarbeitet Sprünge und spielt Schritte am Boden ab. */
+    updateJumpInput(moved) {
+        const { keyboard, audio } = this.world;
+        if (keyboard.isPressedOnce('up') && !this.isAboveGround()) {
             this.idleElapsed = 0;
             this.jump();
             audio?.play('jump');
-        } else if (this.x !== previousX && !this.isAboveGround() && this.speedY === 0) {
+        } else if (moved && !this.isAboveGround() && this.speedY === 0) {
             audio?.play('sandStep');
         }
     }
 
+    /** Aktualisiert die Schwerkraft im festen Physikintervall. */
     updatePhysics(deltaTime) {
         const gravityStep = 1 / 25;
         this.gravityElapsed += deltaTime;
@@ -113,6 +125,7 @@ class Character extends MovableObject {
         this.updateGravity();
     }
 
+    /** Prüft beim Fallen, ob Pepes Füße ein Huhn treffen. */
     updateGravity() {
         const previousFeet = this.getCollisionBounds().bottom;
         super.updateGravity();
@@ -122,6 +135,7 @@ class Character extends MovableObject {
         }
     }
 
+    /** Zeichnet Pepe bei einer Pause mit der Long-Idle-Animation. */
     draw(ctx) {
         if (this.world?.paused && this.world.win === null && !this.isDead()) {
             const elapsed = this.world.pauseAnimationElapsed;
@@ -134,11 +148,13 @@ class Character extends MovableObject {
         super.draw(ctx);
     }
 
+    /** Prüft, ob Pepes letztes Todesbild angezeigt wird. */
     hasFinishedDeathAnimation() {
         const lastImage = this.DEAD_IMAGES.at(-1);
         return this.img === DrawableObject.getImage(lastImage);
     }
 
+    /** Aktualisiert Pepes Bild und erfasst die Dauer seiner Untätigkeit. */
     updateAnimation(deltaTime) {
         const images = this.getAnimationImages();
         this.idleElapsed = images === this.IDLE_IMAGES ? this.idleElapsed + deltaTime : 0;
@@ -146,6 +162,7 @@ class Character extends MovableObject {
         this.playAnimation(images, deltaTime, frameDuration, images !== this.DEAD_IMAGES);
     }
 
+    /** Wählt die Bildfolge mit der höchsten Priorität für Pepes aktuellen Zustand. */
     getAnimationImages() {
         if (this.isDead()) return this.DEAD_IMAGES;
         if (this.isHurt()) return this.HURT_IMAGES;

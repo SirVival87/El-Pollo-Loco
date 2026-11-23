@@ -8,6 +8,7 @@ class StatusBar extends DrawableObject {
     bottleIcon = 'img/7_statusbars/3_icons/icon_salsa_bottle.png';
     coinIcon = 'img/7_statusbars/3_icons/icon_coin.png';
 
+    /** Bereitet die Symbole und den Lebensbalken für Pepe vor. */
     constructor(character) {
         super();
         this.character = character;
@@ -16,6 +17,7 @@ class StatusBar extends DrawableObject {
         document.fonts.load('32px Boogaloo');
     }
 
+    /** Zeichnet den Lebensbalken und beide Sammelzähler. */
     draw(ctx) {
         this.drawHealth(ctx);
 
@@ -31,21 +33,23 @@ class StatusBar extends DrawableObject {
         ctx.restore();
     }
 
+    /** Zeichnet den Grundbalken und berechnet den aktuellen Füllstand. */
     drawHealth(ctx) {
         if (this.img.naturalWidth === 0) return;
-
         super.draw(ctx);
 
         const full = DrawableObject.getImage(this.fullHealthPath);
         const healthRatio = Math.max(0, Math.min(1, this.character.energy / this.character.maxEnergy));
-        if (full.naturalWidth === 0 || healthRatio === 0) return;
+        if (full.naturalWidth > 0 && healthRatio > 0) this.drawHealthFill(ctx, full, healthRatio);
+    }
 
+    /** Zeichnet den zum Füllstand passenden Ausschnitt der Balkengrafik. */
+    drawHealthFill(ctx, full, healthRatio) {
         // Horizontal bounds of the fill area in the original PNG.
         const fillLeft = 79;
         const fillRight = 586;
         const sourceWidth = (fillRight - fillLeft) * healthRatio;
         const scale = this.width / full.naturalWidth;
-
         ctx.drawImage(
             full,
             fillLeft, 0, sourceWidth, full.naturalHeight,
@@ -53,6 +57,7 @@ class StatusBar extends DrawableObject {
         );
     }
 
+    /** Zeichnet Symbol und Anzahl und gibt die Position des nächsten Zählers zurück. */
     drawCounter(ctx, iconPath, count, x) {
         const icon = DrawableObject.getImage(iconPath);
         if (icon.naturalWidth > 0) {

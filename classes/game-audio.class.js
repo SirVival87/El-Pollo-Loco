@@ -86,6 +86,7 @@ class GameAudio {
         },
     };
 
+    /** Liest Lautstärke und Tonstatus aus dem lokalen Speicher. */
     constructor() {
         try {
             const preferences = JSON.parse(localStorage.getItem(this.storageKey));
@@ -96,6 +97,7 @@ class GameAudio {
         }
     }
 
+    /** Speichert die aktuelle Lautstärke und den Tonstatus. */
     savePreferences() {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify({
@@ -107,6 +109,7 @@ class GameAudio {
         }
     }
 
+    /** Initialisiert die Audioausgabe nach einer Benutzereingabe. */
     unlock() {
         if (!this.enabled || !globalThis.AudioContext) return;
 
@@ -122,6 +125,7 @@ class GameAudio {
         }
     }
 
+    /** Schaltet den Spielton dauerhaft ein oder aus. */
     setEnabled(enabled) {
         this.enabled = enabled;
         if (enabled) this.unlock();
@@ -129,6 +133,7 @@ class GameAudio {
         this.savePreferences();
     }
 
+    /** Setzt und speichert eine Lautstärke zwischen 0 und 100. */
     setVolume(volume) {
         if (!Number.isFinite(volume)) return;
         this.volume = Math.max(0, Math.min(100, volume));
@@ -136,15 +141,18 @@ class GameAudio {
         this.savePreferences();
     }
 
+    /** Stellt die Audioausgabe während einer Spielpause stumm. */
     setPaused(paused) {
         this.paused = paused;
         this.updateVolume();
     }
 
+    /** Überträgt Lautstärke, Tonstatus und Pause auf die Audioausgabe. */
     updateVolume() {
         if (this.output) this.output.gain.value = this.enabled && !this.paused ? 0.2 * this.volume / 100 : 0;
     }
 
+    /** Erzeugt eine Sekunde weißes Rauschen für die Soundeffekte. */
     createNoiseBuffer() {
         const { sampleRate } = this.context;
         const buffer = this.context.createBuffer(1, sampleRate, sampleRate);
@@ -155,6 +163,7 @@ class GameAudio {
         return buffer;
     }
 
+    /** Spielt einen bekannten Soundeffekt unter Berücksichtigung seiner Wiederholrate. */
     play(name) {
         const cue = this.cues[name];
         if (!cue || !this.enabled || this.paused || this.context?.state !== 'running') return;
@@ -170,6 +179,7 @@ class GameAudio {
         for (const noise of cue.noise ?? []) this.playNoise(noise, now);
     }
 
+    /** Spielt eine Tonspur mit gleitender Frequenz. */
     playTone(layer, now) {
         const { start, end, duration, delay = 0, shape = 'triangle' } = layer;
         const startTime = now + delay;
@@ -180,6 +190,7 @@ class GameAudio {
         this.playLayer(oscillator, oscillator, layer, startTime);
     }
 
+    /** Spielt eine gefilterte Rauschspur. */
     playNoise(layer, now) {
         const { start, end, duration, delay = 0 } = layer;
         const startTime = now + delay;
@@ -195,13 +206,10 @@ class GameAudio {
         this.playLayer(source, filter, layer, startTime, offset);
     }
 
+    /** Startet die Audiospur und trennt ihre Knoten nach dem Abspielen. */
     playLayer(source, tail, layer, startTime, offset) {
-        const { duration, volume, attack = 0.004 } = layer;
-        const endTime = startTime + duration;
-        const envelope = this.context.createGain();
-        envelope.gain.setValueAtTime(0.001, startTime);
-        envelope.gain.exponentialRampToValueAtTime(volume, startTime + attack);
-        envelope.gain.exponentialRampToValueAtTime(0.001, endTime);
+        const endTime = startTime + layer.duration;
+        const envelope = this.createEnvelope(layer, startTime, endTime);
         tail.connect(envelope);
         envelope.connect(this.output);
         source.onended = () => {
@@ -212,5 +220,15 @@ class GameAudio {
         if (offset === undefined) source.start(startTime);
         else source.start(startTime, offset);
         source.stop(endTime);
+    }
+
+    /** Erzeugt den Lautstärkeverlauf einer Audiospur. */
+    createEnvelope(layer, startTime, endTime) {
+        const { volume, attack = 0.004 } = layer;
+        const envelope = this.context.createGain();
+        envelope.gain.setValueAtTime(0.001, startTime);
+        envelope.gain.exponentialRampToValueAtTime(volume, startTime + attack);
+        envelope.gain.exponentialRampToValueAtTime(0.001, endTime);
+        return envelope;
     }
 }

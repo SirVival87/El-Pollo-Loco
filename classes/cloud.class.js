@@ -5,11 +5,13 @@ class Cloud extends MovableObject {
     width = 720;
     speed = 60; //px pro Second
 
+    /** Setzt Bild und Startposition einer Wolke. */
     constructor(imagePath, x) {
         super().loadImage(imagePath);
         this.x = x;
     }
 
+    /** Bewegt die Wolke anhand der verstrichenen Spielzeit. */
     moveClouds(deltaTime) {
         this.x -= this.speed * deltaTime; // Adjust for frame rate
     }

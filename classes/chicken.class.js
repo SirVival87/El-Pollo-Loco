@@ -6,6 +6,7 @@ class Chicken extends MovableObject {
     static hitboxOffset = { left: 1, top: 4, right: 2, bottom: 4 };
 
     leftBorder = -720;
+    /** Erstellt ein Huhn mit einem Bewegungsbereich und zufälliger Laufrichtung. */
     constructor(x = 200 + Math.random() * 500, rightBorder = 1440) {
         super();
         const type = this.constructor;
@@ -18,7 +19,11 @@ class Chicken extends MovableObject {
         this.speed = (0.3 + Math.random() * 0.25) * type.speedMultiplier;
         this.direction = Math.random() < 0.5 ? -1 : 1;
         this.otherDirection = this.direction === 1;
+        this.loadSprites(type);
+    }
 
+    /** Lädt die Laufbilder und das Todesbild des jeweiligen Hühnertyps. */
+    loadSprites(type) {
         this.WALKING_IMAGES = [1, 2, 3].map(frame =>
             `img/3_enemies_chicken/${type.spriteFolder}/1_walk/${frame}_w.png`
         );
@@ -27,6 +32,7 @@ class Chicken extends MovableObject {
         this.loadImage(this.WALKING_IMAGES[0]);
     }
 
+    /** Zeigt das Todesbild eines Huhns an, falls der Typ besiegbar ist. */
     die() {
         const deadImage = this.constructor.deadImage;
         if (!deadImage) return;
@@ -36,6 +42,7 @@ class Chicken extends MovableObject {
         this.loadImage(deadImage);
     }
 
+    /** Bewegt das Huhn und aktualisiert seine Laufanimation. */
     update(deltaTime) {
         if (this.isDead()) return;
 

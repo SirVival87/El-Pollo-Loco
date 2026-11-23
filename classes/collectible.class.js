@@ -1,4 +1,5 @@
 class Collectible extends DrawableObject {
+    /** Setzt Position, Bild und Ausschnitt des Sammelobjekts. */
     constructor(x, y, sprite) {
         super();
         this.x = x;
@@ -9,6 +10,7 @@ class Collectible extends DrawableObject {
         this.loadImage(sprite.path);
     }
 
+    /** Zeichnet den für das Sammelobjekt festgelegten Bildausschnitt. */
     draw(ctx) {
         if (this.img.naturalWidth === 0) return;
 
@@ -27,6 +29,7 @@ class SalsaBottle extends Collectible {
 
     damage = SalsaBottle.damage;
 
+    /** Platziert eine Flasche standardmäßig auf dem Sand. */
     constructor(x, y = SalsaBottle.groundY - SalsaBottle.height) {
         super(x, y, {
             path: 'img/6_salsa_bottle/1_salsa_bottle_on_ground.png',

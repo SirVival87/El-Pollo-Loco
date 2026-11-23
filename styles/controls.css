@@ -1,0 +1,191 @@
+.game-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.game-controls .game-button:not([hidden]) {
+    position: relative;
+    left: auto;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    padding: 0;
+    transform: none;
+}
+
+.game-controls .game-button:active {
+    transform: translateY(3px);
+}
+
+.game-controls svg {
+    width: 23px;
+    height: 23px;
+}
+
+.game-controls .icon-pressed,
+.game-controls [aria-pressed="true"] .icon-default {
+    display: none;
+}
+
+.game-controls [aria-pressed="true"] .icon-pressed {
+    display: inline;
+}
+
+.play-controls {
+    display: none;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    height: var(--play-controls-height);
+    padding: 7px clamp(5px, 1.2vw, 14px) 10px;
+    background: linear-gradient(#522e1a, #2c180f);
+}
+
+.play-control-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(5px, 1vw, 12px);
+    width: min(44%, 285px);
+}
+
+.play-control {
+    position: static;
+    display: grid;
+    grid-template-columns: auto auto;
+    place-content: center;
+    align-items: center;
+    gap: 3px 7px;
+    min-width: 0;
+    padding: 4px 2px;
+    transform: none;
+    font-size: 1.2rem;
+    touch-action: none;
+    user-select: none;
+}
+
+.play-control:not(:disabled):active {
+    transform: translateY(3px);
+}
+
+.play-control:disabled {
+    cursor: default;
+}
+
+.play-control:focus-visible {
+    outline-offset: -3px;
+}
+
+.play-control svg {
+    width: 22px;
+    height: 22px;
+    justify-self: center;
+}
+
+.play-control-keys {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: center;
+    gap: 3px;
+}
+
+.play-control-keys kbd {
+    min-width: 13px;
+    padding: 0 2px;
+    border: 1px solid #933f18;
+    border-radius: 4px;
+    background: #ffefb6;
+    font: 600 0.69rem / 1.35 system-ui, sans-serif;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .play-control {
+        grid-template-columns: 1fr;
+    }
+
+    .play-control-label {
+        display: none;
+    }
+}
+
+@media (any-pointer: coarse) {
+    .game-stage {
+        --play-controls-height: 78px;
+    }
+
+    .play-controls {
+        display: flex;
+    }
+}
+
+@media (orientation: landscape) and (any-pointer: coarse) {
+    body {
+        --page-padding-block: 4px;
+        gap: 4px;
+    }
+
+    .game-title {
+        width: min(230px, 35%);
+        font-size: clamp(1.2rem, 3vw, 1.65rem);
+        white-space: nowrap;
+    }
+
+    .game-stage {
+        --control-rail: clamp(58px, 13vw, 108px);
+        --rail-gap: clamp(4px, 0.8vw, 10px);
+        --canvas-width-limit: calc(max(100px, var(--available-height)) * 1.5);
+        width: min(1040px, 100%, calc(var(--canvas-width-limit) + 2 * (var(--control-rail) + var(--rail-gap))));
+        background: linear-gradient(#522e1a, #2c180f);
+    }
+
+    .game-stage,
+    .game-stage:is(:fullscreen, .viewport-fullscreen) {
+        display: grid;
+        grid-template-areas: "movement canvas actions";
+        grid-template-columns:
+            var(--control-rail)
+            minmax(0, min(var(--canvas-width-limit), calc(100% - 2 * (var(--control-rail) + var(--rail-gap)))))
+            var(--control-rail);
+        align-items: center;
+        justify-content: center;
+        column-gap: var(--rail-gap);
+    }
+
+
+    .game-viewport,
+    .game-stage:is(:fullscreen, .viewport-fullscreen) .game-viewport {
+        grid-area: canvas;
+        width: 100%;
+    }
+
+    .play-controls {
+        display: contents;
+    }
+
+    .play-control-group {
+        grid-template-columns: minmax(0, 1fr);
+        box-sizing: border-box;
+        width: 100%;
+        padding-inline: 6px;
+    }
+
+    .play-control-group:first-child {
+        grid-area: movement;
+    }
+
+    .play-control-group:last-child {
+        grid-area: actions;
+    }
+
+    .play-control {
+        grid-template-columns: 1fr;
+        min-height: 58px;
+    }
+
+    .play-control-label {
+        display: none;
+    }
+}
