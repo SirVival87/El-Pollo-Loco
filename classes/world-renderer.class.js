@@ -35,13 +35,16 @@ class WorldRenderer {
      * @param {World} world - Aktuelle Spielwelt mit den zu zeichnenden Objekten.
      */
     drawScene(world) {
-        const { level, character, bottleController } = world;
+        const { level, character, boss, bottleController } = world;
         this.drawObjects(level.backgroundObjects);
         this.drawObjects(level.clouds);
         level.bottles.forEach(bottle => bottle.draw(this.ctx));
         level.coins.forEach(coin => coin.draw(this.ctx));
+        if (boss) this.drawObject(boss);
         this.drawObject(character);
-        this.drawObjects(level.enemies);
+        level.enemies.forEach(enemy => {
+            if (enemy !== boss) this.drawObject(enemy);
+        });
         bottleController.activeBottle?.draw(this.ctx);
     }
 
