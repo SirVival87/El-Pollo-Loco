@@ -4,7 +4,8 @@ class GameAudio {
     enabled = true;
     volume = 50;
     musicVolume = 50;
-    roundActive = false;
+    orientationBlocked = false;
+    resultMusicTimer = null;
     storageKey = 'el-pollo-loco-audio';
     paused = false;
     lastPlayed = new Map();
@@ -170,12 +171,17 @@ class GameAudio {
         this.updateVolume();
         this.noiseBuffer = this.createNoiseBuffer();
 
-        // Beim direkten Start aus index.html spielt das Element die lokale Datei selbst ab.
-        if (location.protocol !== 'file:') {
-            this.musicGain = this.context.createGain();
-            this.context.createMediaElementSource(this.music).connect(this.musicGain);
-            this.musicGain.connect(this.context.destination);
-        }
+        if (location.protocol !== 'file:') this.connectMusicOutput();
+    }
+
+    /** Bindet die Musik an einen eigenen Audioausgang mit regelbarer Lautstärke. */
+    connectMusicOutput() {
+        this.musicGain = this.context.createGain();
+        this.context.createMediaElementSource(this.music).connect(this.musicGain);
+        this.musicGain.connect(this.context.destination);
+        this.music.volume = 1;
+        this.music.muted = false;
+        this.updateMusicVolume();
     }
 
     /** Schaltet den Spielton dauerhaft ein oder aus. */
@@ -208,27 +214,44 @@ class GameAudio {
         return Math.max(0, Math.min(100, volume));
     }
 
-    /** Bereitet den Ton für eine neue Runde vor und startet die Musik von vorn. */
-    startRound() {
-        this.roundActive = true;
-        this.paused = false;
-        this.music.currentTime = 0;
+    /** Nutzt eine Benutzereingabe, um die Audioausgabe freizuschalten. */
+    startPlayback() {
         this.unlock();
-        this.updateVolume();
         this.syncMusicPlayback();
     }
 
-    /** Stoppt die Hintergrundmusik am Ende der Runde. */
-    endRound() {
-        this.roundActive = false;
+    /** Spielt den passenden Endsound und gibt ihm Vorrang vor der Musik. */
+    playResult(won) {
         this.setPaused(false);
-        this.music.currentTime = 0;
+        const name = won ? 'victory' : 'gameOver';
+        if (this.canPlayEffects() && this.volume > 0 && this.context?.state === 'running') {
+            this.muteMusicDuringCue(name);
+        }
+        this.play(name);
+    }
+
+    /** Überblendet die Musik für die Laufzeit des Endsignals. */
+    muteMusicDuringCue(name) {
+        const duration = Math.max(...this.cues[name].tones.map(tone => (tone.delay ?? 0) + tone.duration));
+        clearTimeout(this.resultMusicTimer);
+        this.resultMusicTimer = setTimeout(() => {
+            this.resultMusicTimer = null;
+            this.updateMusicVolume();
+        }, duration * 1000);
+        this.updateMusicVolume();
+    }
+
+    /** Sperrt die Audioausgabe, solange die Drehaufforderung sichtbar ist. */
+    setOrientationBlocked(blocked) {
+        this.orientationBlocked = blocked;
+        this.updateVolume();
+        this.syncMusicPlayback();
     }
 
     /** Stellt die Audioausgabe während einer Spielpause stumm. */
     setPaused(paused) {
         this.paused = paused;
-        if (!paused && this.roundActive) this.unlock();
+        if (!paused && this.context?.state === 'suspended') this.unlock();
         this.updateVolume();
         this.syncMusicPlayback();
     }
@@ -236,7 +259,7 @@ class GameAudio {
     /** Startet oder pausiert die Musik entsprechend dem Spiel- und Tonstatus. */
     syncMusicPlayback() {
         this.updateMusicVolume();
-        if (!this.enabled || !this.roundActive || this.paused) {
+        if (!this.enabled || this.paused || this.orientationBlocked || document.hidden) {
             this.music.pause();
             return;
         }
@@ -245,7 +268,7 @@ class GameAudio {
 
     /** Überträgt die gewünschte Musiklautstärke auf den aktiven Audioausgang. */
     updateMusicVolume() {
-        const volume = this.getVolumeGain(this.musicVolume);
+        const volume = this.resultMusicTimer === null ? this.getVolumeGain(this.musicVolume) : 0;
         if (this.musicGain) {
             this.musicGain.gain.value = volume;
         } else {
@@ -254,11 +277,16 @@ class GameAudio {
         }
     }
 
+    /** Prüft, ob der aktuelle Spiel- und Seitenzustand Soundeffekte erlaubt. */
+    canPlayEffects() {
+        return this.enabled && !this.paused && !this.orientationBlocked && !document.hidden;
+    }
+
     /** Überträgt Lautstärke, Tonstatus und Pause auf die Audioausgabe. */
     updateVolume() {
         if (!this.output) return;
         const gain = 0.2 * this.getVolumeGain(this.volume);
-        this.output.gain.value = this.enabled && !this.paused ? gain : 0;
+        this.output.gain.value = this.canPlayEffects() ? gain : 0;
     }
 
     /** Bildet die Reglerposition ab, sodass die Mitte der früheren Lautstärke bei 10 % entspricht. */
@@ -281,7 +309,7 @@ class GameAudio {
     /** Spielt einen bekannten Soundeffekt unter Berücksichtigung seiner Wiederholrate. */
     play(name) {
         const cue = this.cues[name];
-        if (!cue || !this.enabled || this.paused || this.context?.state !== 'running') return;
+        if (!cue || !this.canPlayEffects() || this.context?.state !== 'running') return;
 
         const now = this.context.currentTime;
         if (cue.interval) {

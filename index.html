@@ -40,6 +40,7 @@
 
                         <button class="game-button" id="start-button" type="button">Start</button>
                     </div>
+                    <a class="start-impressum" href="impressum.html" target="_blank" rel="noopener">Impressum</a>
                 </div>
                 <div class="end-actions" id="end-actions" hidden>
                     <button class="game-button" id="restart-button" type="button">Neustart</button>
@@ -99,16 +100,8 @@
                     <input id="music-volume-input" class="volume-input" type="range" min="0" max="100" value="50">
                     <div class="settings-actions">
                         <button class="game-button" id="give-up-button" type="button" hidden>Aufgeben</button>
-                        <a id="impressum-link" href="#impressum-dialog">Impressum</a>
+                        <a id="impressum-link" href="impressum.html" target="_blank" rel="noopener">Impressum</a>
                     </div>
-                </dialog>
-                <dialog class="game-dialog" id="impressum-dialog" aria-labelledby="impressum-title">
-                    <form method="dialog" class="dialog-close-form">
-                        <button class="game-button dialog-close" aria-label="Impressum schließen">×</button>
-                    </form>
-                    <h2 id="impressum-title">Impressum</h2>
-                    <p>El Pollo Loco ist ein privates Lern- und Portfolio-Projekt.</p>
-                    <p>Projekt und Kontakt: <a href="https://github.com/SirVival87/El-Pollo-Loco">El Pollo Loco auf GitHub</a> und <a href="https://github.com/SirVival87">SirVival87</a>.</p>
                 </dialog>
             </div>
             <div class="play-controls" role="group" aria-label="Spielsteuerung">
@@ -147,6 +140,15 @@
             </div>
         </main>
     </div>
+    <section id="rotation-notice" class="rotation-notice" tabindex="-1" aria-labelledby="rotation-title">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="17" y="25" width="40" height="24" rx="4"/>
+            <path d="M8 30a17 17 0 0 1 17-17h13m-6-6 6 6-6 6"/>
+        </svg>
+        <h2 id="rotation-title">Bitte drehe dein Gerät</h2>
+        <p>El Pollo Loco wird im Querformat gespielt.</p>
+        <a href="impressum.html" target="_blank" rel="noopener">Impressum</a>
+    </section>
     <audio id="background-music" src="audio/mexico-mexican-mariachi-music.mp3" preload="none" loop></audio>
 </body>
 </html>

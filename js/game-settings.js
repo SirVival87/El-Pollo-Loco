@@ -3,7 +3,6 @@ const fullscreenButton = document.getElementById('fullscreen-button');
 const soundButton = document.getElementById('sound-button');
 const settingsButton = document.getElementById('settings-button');
 const settingsDialog = document.getElementById('settings-dialog');
-const impressumDialog = document.getElementById('impressum-dialog');
 const volumeInput = document.getElementById('volume-input');
 const volumeValue = document.getElementById('volume-value');
 const musicVolumeInput = document.getElementById('music-volume-input');
@@ -94,21 +93,9 @@ function focusGameAfterClick(event) {
     }
 }
 
-/** Prüft, ob ein Einstellungsdialog den Tastaturfokus beansprucht. */
-function isSettingsOpen() {
-    return settingsDialog.open || impressumDialog.open;
-}
-
-/** Wechselt aus den Einstellungen zum Impressum. */
-function openImpressum(event) {
-    event.preventDefault();
-    settingsDialog.close();
-    impressumDialog.showModal();
-}
-
 /** Beendet das Vollbild-Ersatzlayout mit Escape. */
 function exitFallbackFullscreen(event) {
-    if (isSettingsOpen() || event.key !== 'Escape' ||
+    if (settingsDialog.open || event.key !== 'Escape' ||
         !gameStage.classList.contains('viewport-fullscreen')) return;
     gameStage.classList.remove('viewport-fullscreen');
     updateFullscreenButton();
@@ -119,9 +106,7 @@ function connectGameSettings() {
     giveUpButton.addEventListener('click', returnToStart);
     settingsButton.addEventListener('click', openSettings);
     connectVolumeControls();
-    /** Bindet das Impressum und das Schließen beider Dialoge. */
-    connectDialogs();
-    /** Bindet Ton- und Vollbildsteuerung an die Werkzeugleiste. */
+    closeOnBackdrop(settingsDialog);
     connectToolbar();
 }
 
@@ -135,13 +120,7 @@ function connectVolumeControls() {
     musicVolumeInput.addEventListener('input', updateMusicVolume);
 }
 
-function connectDialogs() {
-    document.getElementById('impressum-link').addEventListener('click', openImpressum);
-    impressumDialog.addEventListener('close', () => settingsDialog.showModal());
-    closeOnBackdrop(settingsDialog);
-    closeOnBackdrop(impressumDialog);
-}
-
+/** Bindet Ton- und Vollbildsteuerung an die Werkzeugleiste. */
 function connectToolbar() {
     updateSoundButton();
     soundButton.addEventListener('click', toggleSound);
