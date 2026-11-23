@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>El Pollo Loco</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="style.css">
@@ -26,67 +26,69 @@
 </head>
 <body>
     <h1 class="game-title">El Pollo Loco</h1>
-    <main class="game-stage" id="game-stage">
-        <div class="game-viewport">
-            <canvas id="canvas" width="720" height="480" tabindex="-1" aria-label="El Pollo Loco Spielfeld"></canvas>
-            <div class="start-screen" id="start-screen">
-                <img src="img/9_intro_outro_screens/start/startscreen_1.png" alt="">
-                <div class="start-intro">
+    <div class="game-layout">
+        <main class="game-stage" id="game-stage">
+            <div class="game-viewport">
+                <canvas id="canvas" width="720" height="480" tabindex="-1" aria-label="El Pollo Loco Spielfeld"></canvas>
+                <div class="start-screen" id="start-screen">
+                    <img src="img/9_intro_outro_screens/start/startscreen_1.png" alt="">
+                    <div class="start-intro">
 
-                    <button class="game-button" id="start-button" type="button">Start</button>
+                        <button class="game-button" id="start-button" type="button">Start</button>
+                    </div>
+                </div>
+                <button class="game-button restart-button" id="restart-button" type="button" hidden>Neustart</button>
+                <div class="game-controls">
+                    <button class="game-button" id="sound-button" type="button" aria-label="Spielton" aria-pressed="true" title="Spielton ausschalten">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 5 6 9H3v6h3l5 4z"/>
+                            <path class="icon-default" d="m16 9 5 6m0-6-5 6"/>
+                            <path class="icon-pressed" d="M15 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12"/>
+                        </svg>
+                    </button>
+                    <button class="game-button" id="fullscreen-button" type="button" aria-label="Vollbild" aria-pressed="false" title="Vollbild einschalten">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path class="icon-default" d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/>
+                            <path class="icon-pressed" d="M3 9h6V3m6 0v6h6M3 15h6v6m6 0v-6h6"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
-            <button class="game-button restart-button" id="restart-button" type="button" hidden>Neustart</button>
-            <div class="game-controls">
-                <button class="game-button" id="sound-button" type="button" aria-label="Spielton" aria-pressed="true" title="Spielton ausschalten">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M11 5 6 9H3v6h3l5 4z"/>
-                        <path class="icon-default" d="m16 9 5 6m0-6-5 6"/>
-                        <path class="icon-pressed" d="M15 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12"/>
-                    </svg>
-                </button>
-                <button class="game-button" id="fullscreen-button" type="button" aria-label="Vollbild" aria-pressed="false" title="Vollbild einschalten">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path class="icon-default" d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/>
-                        <path class="icon-pressed" d="M3 9h6V3m6 0v6h6M3 15h6v6m6 0v-6h6"/>
-                    </svg>
-                </button>
+            <div class="play-controls" role="group" aria-label="Spielsteuerung">
+                <div class="play-control-group" role="group" aria-label="Laufen">
+                    <button class="game-button play-control" type="button" data-game-action="left" aria-label="Links laufen" aria-keyshortcuts="A ArrowLeft" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m13 6-6 6 6 6m-6-6h13"/>
+                        </svg>
+                        <span class="play-control-label">Links</span>
+                        <span class="play-control-keys" aria-hidden="true"><kbd>A</kbd><kbd>←</kbd></span>
+                    </button>
+                    <button class="game-button play-control" type="button" data-game-action="right" aria-label="Rechts laufen" aria-keyshortcuts="D ArrowRight" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m11 6 6 6-6 6m6-6H4"/>
+                        </svg>
+                        <span class="play-control-label">Rechts</span>
+                        <span class="play-control-keys" aria-hidden="true"><kbd>D</kbd><kbd>→</kbd></span>
+                    </button>
+                </div>
+                <div class="play-control-group" role="group" aria-label="Springen und Werfen">
+                    <button class="game-button play-control" type="button" data-game-action="up" aria-label="Springen" aria-keyshortcuts="W ArrowUp Space" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m6 9 6-6 6 6m-6-6v14M5 21h14"/>
+                        </svg>
+                        <span class="play-control-label">Springen</span>
+                        <span class="play-control-keys" aria-hidden="true"><kbd>W</kbd><kbd>↑</kbd><kbd title="Leertaste">␣</kbd></span>
+                    </button>
+                    <button class="game-button play-control" type="button" data-game-action="action" aria-label="Flasche werfen" aria-keyshortcuts="E F" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M15 3h4m-4 0v4l-3 3v7a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-7l-3-3V3M3 11h5m-6 4h5m-3 4h4"/>
+                        </svg>
+                        <span class="play-control-label">Werfen</span>
+                        <span class="play-control-keys" aria-hidden="true"><kbd>E</kbd><kbd>F</kbd></span>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="play-controls" role="group" aria-label="Spielsteuerung">
-            <div class="play-control-group" role="group" aria-label="Laufen">
-                <button class="game-button play-control" type="button" data-game-action="left" aria-label="Links laufen" aria-keyshortcuts="A ArrowLeft" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="m13 6-6 6 6 6m-6-6h13"/>
-                    </svg>
-                    <span class="play-control-label">Links</span>
-                    <span class="play-control-keys" aria-hidden="true"><kbd>A</kbd><kbd>←</kbd></span>
-                </button>
-                <button class="game-button play-control" type="button" data-game-action="right" aria-label="Rechts laufen" aria-keyshortcuts="D ArrowRight" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="m11 6 6 6-6 6m6-6H4"/>
-                    </svg>
-                    <span class="play-control-label">Rechts</span>
-                    <span class="play-control-keys" aria-hidden="true"><kbd>D</kbd><kbd>→</kbd></span>
-                </button>
-            </div>
-            <div class="play-control-group" role="group" aria-label="Springen und Werfen">
-                <button class="game-button play-control" type="button" data-game-action="up" aria-label="Springen" aria-keyshortcuts="W ArrowUp Space" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="m6 9 6-6 6 6m-6-6v14M5 21h14"/>
-                    </svg>
-                    <span class="play-control-label">Springen</span>
-                    <span class="play-control-keys" aria-hidden="true"><kbd>W</kbd><kbd>↑</kbd><kbd title="Leertaste">␣</kbd></span>
-                </button>
-                <button class="game-button play-control" type="button" data-game-action="action" aria-label="Flasche werfen" aria-keyshortcuts="E F" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M15 3h4m-4 0v4l-3 3v7a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-7l-3-3V3M3 11h5m-6 4h5m-3 4h4"/>
-                    </svg>
-                    <span class="play-control-label">Werfen</span>
-                    <span class="play-control-keys" aria-hidden="true"><kbd>E</kbd><kbd>F</kbd></span>
-                </button>
-            </div>
-        </div>
-    </main>
+        </main>
+    </div>
 </body>
 </html>

@@ -13,15 +13,25 @@
 }
 
 body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    --viewport-height: 100vh;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --page-padding-block: clamp(8px, 1.3vw, 18px);
+    --page-padding-inline: clamp(8px, 2vw, 24px);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    justify-items: center;
     gap: clamp(6px, 1.2vw, 14px);
     box-sizing: border-box;
-    min-height: 100vh;
-    min-height: 100svh;
+    height: var(--viewport-height);
     margin: 0;
-    padding: clamp(8px, 1.3vw, 18px) clamp(8px, 2vw, 24px);
+    padding:
+        max(var(--page-padding-block), var(--safe-top))
+        max(var(--page-padding-inline), var(--safe-right))
+        max(var(--page-padding-block), var(--safe-bottom))
+        max(var(--page-padding-inline), var(--safe-left));
     background: #18353b;
     background-image: linear-gradient(#102a37bb, #4c2119c9),
         url('img/9_intro_outro_screens/start/desert-sunset.png');
@@ -29,18 +39,36 @@ body {
     background-size: cover;
 }
 
+@supports (height: 100dvh) {
+    body {
+        --viewport-height: 100dvh;
+    }
+}
+
+.game-layout {
+    display: grid;
+    align-items: start;
+    justify-items: center;
+    align-self: stretch;
+    width: 100%;
+    min-height: 0;
+    container-type: size;
+}
+
 .game-stage {
     --play-controls-height: 78px;
+    --available-height: calc(var(--viewport-height) - 120px);
+    --canvas-width-limit: calc((var(--available-height) - var(--play-controls-height)) * 1.5);
     position: relative;
-    width: min(1040px, 100%);
+    width: min(1040px, 100%, max(280px, var(--canvas-width-limit)));
     overflow: hidden;
     border-radius: 14px;
     box-shadow: 0 20px 54px #0b141bb3, 0 0 0 1px #ffc7738f;
 }
 
-@media (min-width: 600px) and (max-height: 760px) {
+@supports (height: 1cqh) {
     .game-stage {
-        width: min(1040px, 100%, max(520px, calc((100svh - 116px - var(--play-controls-height)) * 1.5)));
+        --available-height: 100cqh;
     }
 }
 
@@ -137,12 +165,15 @@ canvas {
 }
 
 .game-stage:is(:fullscreen, .viewport-fullscreen) {
+    --available-height: calc(var(--viewport-height) - var(--safe-top) - var(--safe-bottom));
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
+    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
     border-radius: 0;
     background: #000;
     box-shadow: none;
@@ -160,8 +191,7 @@ body:has(.viewport-fullscreen) {
 
 .game-stage:is(:fullscreen, .viewport-fullscreen) .game-viewport,
 .game-stage:is(:fullscreen, .viewport-fullscreen) .play-controls {
-    width: min(100%, calc((100vh - var(--play-controls-height)) * 1.5));
-    width: min(100%, calc((100dvh - var(--play-controls-height)) * 1.5));
+    width: min(100%, max(0px, var(--canvas-width-limit)));
 }
 
 .game-controls {
@@ -280,8 +310,8 @@ body:has(.viewport-fullscreen) {
 @media (orientation: landscape) and (pointer: coarse),
        (orientation: landscape) and (max-height: 520px) {
     body {
+        --page-padding-block: 4px;
         gap: 4px;
-        padding-block: 4px;
     }
 
     .game-title {
@@ -293,8 +323,8 @@ body:has(.viewport-fullscreen) {
     .game-stage {
         --control-rail: clamp(58px, 13vw, 108px);
         --rail-gap: clamp(4px, 0.8vw, 10px);
-        --viewport-max-width: calc((100svh - 58px) * 1.5);
-        width: min(1040px, 100%, calc(var(--viewport-max-width) + 2 * (var(--control-rail) + var(--rail-gap))));
+        --canvas-width-limit: calc(max(100px, var(--available-height)) * 1.5);
+        width: min(1040px, 100%, calc(var(--canvas-width-limit) + 2 * (var(--control-rail) + var(--rail-gap))));
         background: linear-gradient(#522e1a, #2c180f);
     }
 
@@ -304,16 +334,13 @@ body:has(.viewport-fullscreen) {
         grid-template-areas: "movement canvas actions";
         grid-template-columns:
             var(--control-rail)
-            minmax(0, min(var(--viewport-max-width), calc(100% - 2 * (var(--control-rail) + var(--rail-gap)))))
+            minmax(0, min(var(--canvas-width-limit), calc(100% - 2 * (var(--control-rail) + var(--rail-gap)))))
             var(--control-rail);
         align-items: center;
         justify-content: center;
         column-gap: var(--rail-gap);
     }
 
-    .game-stage:is(:fullscreen, .viewport-fullscreen) {
-        --viewport-max-width: 150dvh;
-    }
 
     .game-viewport,
     .game-stage:is(:fullscreen, .viewport-fullscreen) .game-viewport {

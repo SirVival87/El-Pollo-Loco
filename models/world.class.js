@@ -181,7 +181,12 @@ class World {
     }
 
     throwBottle() {
-        if (this.win !== null || this.character.isDead() || this.character.bottleCount === 0) return;
+        if (
+            this.win !== null ||
+            this.character.isDead() ||
+            this.character.bottleCount === 0 ||
+            this.thrownBottles.length > 0
+        ) return;
 
         const direction = this.character.otherDirection ? -1 : 1;
         const { left, top, right, bottom } = this.character.getCollisionBounds();
