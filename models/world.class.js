@@ -13,6 +13,10 @@ class World {
     win = null;
     activeBottle = null;
     levelTimers = new Set();
+    levelTime = 0;
+    pausedAt = null;
+    pauseAnimationElapsed = 0;
+    stopped = false;
     lastFrameTime = null;
     frameAccumulator = 0;
     endScreens = {
@@ -47,10 +51,11 @@ class World {
     }
 
     draw(timestamp) {
+        if (this.stopped) return;
         if (timestamp !== undefined) this.advanceSimulation(timestamp);
         this.render();
 
-        if (this.shouldShowEndScreen() && this.drawEndScreen()) {
+        if (!this.paused && this.shouldShowEndScreen() && this.drawEndScreen()) {
             this.stop();
             this.onGameEnd(this.win);
             return;
@@ -59,9 +64,32 @@ class World {
         this.animationFrame = requestAnimationFrame(timestamp => this.draw(timestamp));
     }
 
+    get paused() {
+        return this.pausedAt !== null;
+    }
+
+    setPaused(paused) {
+        if (this.stopped || this.paused === paused) return;
+
+        const now = performance.now();
+        if (paused) {
+            this.pausedAt = now;
+            this.pauseAnimationElapsed = 0;
+        } else {
+            const pauseDuration = now - this.pausedAt;
+            for (const actor of [this.character, ...this.level.enemies]) {
+                actor.lastHit += pauseDuration;
+            }
+            this.pausedAt = null;
+        }
+
+        this.lastFrameTime = null;
+        this.audio?.setPaused?.(paused);
+    }
+
     stop() {
+        this.stopped = true;
         cancelAnimationFrame(this.animationFrame);
-        this.levelTimers.forEach(timer => clearTimeout(timer));
         this.levelTimers.clear();
     }
 
@@ -123,12 +151,16 @@ class World {
     }
 
     advanceSimulation(timestamp) {
-        if (this.lastFrameTime !== null) {
-            const elapsed = Math.min((timestamp - this.lastFrameTime) / 1000, 0.1);
-            this.frameAccumulator += elapsed;
-        }
+        const elapsed = this.lastFrameTime === null ?
+            0 : Math.min((timestamp - this.lastFrameTime) / 1000, 0.1);
         this.lastFrameTime = timestamp;
 
+        if (this.paused) {
+            this.pauseAnimationElapsed += elapsed;
+            return;
+        }
+
+        this.frameAccumulator += elapsed;
         const step = World.simulationStep;
         while (this.frameAccumulator + 1e-9 >= step) {
             this.frameAccumulator -= step;
@@ -137,6 +169,8 @@ class World {
     }
 
     update(deltaTime) {
+        if (this.paused || this.stopped) return;
+
         this.updateGameResult();
         if (this.win === null) {
             this.character.updateMovement();
@@ -157,6 +191,9 @@ class World {
     }
 
     updateLevel(deltaTime) {
+        this.levelTime += deltaTime;
+        this.runLevelTimers();
+
         this.wrapScenery(this.level.backgroundObjects, this.level.backgroundLoopWidth);
         this.level.clouds.forEach(cloud => cloud.moveClouds(deltaTime));
         this.wrapScenery(this.level.clouds, this.level.cloudLoopWidth);
@@ -201,7 +238,8 @@ class World {
             this.win !== null ||
             this.character.isDead() ||
             this.character.bottleCount === 0 ||
-            this.activeBottle !== null
+            this.activeBottle !== null ||
+            this.paused || this.stopped
         ) return;
 
         const direction = this.character.otherDirection ? -1 : 1;
@@ -301,12 +339,17 @@ class World {
         }, 10_000);
     }
 
-    scheduleLevelChange(callback, delay) {
-        const timer = setTimeout(() => {
+    scheduleLevelChange(callback, delayMs) {
+        this.levelTimers.add({ callback, dueAt: this.levelTime + delayMs / 1000 });
+    }
+
+    runLevelTimers() {
+        for (const timer of this.levelTimers) {
+            if (timer.dueAt > this.levelTime + 1e-9) continue;
+
             this.levelTimers.delete(timer);
-            if (this.win === null && !this.character.isDead()) callback();
-        }, delay);
-        this.levelTimers.add(timer);
+            timer.callback();
+        }
     }
 
     collectItems(items) {

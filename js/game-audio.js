@@ -1,5 +1,6 @@
 class GameAudio {
     enabled = true;
+    paused = false;
     lastPlayed = new Map();
 
     cues = {
@@ -89,7 +90,7 @@ class GameAudio {
         if (!this.context) {
             this.context = new AudioContext();
             this.output = this.context.createGain();
-            this.output.gain.value = 0.2;
+            this.updateVolume();
             this.output.connect(this.context.destination);
             this.noiseBuffer = this.createNoiseBuffer();
         }
@@ -101,7 +102,16 @@ class GameAudio {
     setEnabled(enabled) {
         this.enabled = enabled;
         if (enabled) this.unlock();
-        if (this.output) this.output.gain.value = enabled ? 0.2 : 0;
+        this.updateVolume();
+    }
+
+    setPaused(paused) {
+        this.paused = paused;
+        this.updateVolume();
+    }
+
+    updateVolume() {
+        if (this.output) this.output.gain.value = this.enabled && !this.paused ? 0.2 : 0;
     }
 
     createNoiseBuffer() {
@@ -116,7 +126,7 @@ class GameAudio {
 
     play(name) {
         const cue = this.cues[name];
-        if (!cue || !this.enabled || this.context?.state !== 'running') return;
+        if (!cue || !this.enabled || this.paused || this.context?.state !== 'running') return;
 
         const now = this.context.currentTime;
         if (cue.interval) {

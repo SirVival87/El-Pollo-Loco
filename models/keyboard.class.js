@@ -10,14 +10,14 @@ class Keyboard {
   };
 
 
-  constructor() {
+  constructor(acceptAction = () => true) {
     document.addEventListener("keydown", (event) => {
       const { code, repeat, target } = event;
       if (code === 'Space' && target?.closest?.('button')) return;
       if (repeat || this.pressed.has(code)) return;
 
       const action = Object.keys(this.controls).find(name => this.controls[name].includes(code));
-      if (!action) return;
+      if (!action || !acceptAction(action)) return;
 
       this.pressed.add(code);
       this.tapControl(action);

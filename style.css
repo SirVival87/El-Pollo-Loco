@@ -159,6 +159,31 @@ canvas {
     bottom: 6%;
 }
 
+.pause-indicator {
+    position: absolute;
+    top: max(58px, 18%);
+    left: 50%;
+    display: grid;
+    gap: 2px;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 85%;
+    box-sizing: border-box;
+    padding: 5px 12px;
+    border: 1px solid #ffbf54;
+    border-radius: 8px;
+    background: #3b2114e8;
+    color: #fff2c4;
+    font: 1rem / 1.2 Boogaloo, sans-serif;
+    text-align: center;
+    pointer-events: none;
+}
+
+.pause-indicator strong {
+    color: #ffd45c;
+    font-size: 1.3rem;
+}
+
 .game-viewport {
     position: relative;
     width: 100%;

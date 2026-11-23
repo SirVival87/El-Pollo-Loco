@@ -24,6 +24,9 @@ class Character extends MovableObject {
         'img/2_character_pepe/1_idle/idle/I-9.png',
         'img/2_character_pepe/1_idle/idle/I-10.png',
     ];
+    LONGIDLE_IMAGES = Array.from({ length: 10 }, (_, index) =>
+        'img/2_character_pepe/1_idle/long_idle/I-' + (index + 11) + '.png'
+    );
     JUMP_IMAGES = [
         'img/2_character_pepe/3_jump/J-31.png',
         'img/2_character_pepe/3_jump/J-32.png',
@@ -66,6 +69,7 @@ class Character extends MovableObject {
         DrawableObject.preloadImages([
             ...this.WALKING_IMAGES,
             ...this.IDLE_IMAGES,
+            ...this.LONGIDLE_IMAGES,
             ...this.JUMP_IMAGES,
             ...this.HURT_IMAGES,
             ...this.DEAD_IMAGES,
@@ -113,6 +117,18 @@ class Character extends MovableObject {
         if (this.getCollisionBounds().bottom > previousFeet) {
             this.world?.checkChickenStomp(previousFeet);
         }
+    }
+
+    draw(ctx) {
+        if (this.world?.paused && this.world.win === null && !this.isDead()) {
+            const elapsed = this.world.pauseAnimationElapsed;
+            const index = Math.floor(elapsed / 0.2) % this.LONGIDLE_IMAGES.length;
+            const image = DrawableObject.getImage(this.LONGIDLE_IMAGES[index]);
+            ctx.drawImage(image, this.x, this.y, this.width, this.height);
+            return;
+        }
+
+        super.draw(ctx);
     }
 
     hasFinishedDeathAnimation() {

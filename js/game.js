@@ -1,5 +1,5 @@
 let world;
-const keyboard = new Keyboard();
+const keyboard = new Keyboard(acceptGameAction);
 const canvas = document.getElementById('canvas');
 const gameStage = document.getElementById('game-stage');
 const fullscreenButton = document.getElementById('fullscreen-button');
@@ -8,6 +8,7 @@ const gameAudio = new GameAudio();
 const startScreen = document.getElementById('start-screen');
 const startButton = document.getElementById('start-button');
 const restartButton = document.getElementById('restart-button');
+const pauseIndicator = document.getElementById('pause-indicator');
 const playButtons = document.querySelectorAll('[data-game-action]');
 
 function startGame() {
@@ -15,6 +16,8 @@ function startGame() {
     keyboard.reset();
     startScreen.hidden = true;
     restartButton.hidden = true;
+    pauseIndicator.hidden = true;
+    gameAudio.setPaused(false);
     gameAudio.unlock();
     world = new World(canvas, keyboard, showRestartButton, gameAudio);
     playButtons.forEach(button => { button.disabled = false; });
@@ -22,6 +25,7 @@ function startGame() {
 }
 
 function showRestartButton() {
+    pauseIndicator.hidden = true;
     keyboard.reset();
     playButtons.forEach(button => { button.disabled = true; });
     restartButton.hidden = false;
@@ -73,12 +77,32 @@ function focusGameAfterClick(event) {
     }
 }
 
+function pauseGame() {
+    if (!world || world.stopped) return;
+
+    keyboard.reset();
+    world.setPaused(true);
+    pauseIndicator.hidden = false;
+}
+
+function acceptGameAction(action) {
+    if (!world?.paused) return true;
+    if (document.hidden || !document.hasFocus() ||
+        (action !== 'left' && action !== 'right' && action !== 'up')) {
+        return false;
+    }
+
+    world.setPaused(false);
+    pauseIndicator.hidden = true;
+    return true;
+}
+
 function connectPlayButton(button) {
     const action = button.dataset.gameAction;
     const holdToMove = action === 'left' || action === 'right';
 
     button.addEventListener('pointerdown', event => {
-        if (event.button !== 0 || button.disabled) return;
+        if (event.button !== 0 || button.disabled || !acceptGameAction(action)) return;
         if (holdToMove) {
             button.setPointerCapture(event.pointerId);
             keyboard.holdControl(action, event.pointerId);
@@ -92,12 +116,13 @@ function connectPlayButton(button) {
     }
 
     button.addEventListener('click', event => {
-        if (event.detail === 0 && !button.disabled) keyboard.tapControl(action);
+        if (event.detail === 0 && !button.disabled && acceptGameAction(action)) keyboard.tapControl(action);
     });
 
     if (holdToMove) {
         button.addEventListener('keydown', event => {
             if (event.key !== 'Enter' && event.code !== 'Space') return;
+            if (!acceptGameAction(action)) return;
             event.preventDefault();
             keyboard.holdControl(action, button);
         });
@@ -114,6 +139,10 @@ restartButton.addEventListener('click', startGame);
 soundButton.addEventListener('click', toggleSound);
 fullscreenButton.addEventListener('click', toggleFullscreen);
 document.addEventListener('fullscreenchange', updateFullscreenButton);
+globalThis.addEventListener('blur', pauseGame);
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) pauseGame();
+});
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && gameStage.classList.contains('viewport-fullscreen')) {
         gameStage.classList.remove('viewport-fullscreen');
