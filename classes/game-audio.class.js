@@ -86,20 +86,20 @@ class GameAudio {
         },
         victory: {
             tones: [
-                { shape: 'triangle', start: 523.25, end: 523.25, duration: 0.13, volume: 0.68 },
-                { shape: 'triangle', start: 659.25, end: 659.25, delay: 0.11, duration: 0.13, volume: 0.73 },
-                { shape: 'triangle', start: 783.99, end: 783.99, delay: 0.22, duration: 0.14, volume: 0.78 },
-                { shape: 'triangle', start: 1046.5, end: 1046.5, delay: 0.34, duration: 0.39, volume: 0.82 },
-                { shape: 'sine', start: 523.25, end: 523.25, delay: 0.34, duration: 0.34, volume: 0.42 },
+                { shape: 'triangle', start: 523.25, end: 523.25, duration: 0.13, volume: 2.04 },
+                { shape: 'triangle', start: 659.25, end: 659.25, delay: 0.11, duration: 0.13, volume: 2.19 },
+                { shape: 'triangle', start: 783.99, end: 783.99, delay: 0.22, duration: 0.14, volume: 2.34 },
+                { shape: 'triangle', start: 1046.5, end: 1046.5, delay: 0.34, duration: 0.39, volume: 2.46 },
+                { shape: 'sine', start: 523.25, end: 523.25, delay: 0.34, duration: 0.34, volume: 1.26 },
             ],
         },
         gameOver: {
             tones: [
-                { shape: 'triangle', start: 392, end: 392, duration: 0.16, volume: 0.72 },
-                { shape: 'triangle', start: 293.66, end: 293.66, delay: 0.14, duration: 0.17, volume: 0.75 },
-                { shape: 'triangle', start: 233.08, end: 233.08, delay: 0.29, duration: 0.17, volume: 0.72 },
-                { shape: 'triangle', start: 196, end: 164, delay: 0.44, duration: 0.31, volume: 0.78 },
-                { shape: 'sine', start: 98, end: 82, delay: 0.44, duration: 0.31, volume: 0.46 },
+                { shape: 'triangle', start: 392, end: 392, duration: 0.16, volume: 2.16 },
+                { shape: 'triangle', start: 293.66, end: 293.66, delay: 0.14, duration: 0.17, volume: 2.25 },
+                { shape: 'triangle', start: 233.08, end: 233.08, delay: 0.29, duration: 0.17, volume: 2.16 },
+                { shape: 'triangle', start: 196, end: 164, delay: 0.44, duration: 0.31, volume: 2.34 },
+                { shape: 'sine', start: 98, end: 82, delay: 0.44, duration: 0.31, volume: 1.38 },
             ],
         },
         bossStep: {
