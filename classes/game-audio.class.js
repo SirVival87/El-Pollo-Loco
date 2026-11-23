@@ -1,6 +1,8 @@
 class GameAudio {
+    static volumeScaleVersion = 2;
+
     enabled = true;
-    volume = 100;
+    volume = 50;
     musicVolume = 50;
     roundActive = false;
     storageKey = 'el-pollo-loco-audio';
@@ -81,6 +83,24 @@ class GameAudio {
             ],
             noise: [{ start: 320, end: 1300, duration: 0.29, volume: 0.52, attack: 0.055 }],
         },
+        victory: {
+            tones: [
+                { shape: 'triangle', start: 523.25, end: 523.25, duration: 0.13, volume: 0.68 },
+                { shape: 'triangle', start: 659.25, end: 659.25, delay: 0.11, duration: 0.13, volume: 0.73 },
+                { shape: 'triangle', start: 783.99, end: 783.99, delay: 0.22, duration: 0.14, volume: 0.78 },
+                { shape: 'triangle', start: 1046.5, end: 1046.5, delay: 0.34, duration: 0.39, volume: 0.82 },
+                { shape: 'sine', start: 523.25, end: 523.25, delay: 0.34, duration: 0.34, volume: 0.42 },
+            ],
+        },
+        gameOver: {
+            tones: [
+                { shape: 'triangle', start: 392, end: 392, duration: 0.16, volume: 0.72 },
+                { shape: 'triangle', start: 293.66, end: 293.66, delay: 0.14, duration: 0.17, volume: 0.75 },
+                { shape: 'triangle', start: 233.08, end: 233.08, delay: 0.29, duration: 0.17, volume: 0.72 },
+                { shape: 'triangle', start: 196, end: 164, delay: 0.44, duration: 0.31, volume: 0.78 },
+                { shape: 'sine', start: 98, end: 82, delay: 0.44, duration: 0.31, volume: 0.46 },
+            ],
+        },
         bossStep: {
             interval: 0.32,
             tones: [{ shape: 'sine', start: 88, end: 50, duration: 0.15, volume: 0.56 }],
@@ -92,21 +112,37 @@ class GameAudio {
     constructor(music) {
         this.music = music;
         try {
-            const preferences = JSON.parse(localStorage.getItem(this.storageKey));
-            if (typeof preferences?.enabled === 'boolean') this.enabled = preferences.enabled;
-            if (Number.isFinite(preferences?.volume)) this.volume = this.clampVolume(preferences.volume);
-            if (Number.isFinite(preferences?.musicVolume)) {
-                this.musicVolume = this.clampVolume(preferences.musicVolume);
-            }
+            this.restorePreferences(JSON.parse(localStorage.getItem(this.storageKey)));
         } catch {
             // Use defaults when storage is blocked or contains invalid data.
         }
+    }
+
+    /** Übernimmt gespeicherte Werte und rechnet ältere Reglerpositionen um. */
+    restorePreferences(preferences) {
+        if (!preferences) return;
+
+        const { enabled, volume, musicVolume, volumeScale } = preferences;
+        const useCurrentScale = volumeScale === GameAudio.volumeScaleVersion;
+        if (typeof enabled === 'boolean') this.enabled = enabled;
+        if (Number.isFinite(volume)) this.volume = this.restoreVolume(volume, useCurrentScale);
+        if (Number.isFinite(musicVolume)) this.musicVolume = this.restoreVolume(musicVolume, useCurrentScale);
+    }
+
+    /** Ordnet einer älteren Lautstärke die passende Position auf der neuen Skala zu. */
+    restoreVolume(volume, useCurrentScale) {
+        const percentage = this.clampVolume(volume);
+        if (useCurrentScale) return percentage;
+
+        const position = percentage <= 10 ? percentage * 5 : 50 + (percentage - 10) / 90 * 50;
+        return Math.round(position);
     }
 
     /** Speichert die aktuelle Lautstärke und den Tonstatus. */
     savePreferences() {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify({
+                volumeScale: GameAudio.volumeScaleVersion,
                 enabled: this.enabled,
                 volume: this.volume,
                 musicVolume: this.musicVolume,
@@ -209,7 +245,7 @@ class GameAudio {
 
     /** Überträgt die gewünschte Musiklautstärke auf den aktiven Audioausgang. */
     updateMusicVolume() {
-        const volume = this.musicVolume / 100;
+        const volume = this.getVolumeGain(this.musicVolume);
         if (this.musicGain) {
             this.musicGain.gain.value = volume;
         } else {
@@ -220,7 +256,15 @@ class GameAudio {
 
     /** Überträgt Lautstärke, Tonstatus und Pause auf die Audioausgabe. */
     updateVolume() {
-        if (this.output) this.output.gain.value = this.enabled && !this.paused ? 0.2 * this.volume / 100 : 0;
+        if (!this.output) return;
+        const gain = 0.2 * this.getVolumeGain(this.volume);
+        this.output.gain.value = this.enabled && !this.paused ? gain : 0;
+    }
+
+    /** Bildet die Reglerposition ab, sodass die Mitte der früheren Lautstärke bei 10 % entspricht. */
+    getVolumeGain(percentage) {
+        if (percentage <= 50) return percentage / 50 * 0.1;
+        return 0.1 + (percentage - 50) / 50 * 0.9;
     }
 
     /** Erzeugt eine Sekunde weißes Rauschen für die Soundeffekte. */

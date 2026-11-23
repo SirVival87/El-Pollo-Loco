@@ -22,9 +22,10 @@ function startGame() {
     canvas.focus({ preventScroll: true });
 }
 
-/** Zeigt die Aktionen der beendeten Runde an. */
-function showEndActions() {
+/** Zeigt die Aktionen der beendeten Runde an und spielt den passenden Effektsound. */
+function showEndActions(won) {
     gameAudio.endRound();
+    gameAudio.play(won ? 'victory' : 'gameOver');
     pauseIndicator.hidden = true;
     keyboard.reset();
     setPlayButtonsEnabled(false);
