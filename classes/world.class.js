@@ -314,13 +314,13 @@ class World {
 
     /**
      * Zeigt den Tod eines Huhns und plant Entfernen und Wiedererscheinen.
-     * @param {Chicken} chicken - Besiegtes normales Huhn.
+     * @param {Chicken} chicken - Besiegtes Huhn.
      */
     defeatChicken(chicken) {
         chicken.die();
         this.audio?.play('chickenDeath');
         this.scheduleLevelChange(() => this.removeChicken(chicken), 2000);
-        this.scheduleLevelChange(() => this.respawnChicken(), 10_000);
+        this.scheduleLevelChange(() => this.respawnChicken(chicken.constructor), 10_000);
     }
 
     /**
@@ -332,11 +332,14 @@ class World {
         if (index !== -1) this.level.enemies.splice(index, 1);
     }
 
-    /** Platziert ein neues Huhn mit sicherem Abstand zu Pepe. */
-    respawnChicken() {
+    /**
+     * Platziert ein Huhn desselben Typs mit sicherem Abstand zu Pepe.
+     * @param {Function} ChickenType - Konstruktor des besiegten Hühnertyps.
+     */
+    respawnChicken(ChickenType) {
         const { enemies, levelEndX } = this.level;
         const x = getRandomChickenX(0, levelEndX, this.character.x, 300);
-        if (x !== null) enemies.push(new Chicken(x, levelEndX));
+        if (x !== null) enemies.push(new ChickenType(x, levelEndX));
     }
 
     /**

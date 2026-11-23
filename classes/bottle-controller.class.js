@@ -83,8 +83,7 @@ class BottleController {
         if (projectile.isReflected) return this.checkReflectedBottleImpact(projectile);
 
         const chicken = this.world.level.enemies.find(enemy =>
-            enemy instanceof Chicken && !(enemy instanceof SmallChicken) &&
-            !enemy.isDead() && projectile.isColliding(enemy)
+            enemy instanceof Chicken && !enemy.isDead() && projectile.isColliding(enemy)
         );
         if (!chicken) return this.checkBossBottleImpact(projectile);
 

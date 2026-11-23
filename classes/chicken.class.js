@@ -4,6 +4,7 @@ class Chicken extends MovableObject {
     static spriteFolder = 'chicken_normal';
     static speedMultiplier = 1;
     static deadImage = 'img/3_enemies_chicken/chicken_normal/2_dead/dead.png';
+    static deadTopOffset = 33;
     static hitboxOffset = { left: 1, top: 4, right: 2, bottom: 4 };
 
     leftBorder = -720;
@@ -42,11 +43,11 @@ class Chicken extends MovableObject {
 
     /** Zeigt das Todesbild eines Huhns an, falls der Typ besiegbar ist. */
     die() {
-        const deadImage = this.constructor.deadImage;
+        const { deadImage, deadTopOffset } = this.constructor;
         if (!deadImage) return;
 
         this.energy = 0;
-        this.offset.top = 33;
+        this.offset.top = deadTopOffset;
         this.loadImage(deadImage);
     }
 
