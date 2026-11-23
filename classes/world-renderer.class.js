@@ -1,16 +1,23 @@
+/** Zeichnet die Spielwelt, die Statusanzeige und die Endbildschirme. */
 class WorldRenderer {
     endScreens = {
         true: this.loadEndScreen('img/You won, you lost/You Won B.png'),
         false: this.loadEndScreen('img/You won, you lost/Game over A.png'),
     };
 
-    /** Bindet den Zeichenkontext der Spielfläche. */
+    /**
+     * Bindet den Zeichenkontext der Spielfläche.
+     * @param {HTMLCanvasElement} canvas - Leinwand der Spielwelt.
+     */
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
     }
 
-    /** Zeichnet die Welt mit Kameraversatz und anschließend die Statusanzeige. */
+    /**
+     * Zeichnet die Welt mit Kameraversatz und anschließend die Statusanzeige.
+     * @param {World} world - Aktuelle Spielwelt mit den zu zeichnenden Objekten.
+     */
     render(world) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.save();
@@ -23,7 +30,10 @@ class WorldRenderer {
         world.statusBar.draw(this.ctx);
     }
 
-    /** Zeichnet die Objekte in ihrer vorgesehenen Ebenenreihenfolge. */
+    /**
+     * Zeichnet die Objekte in ihrer vorgesehenen Ebenenreihenfolge.
+     * @param {World} world - Aktuelle Spielwelt mit den zu zeichnenden Objekten.
+     */
     drawScene(world) {
         const { level, character, bottleController } = world;
         this.drawObjects(level.backgroundObjects);
@@ -35,12 +45,18 @@ class WorldRenderer {
         bottleController.activeBottle?.draw(this.ctx);
     }
 
-    /** Zeichnet die Objekte einer Ebene. */
+    /**
+     * Zeichnet die Objekte einer Ebene.
+     * @param {DrawableObject[]} objects - Objekte in Zeichenreihenfolge.
+     */
     drawObjects(objects) {
         objects.forEach(object => this.drawObject(object));
     }
 
-    /** Zeichnet das Objekt in seiner Blickrichtung und bei Bedarf seinen Kollisionsrahmen. */
+    /**
+     * Zeichnet das Objekt in seiner Blickrichtung und bei Bedarf seinen Kollisionsrahmen.
+     * @param {DrawableObject} object - Zu zeichnendes Objekt.
+     */
     drawObject(object) {
         if (object.otherDirection) {
             this.drawMirrored(object);
@@ -53,7 +69,10 @@ class WorldRenderer {
         }
     }
 
-    /** Spiegelt das Objekt horizontal innerhalb seines Bildrechtecks. */
+    /**
+     * Spiegelt das Objekt horizontal innerhalb seines Bildrechtecks.
+     * @param {DrawableObject} object - Horizontal zu spiegelndes Objekt.
+     */
     drawMirrored(object) {
         this.ctx.save();
         try {
@@ -64,14 +83,22 @@ class WorldRenderer {
             this.ctx.restore();
         }
     }
-    /** Lädt das Bild für einen Spielausgang. */
+    /**
+     * Lädt das Bild für einen Spielausgang.
+     * @param {string} path - Relativer Pfad zur Endbildschirmgrafik.
+     * @returns {DrawableObject} Zeichenobjekt mit der Endbildschirmgrafik.
+     */
     loadEndScreen(path) {
         const screen = new DrawableObject();
         screen.loadImage(path);
         return screen;
     }
 
-    /** Verdunkelt die Spielfläche und zeichnet das verfügbare Endbild. */
+    /**
+     * Verdunkelt die Spielfläche und zeichnet das verfügbare Endbild.
+     * @param {boolean} won - Ob die Runde gewonnen wurde.
+     * @returns {boolean} Ob der Endbildschirm als Bild oder Ersatztext gezeichnet wurde.
+     */
     drawEndScreen(won) {
         const screen = this.endScreens[won];
         if (!screen.img.complete) return false;
@@ -86,7 +113,12 @@ class WorldRenderer {
         return true;
     }
 
-    /** Wählt zwischen Endbild und Ersatztext. */
+    /**
+     * Wählt zwischen Endbild und Ersatztext.
+     * @param {DrawableObject} screen - Zeichenobjekt mit der Endbildschirmgrafik.
+     * @param {boolean} won - Ob die Runde gewonnen wurde.
+     * @param {number} centerY - Vertikaler Mittelpunkt auf dem Canvas in Pixeln.
+     */
     drawEndContent(screen, won, centerY) {
         const { naturalWidth, naturalHeight } = screen.img;
         if (naturalWidth > 0 && naturalHeight > 0) {
@@ -96,7 +128,12 @@ class WorldRenderer {
         }
     }
 
-    /** Skaliert und zentriert das Endbild auf der Spielfläche. */
+    /**
+     * Skaliert und zentriert das Endbild auf der Spielfläche.
+     * @param {DrawableObject} screen - Zeichenobjekt mit der Endbildschirmgrafik.
+     * @param {boolean} won - Ob die Runde gewonnen wurde.
+     * @param {number} centerY - Vertikaler Mittelpunkt auf dem Canvas in Pixeln.
+     */
     drawEndImage(screen, won, centerY) {
         const { naturalWidth, naturalHeight } = screen.img;
         const { width, height } = this.canvas;
@@ -109,7 +146,11 @@ class WorldRenderer {
         screen.draw(this.ctx);
     }
 
-    /** Zeigt den Spielausgang als Text an, falls das Bild fehlt. */
+    /**
+     * Zeigt den Spielausgang als Text an, falls das Bild fehlt.
+     * @param {boolean} won - Ob die Runde gewonnen wurde.
+     * @param {number} centerY - Vertikaler Mittelpunkt auf dem Canvas in Pixeln.
+     */
     drawEndText(won, centerY) {
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '48px Boogaloo, sans-serif';

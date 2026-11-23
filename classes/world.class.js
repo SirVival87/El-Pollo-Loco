@@ -1,3 +1,4 @@
+/** Koordiniert Spielschleife, Kollisionen, Levelzeit und Ergebnis. */
 class World {
     static showCollisionFrames = false;
     static simulationStep = 1 / 60;
@@ -18,7 +19,14 @@ class World {
     stopped = false;
     lastFrameTime = null;
     frameAccumulator = 0;
-    /** Verbindet Spielwelt, Eingaben, Audio und Rendering und startet die Schleife. */
+    /**
+     * Verbindet Spielwelt, Eingaben, Audio und Rendering und startet die Schleife.
+     * @param {HTMLCanvasElement} canvas - Leinwand der Spielwelt.
+     * @param {Keyboard} keyboard - Eingabestatus für die Spielsteuerung.
+     * @param {GameEndCallback} [onGameEnd] - Wird nach dem ersten gezeichneten Endbildschirm aufgerufen.
+     * @param {GameAudio} [audio] - Optionale Ausgabe für die Spielgeräusche.
+     * @param {PauseChangeCallback} [onPauseChange] - Wird bei einem Wechsel des Pausenstatus aufgerufen.
+     */
     constructor(canvas, keyboard, onGameEnd = () => {}, audio, onPauseChange = () => {}) {
         this.renderer = new WorldRenderer(canvas);
         this.canvas = canvas;
@@ -42,7 +50,10 @@ class World {
         }
     }
 
-    /** Führt einen Animationsframe aus und schließt eine beendete Runde ab. */
+    /**
+     * Führt einen Animationsframe aus und schließt eine beendete Runde ab.
+     * @param {number} [timestamp] - Zeitstempel von requestAnimationFrame in Millisekunden. Beim ersten Aufruf fehlt er.
+     */
     draw(timestamp) {
         if (this.stopped) return;
         if (timestamp !== undefined) this.advanceSimulation(timestamp);
@@ -57,12 +68,18 @@ class World {
         this.animationFrame = requestAnimationFrame(timestamp => this.draw(timestamp));
     }
 
-    /** Zeigt an, ob die Simulation derzeit pausiert. */
+    /**
+     * Zeigt an, ob die Simulation derzeit pausiert.
+     * @returns {boolean} Ob die Simulation gerade pausiert.
+     */
     get paused() {
         return this.pausedAt !== null;
     }
 
-    /** Hält die Simulation an oder setzt sie samt pausierten Trefferzeiten fort. */
+    /**
+     * Hält die Simulation an oder setzt sie samt pausierten Trefferzeiten fort.
+     * @param {boolean} paused - Ob das Spiel pausiert.
+     */
     setPaused(paused) {
         if (this.stopped || this.paused === paused) return;
 
@@ -105,7 +122,10 @@ class World {
         }
     }
 
-    /** Wartet auf die relevanten Todes- und Splash-Animationen. */
+    /**
+     * Wartet auf die relevanten Todes- und Splash-Animationen.
+     * @returns {boolean} Ob der Spielausgang und die erforderlichen Animationen abgeschlossen sind.
+     */
     shouldShowEndScreen() {
         if (this.win === null) return false;
 
@@ -116,7 +136,10 @@ class World {
         return !this.character.isDead() || this.character.hasFinishedDeathAnimation();
     }
 
-    /** Verteilt die Zeit seit dem letzten Frame auf Simulation oder Pausenanimation. */
+    /**
+     * Verteilt die Zeit seit dem letzten Frame auf Simulation oder Pausenanimation.
+     * @param {number} timestamp - Zeitstempel von requestAnimationFrame in Millisekunden.
+     */
     advanceSimulation(timestamp) {
         const elapsed = this.lastFrameTime === null ?
             0 : Math.min((timestamp - this.lastFrameTime) / 1000, 0.1);
@@ -129,7 +152,10 @@ class World {
         }
     }
 
-    /** Arbeitet volle Simulationsschritte ab, bis die Zeit aufgebraucht ist oder das Spiel pausiert. */
+    /**
+     * Arbeitet volle Simulationsschritte ab, bis die Zeit aufgebraucht ist oder das Spiel pausiert.
+     * @param {number} elapsed - Seit der letzten Aktualisierung verstrichene Zeit in Sekunden.
+     */
     runSimulationSteps(elapsed) {
         this.frameAccumulator += elapsed;
         const step = World.simulationStep;
@@ -139,7 +165,10 @@ class World {
         }
     }
 
-    /** Führt einen Simulationsschritt in definierter Reihenfolge aus. */
+    /**
+     * Führt einen Simulationsschritt in definierter Reihenfolge aus.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     update(deltaTime) {
         if (this.paused || this.stopped) return;
 
@@ -154,7 +183,10 @@ class World {
         this.pauseIfIdle();
     }
 
-    /** Aktualisiert die Bewegung von Pepe, Hühnern und Boss. */
+    /**
+     * Aktualisiert die Bewegung von Pepe, Hühnern und Boss.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updateActors(deltaTime) {
         this.character.updateMovement();
         this.level.enemies.forEach(enemy => {
@@ -163,7 +195,10 @@ class World {
         this.updateBoss(deltaTime);
     }
 
-    /** Führt die zustandsabhängigen Animationen von Pepe und Boss weiter. */
+    /**
+     * Führt die zustandsabhängigen Animationen von Pepe und Boss weiter.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updateAnimations(deltaTime) {
         this.character.updateAnimation(deltaTime);
         this.boss?.updateAnimation(deltaTime);
@@ -176,7 +211,10 @@ class World {
         }
     }
 
-    /** Aktualisiert Kulisse, Sammelobjekte und Wurfeingabe. */
+    /**
+     * Aktualisiert Kulisse, Sammelobjekte und Wurfeingabe.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updateLevel(deltaTime) {
         this.levelTime += deltaTime;
         this.runLevelTimers();
@@ -201,7 +239,10 @@ class World {
         if (bottles.length) this.audio?.play('pickup');
     }
 
-    /** Aktualisiert die Bossbewegung und spielt Geräusche in der Nähe der Leinwand. */
+    /**
+     * Aktualisiert die Bossbewegung und spielt Geräusche in der Nähe der Leinwand.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updateBoss(deltaTime) {
         if (!this.boss) return;
 
@@ -216,13 +257,19 @@ class World {
         }
     }
 
-    /** Prüft, ob der Boss auf oder kurz neben der Leinwand liegt. */
+    /**
+     * Prüft, ob der Boss auf oder kurz neben der Leinwand liegt.
+     * @returns {boolean} Ob der Boss horizontal im Sichtbereich oder höchstens 80 Pixel daneben liegt.
+     */
     isBossNearViewport() {
         const screenX = this.boss.x + this.cameraX;
         return screenX <= this.canvas.width + 80 && screenX + this.boss.width >= -80;
     }
 
-    /** Wendet Kontaktschaden an und spielt das Geräusch des Gegners. */
+    /**
+     * Wendet Kontaktschaden an und spielt das Geräusch des Gegners.
+     * @param {(Chicken|Endboss)} enemy - Gegner, dessen Kontaktschaden angewendet wird.
+     */
     hitCharacter(enemy) {
         if (!this.character.hit(enemy.contactDamage)) return;
 
@@ -231,7 +278,10 @@ class World {
         this.audio?.play(cue);
     }
 
-    /** Verarbeitet eine Landung auf einem normalen oder kleinen Huhn. */
+    /**
+     * Verarbeitet eine Landung auf einem normalen oder kleinen Huhn.
+     * @param {number} previousFeet - Y-Koordinate von Pepes Füßen vor dem Fallschritt.
+     */
     checkChickenStomp(previousFeet) {
         if (this.win !== null || this.character.isDead()) return;
         const player = this.character.getCollisionBounds();
@@ -247,7 +297,13 @@ class World {
         this.defeatChicken(chicken);
     }
 
-    /** Prüft anhand der vorherigen Fußposition, ob Pepe ein Huhn von oben trifft. */
+    /**
+     * Prüft anhand der vorherigen Fußposition, ob Pepe ein Huhn von oben trifft.
+     * @param {(Chicken|Endboss)} enemy - Gegner, der auf einen Sprungtreffer geprüft wird.
+     * @param {CollisionBounds} player - Aktuelle Hitbox von Pepe.
+     * @param {number} previousFeet - Y-Koordinate von Pepes Füßen vor dem Fallschritt.
+     * @returns {boolean} Ob Pepe von oben auf ein lebendes Huhn trifft.
+     */
     wasStomped(enemy, player, previousFeet) {
         if (!(enemy instanceof Chicken) || enemy.isDead()) return false;
 
@@ -256,7 +312,10 @@ class World {
             player.left < bounds.right && player.right > bounds.left;
     }
 
-    /** Zeigt den Tod eines Huhns und plant Entfernen und Wiedererscheinen. */
+    /**
+     * Zeigt den Tod eines Huhns und plant Entfernen und Wiedererscheinen.
+     * @param {Chicken} chicken - Besiegtes normales Huhn.
+     */
     defeatChicken(chicken) {
         chicken.die();
         this.audio?.play('chickenDeath');
@@ -264,7 +323,10 @@ class World {
         this.scheduleLevelChange(() => this.respawnChicken(), 10_000);
     }
 
-    /** Entfernt das angegebene Huhn aus der Gegnerliste. */
+    /**
+     * Entfernt das angegebene Huhn aus der Gegnerliste.
+     * @param {Chicken} chicken - Huhn, das aus der Gegnerliste entfernt wird.
+     */
     removeChicken(chicken) {
         const index = this.level.enemies.indexOf(chicken);
         if (index !== -1) this.level.enemies.splice(index, 1);
@@ -279,8 +341,8 @@ class World {
 
     /**
      * Plant ein Ereignis relativ zur laufenden Levelzeit.
-     * @param {Function} callback Auszuführendes Levelereignis.
-     * @param {number} delayMs Wartezeit in Millisekunden.
+     * @param {LevelChangeCallback} callback - Auszuführendes Levelereignis.
+     * @param {number} delayMs - Wartezeit in Millisekunden laufender Spielzeit.
      */
     scheduleLevelChange(callback, delayMs) {
         this.levelTimers.add({ callback, dueAt: this.levelTime + delayMs / 1000 });
@@ -296,7 +358,11 @@ class World {
         }
     }
 
-    /** Entfernt berührte Sammelobjekte aus der Liste und gibt sie zurück. */
+    /**
+     * Entfernt berührte Sammelobjekte aus der Liste und gibt sie zurück.
+     * @param {Collectible[]} items - Veränderbare Liste der Sammelobjekte.
+     * @returns {Collectible[]} Berührte und aus der Liste entfernte Objekte.
+     */
     collectItems(items) {
         const collected = [];
         for (let i = items.length - 1; i >= 0; i--) {
@@ -307,7 +373,11 @@ class World {
         return collected;
     }
 
-    /** Verschiebt Kulissenkacheln außerhalb der Kamera in die nächste Wiederholung. */
+    /**
+     * Verschiebt Kulissenkacheln außerhalb der Kamera in die nächste Wiederholung.
+     * @param {DrawableObject[]} objects - Zu wiederholende Kulissenkacheln.
+     * @param {number} loopWidth - Breite eines vollständigen Kachelzyklus in Pixeln.
+     */
     wrapScenery(objects, loopWidth) {
         if (loopWidth === 0) return;
 

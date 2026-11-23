@@ -26,7 +26,10 @@ function startGame() {
     canvas.focus({ preventScroll: true });
 }
 
-/** Zeigt die Aktionen der beendeten Runde an und spielt den passenden Effektsound. */
+/**
+ * Zeigt die Aktionen der beendeten Runde an und spielt den passenden Effektsound.
+ * @param {boolean} won - Ob die Runde gewonnen wurde.
+ */
 function showEndActions(won) {
     gameAudio.playResult(won);
     pauseIndicator.hidden = true;
@@ -57,7 +60,10 @@ function pauseGame() {
     world.setPaused(true);
 }
 
-/** Synchronisiert Pausenanzeige und Eingabestatus mit der Spielwelt. */
+/**
+ * Synchronisiert Pausenanzeige und Eingabestatus mit der Spielwelt.
+ * @param {boolean} paused - Ob das Spiel pausiert.
+ */
 function showPauseState(paused) {
     if (paused) keyboard.reset();
     pauseIndicator.hidden = !paused;
@@ -65,8 +71,8 @@ function showPauseState(paused) {
 
 /**
  * Prüft Eingaben und setzt eine pausierte Runde bei Bewegung fort.
- * @param {string} action Name der Spielaktion.
- * @returns {boolean} Ob die Aktion verarbeitet werden darf.
+ * @param {GameAction} action - Name der Spielaktion.
+ * @returns {boolean} Ob die Aktion im aktuellen Spielzustand zugelassen ist.
  */
 function acceptGameAction(action) {
     if (portraitMode.matches || settingsDialog.open) return false;
@@ -80,7 +86,10 @@ function acceptGameAction(action) {
     return true;
 }
 
-/** Aktiviert oder sperrt die Bildschirmsteuerung. */
+/**
+ * Aktiviert oder sperrt die Bildschirmsteuerung.
+ * @param {boolean} enabled - Ob die Bildschirmsteuerung bedienbar sein soll.
+ */
 function setPlayButtonsEnabled(enabled) {
     playButtons.forEach(button => { button.disabled = !enabled; });
 }

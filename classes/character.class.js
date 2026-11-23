@@ -1,3 +1,4 @@
+/** Steuert Pepes Bewegung, Eingabereaktionen, Inventar und Animationen. */
 class Character extends MovableObject {
     static standardFrameDuration = 0.2;
 
@@ -63,7 +64,10 @@ class Character extends MovableObject {
     bottles = [];
     coinCount = 0;
 
-    /** Gibt die Anzahl der verfügbaren Flaschen zurück. */
+    /**
+     * Gibt die Anzahl der verfügbaren Flaschen zurück.
+     * @returns {number} Verfügbare Flaschen im Inventar.
+     */
     get bottleCount() {
         return this.bottles.length;
     }
@@ -105,7 +109,10 @@ class Character extends MovableObject {
         }
     }
 
-    /** Verarbeitet Sprünge und spielt Schritte am Boden ab. */
+    /**
+     * Verarbeitet Sprünge und spielt Schritte am Boden ab.
+     * @param {boolean} moved - Ob Pepe sich im aktuellen Bewegungsschritt horizontal bewegt hat.
+     */
     updateJumpInput(moved) {
         const { keyboard, audio } = this.world;
         if (keyboard.isPressedOnce('up') && !this.isAboveGround()) {
@@ -117,7 +124,10 @@ class Character extends MovableObject {
         }
     }
 
-    /** Aktualisiert die Schwerkraft im festen Physikintervall. */
+    /**
+     * Aktualisiert die Schwerkraft im festen Physikintervall.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updatePhysics(deltaTime) {
         const gravityStep = 1 / 25;
         this.gravityElapsed += deltaTime;
@@ -137,7 +147,10 @@ class Character extends MovableObject {
         }
     }
 
-    /** Zeichnet Pepe bei einer Pause mit der Long-Idle-Animation. */
+    /**
+     * Zeichnet Pepe bei einer Pause mit der Long-Idle-Animation.
+     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     */
     draw(ctx) {
         if (this.world?.paused && this.world.win === null && !this.isDead()) {
             const elapsed = this.world.pauseAnimationElapsed;
@@ -150,13 +163,19 @@ class Character extends MovableObject {
         super.draw(ctx);
     }
 
-    /** Prüft, ob alle Todesbilder für ihre volle Dauer angezeigt wurden. */
+    /**
+     * Prüft, ob alle Todesbilder für ihre volle Dauer angezeigt wurden.
+     * @returns {boolean} Ob die vollständige Dauer aller Todesbilder erreicht ist.
+     */
     hasFinishedDeathAnimation() {
         const duration = this.DEAD_IMAGES.length * Character.standardFrameDuration;
         return this.animationImages === this.DEAD_IMAGES && this.animationElapsed + 1e-9 >= duration;
     }
 
-    /** Aktualisiert Pepes Bild und erfasst die Dauer seiner Untätigkeit. */
+    /**
+     * Aktualisiert Pepes Bild und erfasst die Dauer seiner Untätigkeit.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updateAnimation(deltaTime) {
         const images = this.getAnimationImages();
         this.idleElapsed = images === this.IDLE_IMAGES ? this.idleElapsed + deltaTime : 0;
@@ -164,7 +183,10 @@ class Character extends MovableObject {
         this.playAnimation(images, deltaTime, frameDuration, images !== this.DEAD_IMAGES);
     }
 
-    /** Wählt die Bildfolge mit der höchsten Priorität für Pepes aktuellen Zustand. */
+    /**
+     * Wählt die Bildfolge mit der höchsten Priorität für Pepes aktuellen Zustand.
+     * @returns {string[]} Bildpfade der aktuell benötigten Animation.
+     */
     getAnimationImages() {
         if (this.isDead()) return this.DEAD_IMAGES;
         if (this.isHurt()) return this.HURT_IMAGES;

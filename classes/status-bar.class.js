@@ -1,3 +1,4 @@
+/** Zeichnet Pepes Lebensbalken und die Zahl eingesammelter Objekte. */
 class StatusBar extends DrawableObject {
     x = 16;
     y = 10;
@@ -8,7 +9,10 @@ class StatusBar extends DrawableObject {
     bottleIcon = 'img/7_statusbars/3_icons/icon_salsa_bottle.png';
     coinIcon = 'img/7_statusbars/3_icons/icon_coin.png';
 
-    /** Bereitet die Symbole und den Lebensbalken für Pepe vor. */
+    /**
+     * Bereitet die Symbole und den Lebensbalken für Pepe vor.
+     * @param {Character} character - Pepe als Quelle für Energie, Flaschen und Münzen.
+     */
     constructor(character) {
         super();
         this.character = character;
@@ -17,7 +21,10 @@ class StatusBar extends DrawableObject {
         document.fonts.load('32px Boogaloo');
     }
 
-    /** Zeichnet den Lebensbalken und beide Sammelzähler. */
+    /**
+     * Zeichnet den Lebensbalken und beide Sammelzähler.
+     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     */
     draw(ctx) {
         this.drawHealth(ctx);
 
@@ -33,7 +40,10 @@ class StatusBar extends DrawableObject {
         ctx.restore();
     }
 
-    /** Zeichnet den Grundbalken und berechnet den aktuellen Füllstand. */
+    /**
+     * Zeichnet den Grundbalken und berechnet den aktuellen Füllstand.
+     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     */
     drawHealth(ctx) {
         if (this.img.naturalWidth === 0) return;
         super.draw(ctx);
@@ -43,7 +53,12 @@ class StatusBar extends DrawableObject {
         if (full.naturalWidth > 0 && healthRatio > 0) this.drawHealthFill(ctx, full, healthRatio);
     }
 
-    /** Zeichnet den zum Füllstand passenden Ausschnitt der Balkengrafik. */
+    /**
+     * Zeichnet den zum Füllstand passenden Ausschnitt der Balkengrafik.
+     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * @param {HTMLImageElement} full - Grafik des vollständig gefüllten Lebensbalkens.
+     * @param {number} healthRatio - Lebensanteil zwischen 0 und 1.
+     */
     drawHealthFill(ctx, full, healthRatio) {
         // Horizontal bounds of the fill area in the original PNG.
         const fillLeft = 79;
@@ -57,7 +72,14 @@ class StatusBar extends DrawableObject {
         );
     }
 
-    /** Zeichnet Symbol und Anzahl und gibt die Position des nächsten Zählers zurück. */
+    /**
+     * Zeichnet Symbol und Anzahl und gibt die Position des nächsten Zählers zurück.
+     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * @param {string} iconPath - Pfad zum Symbol des Sammelobjekts.
+     * @param {number} count - Anzahl gesammelter Objekte.
+     * @param {number} x - Horizontale Startposition auf dem Canvas.
+     * @returns {number} X-Position für den nachfolgenden Zähler in Canvas-Pixeln.
+     */
     drawCounter(ctx, iconPath, count, x) {
         const icon = DrawableObject.getImage(iconPath);
         if (icon.naturalWidth > 0) {

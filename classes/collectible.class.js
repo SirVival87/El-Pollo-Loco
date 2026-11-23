@@ -1,5 +1,11 @@
+/** Zeichenbares Sammelobjekt mit einem festgelegten Sprite-Ausschnitt. */
 class Collectible extends DrawableObject {
-    /** Setzt Position, Bild und Ausschnitt des Sammelobjekts. */
+    /**
+     * Setzt Position, Bild und Ausschnitt des Sammelobjekts.
+     * @param {number} x - Linke Kante in Weltkoordinaten.
+     * @param {number} y - Obere Kante in Weltkoordinaten.
+     * @param {CollectibleSprite} sprite - Bildpfad, Bildausschnitt und Anzeigegröße.
+     */
     constructor(x, y, sprite) {
         super();
         this.x = x;
@@ -10,7 +16,10 @@ class Collectible extends DrawableObject {
         this.loadImage(sprite.path);
     }
 
-    /** Zeichnet den für das Sammelobjekt festgelegten Bildausschnitt. */
+    /**
+     * Zeichnet den für das Sammelobjekt festgelegten Bildausschnitt.
+     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     */
     draw(ctx) {
         if (this.img.naturalWidth === 0) return;
 
@@ -21,6 +30,7 @@ class Collectible extends DrawableObject {
     }
 }
 
+/** Einsammelbare Salsa-Flasche mit einem festen Schadenswert. */
 class SalsaBottle extends Collectible {
     static damage = 35;
     static width = 26;
@@ -29,7 +39,11 @@ class SalsaBottle extends Collectible {
 
     damage = SalsaBottle.damage;
 
-    /** Platziert eine Flasche standardmäßig auf dem Sand. */
+    /**
+     * Platziert eine Flasche standardmäßig auf dem Sand.
+     * @param {number} x - Linke Kante in Weltkoordinaten.
+     * @param {number} [y] - Obere Kante in Weltkoordinaten. Standardmäßig steht die Flasche auf dem Sand.
+     */
     constructor(x, y = SalsaBottle.groundY - SalsaBottle.height) {
         super(x, y, {
             path: 'img/6_salsa_bottle/1_salsa_bottle_on_ground.png',

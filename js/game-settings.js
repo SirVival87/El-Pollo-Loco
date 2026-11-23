@@ -9,14 +9,17 @@ const musicVolumeInput = document.getElementById('music-volume-input');
 const musicVolumeValue = document.getElementById('music-volume-value');
 const giveUpButton = document.getElementById('give-up-button');
 
-/** Schaltet den Spielton über das Symbol um. */
+/**
+ * Schaltet den Spielton über das Symbol um.
+ * @param {MouseEvent} event - Aktivierung des Ton-Buttons.
+ */
 function toggleSound(event) {
     gameAudio.setEnabled(!gameAudio.enabled);
-    /** Synchronisiert Status und Beschriftung des Ton-Symbols. */
     updateSoundButton();
     focusGameAfterClick(event);
 }
 
+/** Synchronisiert Status und Beschriftung des Ton-Symbols. */
 function updateSoundButton() {
     soundButton.setAttribute('aria-pressed', String(gameAudio.enabled));
     soundButton.title = gameAudio.enabled ? 'Spielton ausschalten' : 'Spielton einschalten';
@@ -41,7 +44,10 @@ function openSettings() {
     settingsDialog.showModal();
 }
 
-/** Schließt den Dialog bei einem Klick außerhalb seiner sichtbaren Fläche. */
+/**
+ * Schließt den Dialog bei einem Klick außerhalb seiner sichtbaren Fläche.
+ * @param {HTMLDialogElement} dialog - Modaler Dialog, der außerhalb seiner Box geschlossen werden soll.
+ */
 function closeOnBackdrop(dialog) {
     dialog.addEventListener('click', event => {
         if (event.target !== dialog) return;
@@ -59,7 +65,11 @@ function updateFullscreenButton() {
     fullscreenButton.title = active ? 'Vollbild ausschalten' : 'Vollbild einschalten';
 }
 
-/** Wechselt zwischen Fenster- und Vollbildansicht. */
+/**
+ * Wechselt zwischen Fenster- und Vollbildansicht.
+ * @param {MouseEvent} event - Aktivierung des Vollbild-Buttons.
+ * @returns {Promise<void>} Wird nach dem Moduswechsel und der Aktualisierung des Buttons erfüllt.
+ */
 async function toggleFullscreen(event) {
     if (gameStage.classList.contains('viewport-fullscreen')) {
         gameStage.classList.remove('viewport-fullscreen');
@@ -73,7 +83,10 @@ async function toggleFullscreen(event) {
     focusGameAfterClick(event);
 }
 
-/** Versucht natives Vollbild und nutzt bei Bedarf das Seitenlayout als Ersatz. */
+/**
+ * Versucht natives Vollbild und nutzt bei Bedarf das Seitenlayout als Ersatz.
+ * @returns {Promise<void>} Wird nach dem Wechsel in natives Vollbild oder das CSS-Ersatzlayout erfüllt.
+ */
 async function enterFullscreen() {
     if (document.fullscreenEnabled) {
         try {
@@ -86,14 +99,20 @@ async function enterFullscreen() {
     gameStage.classList.add('viewport-fullscreen');
 }
 
-/** Gibt der Spielfläche nach einem Zeigerklick den Tastaturfokus zurück. */
+/**
+ * Gibt der Spielfläche nach einem Zeigerklick den Tastaturfokus zurück.
+ * @param {MouseEvent} event - Klickereignis zur Unterscheidung von Zeiger- und Tastaturaktivierung.
+ */
 function focusGameAfterClick(event) {
     if (event.detail > 0 && world?.win === null) {
         canvas.focus({ preventScroll: true });
     }
 }
 
-/** Beendet das Vollbild-Ersatzlayout mit Escape. */
+/**
+ * Beendet das Vollbild-Ersatzlayout mit Escape.
+ * @param {KeyboardEvent} event - Tastendruck, der auf Escape geprüft wird.
+ */
 function exitFallbackFullscreen(event) {
     if (settingsDialog.open || event.key !== 'Escape' ||
         !gameStage.classList.contains('viewport-fullscreen')) return;

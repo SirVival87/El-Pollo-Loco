@@ -1,3 +1,4 @@
+/** Fliegende Flasche mit einer Flugbahn und Splash-Animation. */
 class ThrowableObject extends MovableObject {
     static size = 44;
     static frameDuration = 0.075;
@@ -21,7 +22,13 @@ class ThrowableObject extends MovableObject {
         DrawableObject.preloadImages([...this.rotationImages, ...this.splashImages]);
     }
 
-    /** Erstellt das Projektil aus einer eingesammelten Flasche. */
+    /**
+     * Erstellt das Projektil aus einer eingesammelten Flasche.
+     * @param {number} x - Startposition auf der horizontalen Weltachse.
+     * @param {number} y - Startposition auf der vertikalen Weltachse.
+     * @param {number} direction - Wurfrichtung. 1 steht für rechts, -1 für links.
+     * @param {SalsaBottle} bottle - Geworfene Flasche mit ihrem Schadenswert.
+     */
     constructor(x, y, direction, bottle) {
         super();
         this.x = x;
@@ -31,18 +38,27 @@ class ThrowableObject extends MovableObject {
         this.damage = bottle.damage;
     }
 
-    /** Prüft, ob die Flasche gerade zerplatzt. */
+    /**
+     * Prüft, ob die Flasche gerade zerplatzt.
+     * @returns {boolean} Ob die Splash-Animation gestartet wurde.
+     */
     get isSplashing() {
         return this.splashTime !== null;
     }
 
-    /** Prüft, ob das letzte Splash-Bild beendet ist. */
+    /**
+     * Prüft, ob das letzte Splash-Bild beendet ist.
+     * @returns {boolean} Ob alle Bilder des Splashs vollständig abgespielt sind.
+     */
     get hasFinishedSplash() {
         return this.isSplashing &&
             this.splashTime >= ThrowableObject.splashImages.length * ThrowableObject.frameDuration;
     }
 
-    /** Aktualisiert Flugbahn oder Splash-Zeit. */
+    /**
+     * Aktualisiert Flugbahn oder Splash-Zeit.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     update(deltaTime) {
         if (this.isSplashing) {
             this.splashTime += deltaTime;
@@ -55,7 +71,10 @@ class ThrowableObject extends MovableObject {
         this.velocityY += this.gravity * deltaTime;
     }
 
-    /** Berechnet die Flugbahn zurück zu Pepes aktueller Position. */
+    /**
+     * Berechnet die Flugbahn zurück zu Pepes aktueller Position.
+     * @param {CollisionBounds} target - Hitbox, auf deren Mittelpunkt das Projektil zielt.
+     */
     reflect(target) {
         this.isReflected = true;
         this.velocityX *= -1;
@@ -75,12 +94,18 @@ class ThrowableObject extends MovableObject {
         this.splashTime = 0;
     }
 
-    /** Prüft, ob die Flasche im Fallen den Boden erreicht hat. */
+    /**
+     * Prüft, ob die Flasche im Fallen den Boden erreicht hat.
+     * @returns {boolean} Ob das fallende Projektil den Boden erreicht hat.
+     */
     hasLanded() {
         return this.velocityY >= 0 && this.y + this.height >= SalsaBottle.groundY;
     }
 
-    /** Zeichnet das aktuelle Rotationsbild der Flasche oder den Splash. */
+    /**
+     * Zeichnet das aktuelle Rotationsbild der Flasche oder den Splash.
+     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     */
     draw(ctx) {
         if (this.isSplashing) {
             this.drawSplash(ctx);
@@ -95,7 +120,10 @@ class ThrowableObject extends MovableObject {
         }
     }
 
-    /** Zeichnet das Splash-Bild für die aktuelle Animationszeit. */
+    /**
+     * Zeichnet das Splash-Bild für die aktuelle Animationszeit.
+     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     */
     drawSplash(ctx) {
         const { frameDuration, splashImages } = ThrowableObject;
         const index = Math.min(Math.floor(this.splashTime / frameDuration), splashImages.length - 1);

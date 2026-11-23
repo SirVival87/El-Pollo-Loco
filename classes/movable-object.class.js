@@ -1,3 +1,4 @@
+/** Ergänzt Zeichenobjekte um Bewegung, Animation, Treffer und Energie. */
 class MovableObject extends DrawableObject {
     static maxEnergy = 100;
 
@@ -27,17 +28,20 @@ class MovableObject extends DrawableObject {
     }
 
 
-    /** Gibt die maximale Energie des jeweiligen Objekttyps zurück. */
+    /**
+     * Gibt die maximale Energie des jeweiligen Objekttyps zurück.
+     * @returns {number} Maximale Energie des jeweiligen Objekttyps.
+     */
     get maxEnergy() {
         return this.constructor.maxEnergy;
     }
 
     /**
      * Wählt nach Spielzeit ein Bild der aktuellen Animation.
-     * @param {string[]} images Bildpfade in Wiedergabereihenfolge.
-     * @param {number} deltaTime Vergangene Spielzeit in Sekunden.
-     * @param {number} frameDuration Dauer eines Bildes in Sekunden.
-     * @param {boolean} [loop=true] Wiederholt die Bildfolge.
+     * @param {string[]} images - Bildpfade in Wiedergabereihenfolge.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * @param {number} frameDuration - Anzeigedauer je Bild in Sekunden.
+     * @param {boolean} [loop=true] - Ob die Bildfolge wiederholt werden soll.
      */
     playAnimation(images, deltaTime, frameDuration, loop = true) {
         if (this.animationImages === images) {
@@ -66,7 +70,10 @@ class MovableObject extends DrawableObject {
     }
 
 
-    /** Prüft, ob sich das Objekt oberhalb seiner Bodenposition befindet. */
+    /**
+     * Prüft, ob sich das Objekt oberhalb seiner Bodenposition befindet.
+     * @returns {boolean} Ob die Y-Koordinate oberhalb der Bodenposition liegt.
+     */
     isAboveGround() {
         return this.y < this.groundY;
     }
@@ -77,7 +84,11 @@ class MovableObject extends DrawableObject {
         this.speedY = 30;
     }
 
-    /** Prüft, ob sich zwei Kollisionsrechtecke überlappen. */
+    /**
+     * Prüft, ob sich zwei Kollisionsrechtecke überlappen.
+     * @param {DrawableObject} movableObject - Objekt, dessen Kollisionsrechteck geprüft wird.
+     * @returns {boolean} Ob sich die beiden Rechtecke überlappen.
+     */
     isColliding(movableObject) {
         const a = this.getCollisionBounds();
         const b = movableObject.getCollisionBounds();
@@ -87,8 +98,8 @@ class MovableObject extends DrawableObject {
 
     /**
      * Zieht gültigen Schaden außerhalb der Trefferpause ab.
-     * @param {number} damage Abzuziehende Energie.
-     * @returns {boolean} Ob der Treffer wirksam war.
+     * @param {number} damage - Abzuziehende Energie.
+     * @returns {boolean} Ob der Treffer Energie abgezogen hat.
      */
     hit(damage) {
         const now = performance.now();
@@ -102,12 +113,18 @@ class MovableObject extends DrawableObject {
         return true;
     }
 
-    /** Prüft, ob die Zeitspanne für die Trefferanimation läuft. */
+    /**
+     * Prüft, ob die Zeitspanne für die Trefferanimation läuft.
+     * @returns {boolean} Ob seit dem letzten Treffer weniger als 600 Millisekunden vergangen sind.
+     */
     isHurt() {
         return performance.now() - this.lastHit < 600;
     }
 
-    /** Prüft, ob die Energie aufgebraucht ist. */
+    /**
+     * Prüft, ob die Energie aufgebraucht ist.
+     * @returns {boolean} Ob die Energie auf null gefallen ist.
+     */
     isDead() {
         return this.energy <= 0;
     }

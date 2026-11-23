@@ -1,3 +1,4 @@
+/** Schnelle, unverwundbare Huhnvariante mit eigenem Sprite-Ordner. */
 class SmallChicken extends Chicken {
     static size = 36;
     static spriteFolder = 'chicken_small';

@@ -1,6 +1,6 @@
+/** Mischt Soundeffekte und Hintergrundmusik und speichert beide Lautstärken. */
 class GameAudio {
     static volumeScaleVersion = 2;
-
     enabled = true;
     volume = 50;
     musicVolume = 50;
@@ -9,7 +9,6 @@ class GameAudio {
     storageKey = 'el-pollo-loco-audio';
     paused = false;
     lastPlayed = new Map();
-
     cues = {
         pickup: {
             tones: [{ start: 550, end: 920, duration: 0.12, volume: 0.5 }],
@@ -109,7 +108,8 @@ class GameAudio {
         },
     };
 
-    /** Liest Lautstärke und Tonstatus aus dem lokalen Speicher. */
+    /** Liest Lautstärke und Tonstatus aus dem lokalen Speicher.
+     * @param {HTMLAudioElement} music - Medienelement für die Hintergrundmusik. */
     constructor(music) {
         this.music = music;
         try {
@@ -119,10 +119,10 @@ class GameAudio {
         }
     }
 
-    /** Übernimmt gespeicherte Werte und rechnet ältere Reglerpositionen um. */
+    /** Übernimmt gespeicherte Werte und rechnet ältere Reglerpositionen um.
+     * @param {(AudioPreferences|null)} preferences - Gelesene Einstellungen oder null, wenn keine vorliegen. */
     restorePreferences(preferences) {
         if (!preferences) return;
-
         const { enabled, volume, musicVolume, volumeScale } = preferences;
         const useCurrentScale = volumeScale === GameAudio.volumeScaleVersion;
         if (typeof enabled === 'boolean') this.enabled = enabled;
@@ -130,11 +130,13 @@ class GameAudio {
         if (Number.isFinite(musicVolume)) this.musicVolume = this.restoreVolume(musicVolume, useCurrentScale);
     }
 
-    /** Ordnet einer älteren Lautstärke die passende Position auf der neuen Skala zu. */
+    /** Ordnet einer älteren Lautstärke die passende Position auf der neuen Skala zu.
+     * @param {number} volume - Reglerposition zwischen 0 und 100.
+     * @param {boolean} useCurrentScale - Ob der gespeicherte Wert bereits die neue Skala verwendet.
+     * @returns {number} Position auf der aktuellen Lautstärkeskala. */
     restoreVolume(volume, useCurrentScale) {
         const percentage = this.clampVolume(volume);
         if (useCurrentScale) return percentage;
-
         const position = percentage <= 10 ? percentage * 5 : 50 + (percentage - 10) / 90 * 50;
         return Math.round(position);
     }
@@ -156,7 +158,6 @@ class GameAudio {
     /** Initialisiert die Audioausgabe nach einer Benutzereingabe. */
     unlock() {
         if (!this.enabled || !globalThis.AudioContext) return;
-
         if (!this.context) this.createAudioOutput();
         if (this.context.state === 'suspended') {
             this.context.resume().catch(() => {});
@@ -170,7 +171,6 @@ class GameAudio {
         this.output.connect(this.context.destination);
         this.updateVolume();
         this.noiseBuffer = this.createNoiseBuffer();
-
         if (location.protocol !== 'file:') this.connectMusicOutput();
     }
 
@@ -184,7 +184,8 @@ class GameAudio {
         this.updateMusicVolume();
     }
 
-    /** Schaltet den Spielton dauerhaft ein oder aus. */
+    /** Schaltet den Spielton dauerhaft ein oder aus.
+     * @param {boolean} enabled - Ob Musik und Soundeffekte aktiviert sein sollen. */
     setEnabled(enabled) {
         this.enabled = enabled;
         if (enabled) this.unlock();
@@ -193,7 +194,8 @@ class GameAudio {
         this.savePreferences();
     }
 
-    /** Setzt und speichert eine Lautstärke zwischen 0 und 100. */
+    /** Setzt und speichert eine Lautstärke zwischen 0 und 100.
+     * @param {number} volume - Reglerposition zwischen 0 und 100. */
     setVolume(volume) {
         if (!Number.isFinite(volume)) return;
         this.volume = this.clampVolume(volume);
@@ -201,7 +203,8 @@ class GameAudio {
         this.savePreferences();
     }
 
-    /** Setzt und speichert die Lautstärke der Hintergrundmusik. */
+    /** Setzt und speichert die Lautstärke der Hintergrundmusik.
+     * @param {number} volume - Reglerposition zwischen 0 und 100. */
     setMusicVolume(volume) {
         if (!Number.isFinite(volume)) return;
         this.musicVolume = this.clampVolume(volume);
@@ -209,7 +212,9 @@ class GameAudio {
         this.savePreferences();
     }
 
-    /** Begrenzt die Lautstärke auf den Wertebereich der Regler. */
+    /** Begrenzt die Lautstärke auf den Wertebereich der Regler.
+     * @param {number} volume - Zu begrenzender Reglerwert.
+     * @returns {number} Auf den Bereich von 0 bis 100 begrenzter Wert. */
     clampVolume(volume) {
         return Math.max(0, Math.min(100, volume));
     }
@@ -220,7 +225,8 @@ class GameAudio {
         this.syncMusicPlayback();
     }
 
-    /** Spielt den passenden Endsound und gibt ihm Vorrang vor der Musik. */
+    /** Spielt den passenden Endsound und gibt ihm Vorrang vor der Musik.
+     * @param {boolean} won - Ob die Runde gewonnen wurde. */
     playResult(won) {
         this.setPaused(false);
         const name = won ? 'victory' : 'gameOver';
@@ -230,7 +236,8 @@ class GameAudio {
         this.play(name);
     }
 
-    /** Überblendet die Musik für die Laufzeit des Endsignals. */
+    /** Schaltet die Musik für die Laufzeit des Endsignals stumm.
+     * @param {string} name - Name des Endsignals mit Tonspuren. Zulässig sind victory und gameOver. */
     muteMusicDuringCue(name) {
         const duration = Math.max(...this.cues[name].tones.map(tone => (tone.delay ?? 0) + tone.duration));
         clearTimeout(this.resultMusicTimer);
@@ -241,14 +248,15 @@ class GameAudio {
         this.updateMusicVolume();
     }
 
-    /** Sperrt die Audioausgabe, solange die Drehaufforderung sichtbar ist. */
+    /** @param {boolean} blocked - Ob die Drehaufforderung die Audioausgabe sperrt. */
     setOrientationBlocked(blocked) {
         this.orientationBlocked = blocked;
         this.updateVolume();
         this.syncMusicPlayback();
     }
 
-    /** Stellt die Audioausgabe während einer Spielpause stumm. */
+    /** Stellt die Audioausgabe während einer Spielpause stumm.
+     * @param {boolean} paused - Ob das Spiel pausiert. */
     setPaused(paused) {
         this.paused = paused;
         if (!paused && this.context?.state === 'suspended') this.unlock();
@@ -277,7 +285,7 @@ class GameAudio {
         }
     }
 
-    /** Prüft, ob der aktuelle Spiel- und Seitenzustand Soundeffekte erlaubt. */
+    /** @returns {boolean} Ob Tonstatus, Sichtbarkeit, Ausrichtung und Pause Soundeffekte erlauben. */
     canPlayEffects() {
         return this.enabled && !this.paused && !this.orientationBlocked && !document.hidden;
     }
@@ -289,13 +297,15 @@ class GameAudio {
         this.output.gain.value = this.canPlayEffects() ? gain : 0;
     }
 
-    /** Bildet die Reglerposition ab, sodass die Mitte der früheren Lautstärke bei 10 % entspricht. */
+    /** Bildet die Reglerposition ab, sodass die Mitte der früheren Lautstärke bei 10 % entspricht.
+     * @param {number} percentage - Reglerposition zwischen 0 und 100.
+     * @returns {number} Verstärkungsfaktor zwischen 0 und 1. */
     getVolumeGain(percentage) {
         if (percentage <= 50) return percentage / 50 * 0.1;
         return 0.1 + (percentage - 50) / 50 * 0.9;
     }
 
-    /** Erzeugt eine Sekunde weißes Rauschen für die Soundeffekte. */
+    /** @returns {AudioBuffer} Monopuffer mit einer Sekunde weißem Rauschen für die Soundeffekte. */
     createNoiseBuffer() {
         const { sampleRate } = this.context;
         const buffer = this.context.createBuffer(1, sampleRate, sampleRate);
@@ -306,11 +316,11 @@ class GameAudio {
         return buffer;
     }
 
-    /** Spielt einen bekannten Soundeffekt unter Berücksichtigung seiner Wiederholrate. */
+    /** Spielt einen bekannten Soundeffekt unter Berücksichtigung seiner Wiederholrate.
+     * @param {string} name - Schlüssel eines Soundeffekts im Katalog. */
     play(name) {
         const cue = this.cues[name];
         if (!cue || !this.canPlayEffects() || this.context?.state !== 'running') return;
-
         const now = this.context.currentTime;
         if (cue.interval) {
             const previous = this.lastPlayed.get(name) ?? -Infinity;
@@ -322,7 +332,9 @@ class GameAudio {
         for (const noise of cue.noise ?? []) this.playNoise(noise, now);
     }
 
-    /** Spielt eine Tonspur mit gleitender Frequenz. */
+    /** Spielt eine Tonspur mit gleitender Frequenz.
+     * @param {SoundLayer} layer - Parameter der Tonspur.
+     * @param {number} now - Bezugszeit des AudioContext in Sekunden. */
     playTone(layer, now) {
         const { start, end, duration, delay = 0, shape = 'triangle' } = layer;
         const startTime = now + delay;
@@ -333,7 +345,9 @@ class GameAudio {
         this.playLayer(oscillator, oscillator, layer, startTime);
     }
 
-    /** Spielt eine gefilterte Rauschspur. */
+    /** Spielt eine gefilterte Rauschspur.
+     * @param {SoundLayer} layer - Parameter der gefilterten Rauschspur.
+     * @param {number} now - Bezugszeit des AudioContext in Sekunden. */
     playNoise(layer, now) {
         const { start, end, duration, delay = 0 } = layer;
         const startTime = now + delay;
@@ -349,7 +363,12 @@ class GameAudio {
         this.playLayer(source, filter, layer, startTime, offset);
     }
 
-    /** Startet die Audiospur und trennt ihre Knoten nach dem Abspielen. */
+    /** Startet die Audiospur und trennt ihre Knoten nach dem Abspielen.
+     * @param {AudioScheduledSourceNode} source - Abspielbarer Audioquellknoten.
+     * @param {AudioNode} tail - Ausgangsknoten der Spur vor der Lautstärkehüllkurve.
+     * @param {SoundLayer} layer - Zeit- und Lautstärkeparameter der Spur.
+     * @param {number} startTime - Startzeit auf der Zeitleiste des AudioContext in Sekunden.
+     * @param {number} [offset] - Abspielposition im Rauschpuffer in Sekunden. */
     playLayer(source, tail, layer, startTime, offset) {
         const endTime = startTime + layer.duration;
         const envelope = this.createEnvelope(layer, startTime, endTime);
@@ -365,7 +384,11 @@ class GameAudio {
         source.stop(endTime);
     }
 
-    /** Erzeugt den Lautstärkeverlauf einer Audiospur. */
+    /** Erzeugt den Lautstärkeverlauf einer Audiospur.
+     * @param {SoundLayer} layer - Lautstärke und Einschwingzeit der Spur.
+     * @param {number} startTime - Beginn der Spur auf der Zeitleiste des AudioContext in Sekunden.
+     * @param {number} endTime - Ende der Spur auf der Zeitleiste des AudioContext in Sekunden.
+     * @returns {GainNode} Knoten mit der geplanten Lautstärkehüllkurve. */
     createEnvelope(layer, startTime, endTime) {
         const { volume, attack = 0.004 } = layer;
         const envelope = this.context.createGain();

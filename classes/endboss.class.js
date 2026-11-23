@@ -1,3 +1,4 @@
+/** Bossgegner mit Patrouille, Sprungangriff und eigener Todesanimation. */
 class Endboss extends MovableObject {
     x = 720;
     y = 140;
@@ -61,7 +62,10 @@ class Endboss extends MovableObject {
         'img/4_enemie_boss_chicken/5_dead/G26.png',
     ]
 
-    /** Setzt die Startposition des Bosses und lädt seine Sprites. */
+    /**
+     * Setzt die Startposition des Bosses und lädt seine Sprites.
+     * @param {number} [x=720] - Start- und Bezugspunkt der Patrouille in Weltkoordinaten.
+     */
     constructor(x = 720) {
         super();
         this.x = x;
@@ -76,7 +80,10 @@ class Endboss extends MovableObject {
         this.loadImage(this.WALKING_IMAGES[0]);
     }
 
-    /** Aktualisiert den Wechsel zwischen Patrouille und Sprungangriff. */
+    /**
+     * Aktualisiert den Wechsel zwischen Patrouille und Sprungangriff.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updateJump(deltaTime) {
         const previousElapsed = this.jumpElapsed;
         this.jumpElapsed += deltaTime;
@@ -106,7 +113,10 @@ class Endboss extends MovableObject {
         }
     }
 
-    /** Steuert die Rückkehr zum Startpunkt des Angriffs. */
+    /**
+     * Steuert die Rückkehr zum Startpunkt des Angriffs.
+     * @param {number} forwardX - Horizontale Landeposition des Hinsprungs in Weltkoordinaten.
+     */
     updateReturnJump(forwardX) {
         const returnElapsed = this.jumpElapsed - this.returnJumpAt;
         if (returnElapsed < this.jumpDuration) {
@@ -120,7 +130,10 @@ class Endboss extends MovableObject {
         this.jumpElapsed = -this.getJumpDelay();
     }
 
-    /** Bewegt den Boss auf seiner Patrouillenstrecke hin und zurück. */
+    /**
+     * Bewegt den Boss auf seiner Patrouillenstrecke hin und zurück.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updatePatrol(deltaTime) {
         const roundTrip = this.patrolDistance * 2;
         this.patrolTravel = (this.patrolTravel + this.patrolSpeed * deltaTime) % roundTrip;
@@ -129,26 +142,40 @@ class Endboss extends MovableObject {
         this.x = this.homeX - distanceFromHome;
     }
 
-    /** Gibt die zufällige Wartezeit bis zum nächsten Angriff in Sekunden zurück. */
+    /**
+     * Gibt die zufällige Wartezeit bis zum nächsten Angriff in Sekunden zurück.
+     * @returns {number} Wartezeit in Sekunden zwischen 2 und 5.
+     */
     getJumpDelay() {
         return 2 + Math.random() * 3;
     }
 
-    /** Positioniert den Boss auf seinem Sprungbogen. */
+    /**
+     * Positioniert den Boss auf seinem Sprungbogen.
+     * @param {number} progress - Fortschritt des Sprungbogens zwischen 0 und 1.
+     * @param {number} startX - Horizontale Startposition in Weltkoordinaten.
+     * @param {number} distance - Vorzeichenbehaftete Sprungweite in Pixeln.
+     */
     setJumpPose(progress, startX, distance) {
         this.isJumping = true;
         this.x = startX + distance * progress;
         this.y = this.groundY - Math.sin(progress * Math.PI) * this.jumpHeight;
     }
 
-    /** Setzt den Boss an der angegebenen Stelle auf den Boden. */
+    /**
+     * Setzt den Boss an der angegebenen Stelle auf den Boden.
+     * @param {number} x - Horizontale Landeposition in Weltkoordinaten.
+     */
     setGroundPose(x) {
         this.isJumping = false;
         this.x = x;
         this.y = this.groundY;
     }
 
-    /** Zeigt abhängig vom Zustand die passende Animation des Bosses. */
+    /**
+     * Zeigt abhängig vom Zustand die passende Animation des Bosses.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updateAnimation(deltaTime) {
         if (this.isDead()) {
             this.updateDeathAnimation(deltaTime);
@@ -164,7 +191,10 @@ class Endboss extends MovableObject {
         }
     }
 
-    /** Spielt die Todesbilder bis zum letzten Bild einmal ab. */
+    /**
+     * Spielt die Todesbilder bis zum letzten Bild einmal ab.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
     updateDeathAnimation(deltaTime) {
         this.deathElapsed = this.deathElapsed === null ? 0 : this.deathElapsed + deltaTime;
         const frameDuration = this.deathDuration / this.DEAD_IMAGES.length;
@@ -178,14 +208,23 @@ class Endboss extends MovableObject {
         this.showAnimationFrame(this.ATTACK_IMAGES, jumpTime, this.jumpDuration / this.ATTACK_IMAGES.length);
     }
 
-    /** Berechnet das Sprite aus der verstrichenen Animationszeit. */
+    /**
+     * Berechnet das Sprite aus der verstrichenen Animationszeit.
+     * @param {string[]} images - Bildpfade in Wiedergabereihenfolge.
+     * @param {number} elapsed - Fortschritt der Animation in Sekunden.
+     * @param {number} frameDuration - Anzeigedauer je Bild in Sekunden.
+     * @param {boolean} [loop=false] - Ob die Bildfolge wiederholt werden soll.
+     */
     showAnimationFrame(images, elapsed, frameDuration, loop = false) {
         const frame = Math.floor(elapsed / frameDuration);
         const index = loop ? frame % images.length : Math.min(frame, images.length - 1);
         this.loadImage(images[index]);
     }
 
-    /** Prüft, ob die vorgesehene Dauer der Todesanimation abgelaufen ist. */
+    /**
+     * Prüft, ob die vorgesehene Dauer der Todesanimation abgelaufen ist.
+     * @returns {boolean} Ob die Dauer der Todesanimation abgelaufen ist.
+     */
     hasFinishedDeathAnimation() {
         return this.deathElapsed >= this.deathDuration;
     }
