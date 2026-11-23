@@ -1,4 +1,6 @@
 class Character extends MovableObject {
+    static standardFrameDuration = 0.2;
+
     x = 60;
     y = 35;
     height = 200;
@@ -148,17 +150,17 @@ class Character extends MovableObject {
         super.draw(ctx);
     }
 
-    /** Prüft, ob Pepes letztes Todesbild angezeigt wird. */
+    /** Prüft, ob alle Todesbilder für ihre volle Dauer angezeigt wurden. */
     hasFinishedDeathAnimation() {
-        const lastImage = this.DEAD_IMAGES.at(-1);
-        return this.img === DrawableObject.getImage(lastImage);
+        const duration = this.DEAD_IMAGES.length * Character.standardFrameDuration;
+        return this.animationImages === this.DEAD_IMAGES && this.animationElapsed + 1e-9 >= duration;
     }
 
     /** Aktualisiert Pepes Bild und erfasst die Dauer seiner Untätigkeit. */
     updateAnimation(deltaTime) {
         const images = this.getAnimationImages();
         this.idleElapsed = images === this.IDLE_IMAGES ? this.idleElapsed + deltaTime : 0;
-        const frameDuration = images === this.JUMP_IMAGES ? 0.1 : 0.2;
+        const frameDuration = images === this.JUMP_IMAGES ? 0.1 : Character.standardFrameDuration;
         this.playAnimation(images, deltaTime, frameDuration, images !== this.DEAD_IMAGES);
     }
 
