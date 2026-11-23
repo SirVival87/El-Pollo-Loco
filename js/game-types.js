@@ -78,3 +78,11 @@
  * @property {number} [attack=0.004] - Einschwingzeit der Verstärkung in Sekunden.
  * @property {OscillatorType} [shape=triangle] - Wellenform einer Tonspur.
  */
+
+/**
+ * Synthetisierter Soundeffekt mit einer oder mehreren Spuren.
+ * @typedef {Object} SoundCue
+ * @property {SoundLayer[]} [tones] - Tonspuren des Effekts.
+ * @property {SoundLayer[]} [noise] - Rauschspuren des Effekts.
+ * @property {number} [interval] - Mindestabstand zwischen Wiedergaben in Sekunden.
+ */

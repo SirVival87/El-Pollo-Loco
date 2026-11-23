@@ -56,9 +56,8 @@ body {
 }
 
 .game-stage {
-    --play-controls-height: 0px;
     --available-height: calc(var(--viewport-height) - 120px);
-    --canvas-width-limit: calc((var(--available-height) - var(--play-controls-height)) * 1.5);
+    --canvas-width-limit: calc(var(--available-height) * 1.5);
     position: relative;
     width: min(1040px, 100%, max(280px, var(--canvas-width-limit)));
     overflow: hidden;

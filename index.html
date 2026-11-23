@@ -23,6 +23,7 @@
     <script src="./classes/world-renderer.class.js" defer></script>
     <script src="./classes/bottle-controller.class.js" defer></script>
     <script src="./classes/world.class.js" defer></script>
+    <script src="./js/sound-cues.js" defer></script>
     <script src="./classes/game-audio.class.js" defer></script>
     <script src="./js/play-controls.js" defer></script>
     <script src="./js/game-settings.js" defer></script>
@@ -40,7 +41,7 @@
 
                         <button class="game-button" id="start-button" type="button">Start</button>
                     </div>
-                    <a class="start-impressum" href="impressum.html" target="_blank" rel="noopener">Impressum</a>
+                    <a class="start-impressum" href="templates/impressum.html" target="_blank" rel="noopener">Impressum</a>
                 </div>
                 <div class="end-actions" id="end-actions" hidden>
                     <button class="game-button" id="restart-button" type="button">Neustart</button>
@@ -100,7 +101,7 @@
                     <input id="music-volume-input" class="volume-input" type="range" min="0" max="100" value="50">
                     <div class="settings-actions">
                         <button class="game-button" id="give-up-button" type="button" hidden>Aufgeben</button>
-                        <a id="impressum-link" href="impressum.html" target="_blank" rel="noopener">Impressum</a>
+                        <a id="impressum-link" href="templates/impressum.html" target="_blank" rel="noopener">Impressum</a>
                     </div>
                 </dialog>
             </div>
@@ -147,7 +148,7 @@
         </svg>
         <h2 id="rotation-title">Bitte drehe dein Gerät</h2>
         <p>El Pollo Loco wird im Querformat gespielt.</p>
-        <a href="impressum.html" target="_blank" rel="noopener">Impressum</a>
+        <a href="templates/impressum.html" target="_blank" rel="noopener">Impressum</a>
     </section>
     <audio id="background-music" src="audio/mexico-mexican-mariachi-music.mp3" preload="none" loop></audio>
 </body>

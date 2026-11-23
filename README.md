@@ -12,7 +12,7 @@ Ein 2D-Jump-and-Run als JavaScript-Portfolio-Projekt mit HTML5 Canvas, responsiv
 | Springen | W, Pfeil nach oben oder Leertaste |
 | Flasche werfen | E oder F |
 
-Die Bildschirmtasten erscheinen auf Geräten mit Touch-Eingabe. Im mobilen Querformat liegen die Laufpfeile links neben der Leinwand und die Aktionstasten rechts. Ton und Vollbild lassen sich oben rechts umschalten.
+Die Bildschirmtasten erscheinen bei Touch-Eingabe auf Handy- und Tablet-Größen. Im mobilen Querformat liegen die Laufpfeile links neben der Leinwand und die Aktionstasten rechts. Ton und Vollbild lassen sich oben rechts umschalten.
 
 Sammle Münzen und Flaschen. Flaschen besiegen beide Hühnertypen. Ein Sprung von oben besiegt ein normales Huhn, kostet Pepe bei einem kleinen Huhn aber Leben. Der Endboss ist am Ende des Levels. Triff ihn mit Flaschen, wenn er am Boden ist.
 
@@ -23,6 +23,7 @@ Sammle Münzen und Flaschen. Flaschen besiegen beide Hühnertypen. Ein Sprung vo
 - **levels/** enthält den Aufbau und die Platzierungsdaten des Levels.
 - **js/** enthält die Einstellungen und die Bildschirmsteuerung.
 - **styles/** enthält die Stylesheets für Spielfläche, Steuerung und Dialoge.
+- **templates/** enthält eigenständige statische HTML-Seiten wie das Impressum.
 - **img/** und **fonts/** enthalten die Grafiken und Schriften.
 
 ## Musik

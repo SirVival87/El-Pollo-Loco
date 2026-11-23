@@ -147,6 +147,7 @@ class World {
 
         if (this.paused) {
             this.pauseAnimationElapsed += elapsed;
+            if (this.audio?.sleeping) this.audio.play('sleep');
         } else {
             this.runSimulationSteps(elapsed);
         }
@@ -174,7 +175,7 @@ class World {
 
         this.updateGameResult();
         if (this.win === null) this.updateActors(deltaTime);
-        if (this.win !== true) this.character.updatePhysics(deltaTime);
+        if (this.win === null) this.character.updatePhysics(deltaTime);
         this.checkCollisions();
         this.updateGameResult();
         if (this.win === null) this.updateLevel(deltaTime);
@@ -204,10 +205,11 @@ class World {
         this.boss?.updateAnimation(deltaTime);
     }
 
-    /** Pausiert die Spielwelt nach 15 Sekunden Untätigkeit. */
+    /** Pausiert die Spielwelt mit Schlafgeräusch nach 15 Sekunden Untätigkeit. */
     pauseIfIdle() {
         if (this.win === null && this.character.idleElapsed + 1e-9 >= 15) {
             this.setPaused(true);
+            this.audio?.setSleeping?.(true);
         }
     }
 

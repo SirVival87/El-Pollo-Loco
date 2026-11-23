@@ -8,7 +8,7 @@ const restartButton = document.getElementById('restart-button');
 const endActions = document.getElementById('end-actions');
 const pauseIndicator = document.getElementById('pause-indicator');
 const rotationNotice = document.getElementById('rotation-notice');
-const portraitMode = matchMedia('(orientation: portrait) and (any-pointer: coarse)');
+const portraitMode = matchMedia('(orientation: portrait) and (pointer: coarse) and (max-width: 1080px) and (max-height: 1440px)');
 const playButtons = document.querySelectorAll('[data-game-action]');
 
 /** Startet eine neue Runde und setzt die Eingaben zurück. */
@@ -57,6 +57,7 @@ function returnToStart() {
 function pauseGame() {
     if (!world || world.stopped) return;
 
+    gameAudio.setSleeping(false);
     world.setPaused(true);
 }
 

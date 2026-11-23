@@ -115,7 +115,7 @@ class BottleController {
         if (this.world.boss.isJumping) {
             projectile.reflect(this.world.character.getCollisionBounds());
         } else {
-            this.world.boss.hit(projectile.damage);
+            if (this.world.boss.hit(projectile.damage)) this.world.audio?.play('bossHurt');
             this.destroyBottle(projectile);
         }
         return true;
