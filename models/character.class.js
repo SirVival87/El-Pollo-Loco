@@ -63,7 +63,7 @@ class Character extends MovableObject {
         'img/2_character_pepe/5_dead/D-57.png',
     ];
     world;
-    speed = 10;
+    speed = 5;
     groundY = 235;
     leftBoundary = -720;
     bottles = [];
