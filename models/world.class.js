@@ -1,5 +1,6 @@
 class World {
     static showCollisionFrames = false;
+    static simulationStep = 1 / 60;
 
     character = new Character();
     level = createLevel1();
@@ -10,9 +11,10 @@ class World {
     camera_x = 0;
     statusBar = new StatusBar(this.character);
     win = null;
-    thrownBottles = [];
+    activeBottle = null;
     levelTimers = new Set();
-    bottleImages = ThrowableObject.loadSprites();
+    lastFrameTime = null;
+    frameAccumulator = 0;
     endScreens = {
         true: this.loadEndScreen('img/You won, you lost/You Won B.png'),
         false: this.loadEndScreen('img/You won, you lost/Game over A.png'),
@@ -26,6 +28,7 @@ class World {
         this.onGameEnd = onGameEnd;
         this.audio = audio;
         this.setWorld();
+        ThrowableObject.preloadSprites();
         this.draw();
     }
 
@@ -43,15 +46,8 @@ class World {
         }
     }
 
-    draw(timestamp = 0) {
-        const deltaTime = this.getDeltaTime(timestamp);
-
-        this.updateGameResult();
-        if (this.win === null) {
-            this.update(deltaTime);
-        }
-        this.updateThrownBottles(Math.min(deltaTime, 0.05));
-        this.boss?.updateAnimation(deltaTime);
+    draw(timestamp) {
+        if (timestamp !== undefined) this.advanceSimulation(timestamp);
         this.render();
 
         if (this.shouldShowEndScreen() && this.drawEndScreen()) {
@@ -67,8 +63,6 @@ class World {
         cancelAnimationFrame(this.animationFrame);
         this.levelTimers.forEach(timer => clearTimeout(timer));
         this.levelTimers.clear();
-        this.character.stop();
-        this.level.enemies.forEach(enemy => enemy.stop());
     }
 
     updateGameResult() {
@@ -86,7 +80,7 @@ class World {
 
         if (this.win) {
             const bossAnimationFinished = !this.boss?.isDead() || this.boss.hasFinishedDeathAnimation();
-            return bossAnimationFinished && !this.thrownBottles.some(bottle => bottle.isSplashing);
+            return bossAnimationFinished && !this.activeBottle?.isSplashing;
         }
         return !this.character.isDead() || this.character.hasFinishedDeathAnimation();
     }
@@ -128,17 +122,45 @@ class World {
         return true;
     }
 
-    getDeltaTime(timestamp) {
-        const deltaTime = this.lastFrameTime ? (timestamp - this.lastFrameTime) / 1000 : 0;
+    advanceSimulation(timestamp) {
+        if (this.lastFrameTime !== null) {
+            const elapsed = Math.min((timestamp - this.lastFrameTime) / 1000, 0.1);
+            this.frameAccumulator += elapsed;
+        }
         this.lastFrameTime = timestamp;
-        return deltaTime;
+
+        const step = World.simulationStep;
+        while (this.frameAccumulator + 1e-9 >= step) {
+            this.frameAccumulator -= step;
+            this.update(step);
+        }
     }
 
     update(deltaTime) {
-        this.moveBackgroundObjectsBackIntoView();
+        this.updateGameResult();
+        if (this.win === null) {
+            this.character.updateMovement();
+            this.level.enemies.forEach(enemy => {
+                if (enemy instanceof Chicken) enemy.update(deltaTime);
+            });
+            this.updateBoss(deltaTime);
+        }
+
+        if (this.win !== true) this.character.updatePhysics(deltaTime);
+        this.checkCollisions();
+        this.updateGameResult();
+
+        if (this.win === null) this.updateLevel(deltaTime);
+        this.updateActiveBottle(deltaTime);
+        this.character.updateAnimation(deltaTime);
+        this.boss?.updateAnimation(deltaTime);
+    }
+
+    updateLevel(deltaTime) {
+        this.wrapScenery(this.level.backgroundObjects, this.level.backgroundLoopWidth);
         this.level.clouds.forEach(cloud => cloud.moveClouds(deltaTime));
-        this.moveCloudsBackIntoView();
-        this.updateBoss(deltaTime);
+        this.wrapScenery(this.level.clouds, this.level.cloudLoopWidth);
+
         const coins = this.collectItems(this.level.coins);
         const bottles = this.collectItems(this.level.bottles);
         this.character.coinCount += coins.length;
@@ -167,9 +189,7 @@ class World {
     }
 
     hitCharacter(enemy) {
-        const previousEnergy = this.character.energy;
-        this.character.hit(enemy.contactDamage);
-        if (this.character.energy >= previousEnergy) return;
+        if (!this.character.hit(enemy.contactDamage)) return;
 
         const cue = enemy instanceof Endboss ? 'bossHit' :
             enemy instanceof SmallChicken ? 'smallChickenHit' : 'chickenHit';
@@ -181,7 +201,7 @@ class World {
             this.win !== null ||
             this.character.isDead() ||
             this.character.bottleCount === 0 ||
-            this.thrownBottles.length > 0
+            this.activeBottle !== null
         ) return;
 
         const direction = this.character.otherDirection ? -1 : 1;
@@ -189,31 +209,29 @@ class World {
         const x = direction === 1 ? right : left - ThrowableObject.size;
         const y = (top + bottom - ThrowableObject.size) / 2;
         const bottle = this.character.bottles.pop();
-        this.thrownBottles.push(new ThrowableObject(x, y, direction, bottle, this.bottleImages));
+        this.activeBottle = new ThrowableObject(x, y, direction, bottle);
         this.audio?.play('throw');
     }
 
-    updateThrownBottles(deltaTime) {
-        if (this.thrownBottles.length === 0) return;
+    updateActiveBottle(deltaTime) {
+        const bottle = this.activeBottle;
+        if (!bottle) return;
 
-        this.thrownBottles = this.thrownBottles.filter(bottle => {
-            if (bottle.isSplashing) {
-                bottle.update(deltaTime);
-                return !bottle.hasFinishedSplash;
-            }
-            if (this.win !== null) return true;
-
+        if (bottle.isSplashing) {
             bottle.update(deltaTime);
-            if (this.checkBottleImpact(bottle)) return true;
-            if (bottle.hasLanded()) {
-                const rightBoundary = this.level.level_end_x - SalsaBottle.width;
-                bottle.sourceBottle.x = Math.max(this.character.leftBoundary, Math.min(rightBoundary, bottle.x));
-                this.level.bottles.push(bottle.sourceBottle);
-                this.audio?.play('bottleLand');
-                return false;
-            }
-            return true;
-        });
+            if (bottle.hasFinishedSplash) this.activeBottle = null;
+            return;
+        }
+        if (this.win !== null) return;
+
+        bottle.update(deltaTime);
+        if (this.checkBottleImpact(bottle) || !bottle.hasLanded()) return;
+
+        const rightBoundary = this.level.level_end_x - SalsaBottle.width;
+        bottle.sourceBottle.x = Math.max(this.character.leftBoundary, Math.min(rightBoundary, bottle.x));
+        this.level.bottles.push(bottle.sourceBottle);
+        this.audio?.play('bottleLand');
+        this.activeBottle = null;
     }
 
     checkBottleImpact(projectile) {
@@ -313,7 +331,7 @@ class World {
             this.level.coins.forEach(coin => coin.draw(this.ctx));
             this.addToMap(this.character);
             this.addObjectsToMap(this.level.enemies);
-            this.thrownBottles.forEach(bottle => bottle.draw(this.ctx));
+            this.activeBottle?.draw(this.ctx);
         } finally {
             this.ctx.restore();
         }
@@ -327,38 +345,15 @@ class World {
         });
     }
 
-    moveBackgroundObjectsBackIntoView() {
-        let leftBorder = -this.camera_x;
-        let rightBorder = leftBorder + this.canvas.width;
-        let backgroundWidth = this.canvas.width;
-        let backgroundLoopWidth = backgroundWidth * 4;
+    wrapScenery(objects, loopWidth) {
+        if (loopWidth === 0) return;
 
-        this.level.backgroundObjects.forEach(backgroundObject => {
-            if (backgroundObject.x + backgroundObject.width < leftBorder) {
-                backgroundObject.x += backgroundLoopWidth;
-            }
-
-            if (backgroundObject.x > rightBorder) {
-                backgroundObject.x -= backgroundLoopWidth;
-            }
-        });
-    }
-
-    moveCloudsBackIntoView() {
-        let leftBorder = -this.camera_x;
-        let rightBorder = leftBorder + this.canvas.width;
-        let cloudWidth = this.canvas.width;
-        let cloudLoopWidth = cloudWidth * 4;
-
-        this.level.clouds.forEach(cloud => {
-            if (cloud.x + cloud.width < leftBorder) {
-                cloud.x += cloudLoopWidth;
-            }
-
-            if (cloud.x > rightBorder) {
-                cloud.x -= cloudLoopWidth;
-            }
-        });
+        const left = -this.camera_x;
+        const right = left + this.canvas.width;
+        for (const object of objects) {
+            if (object.x + object.width < left) object.x += loopWidth;
+            if (object.x > right) object.x -= loopWidth;
+        }
     }
 
     addToMap(movableObject) {

@@ -12,7 +12,7 @@ class StatusBar extends DrawableObject {
         super();
         this.character = character;
         this.loadImage(this.emptyHealthPath);
-        this.loadImagesArray([this.fullHealthPath, this.bottleIcon, this.coinIcon]);
+        DrawableObject.preloadImages([this.fullHealthPath, this.bottleIcon, this.coinIcon]);
         document.fonts.load('32px Boogaloo');
     }
 
@@ -36,8 +36,8 @@ class StatusBar extends DrawableObject {
 
         super.draw(ctx);
 
-        const full = this.characterImageCache[this.fullHealthPath];
-        const healthRatio = Math.max(0, Math.min(1, this.character.energy / 100));
+        const full = DrawableObject.getImage(this.fullHealthPath);
+        const healthRatio = Math.max(0, Math.min(1, this.character.energy / this.character.maxEnergy));
         if (full.naturalWidth === 0 || healthRatio === 0) return;
 
         // Horizontal bounds of the fill area in the original PNG.
@@ -54,7 +54,7 @@ class StatusBar extends DrawableObject {
     }
 
     drawCounter(ctx, iconPath, count, x) {
-        const icon = this.characterImageCache[iconPath];
+        const icon = DrawableObject.getImage(iconPath);
         if (icon.naturalWidth > 0) {
             ctx.drawImage(icon, x, this.y + 3, 44, 44);
         }

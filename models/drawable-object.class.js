@@ -1,25 +1,28 @@
 class DrawableObject {
+    static imageCache = new Map();
+
     x = 0;
     y = 0;
     img;
     height = 480;
     width = 720;
-    characterImageCache = {};
     offset = { left: 0, top: 0, right: 0, bottom: 0 };
 
-    loadImagesArray(arr) {
-        arr.forEach(path => {
-            let img = new Image();
-            img.src = path;
-            this.characterImageCache[path] = img;
-        });
-
+    static getImage(path) {
+        if (!DrawableObject.imageCache.has(path)) {
+            const image = new Image();
+            image.src = path;
+            DrawableObject.imageCache.set(path, image);
+        }
+        return DrawableObject.imageCache.get(path);
     }
 
+    static preloadImages(paths) {
+        paths.forEach(path => DrawableObject.getImage(path));
+    }
 
     loadImage(path) {
-        this.img = new Image();
-        this.img.src = path;
+        this.img = DrawableObject.getImage(path);
     }
 
     draw(ctx) {

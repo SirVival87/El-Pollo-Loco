@@ -4,7 +4,6 @@ class Endboss extends MovableObject {
     height = 300;
     width = 300;
     groundY = 140;
-    energy = 100;
     offset = { left: 12, top: 46, right: 8, bottom: 10 };
     hitCooldown = 0;
     patrolDistance = 200;
@@ -66,14 +65,14 @@ class Endboss extends MovableObject {
         super();
         this.x = x;
         this.homeX = x;
-        this.loadImagesArray([
+        DrawableObject.preloadImages([
             ...this.WALKING_IMAGES,
             ...this.ALERT_IMAGES,
             ...this.ATTACK_IMAGES,
             ...this.HURT_IMAGES,
             ...this.DEAD_IMAGES,
         ]);
-        this.img = this.characterImageCache[this.WALKING_IMAGES[0]];
+        this.loadImage(this.WALKING_IMAGES[0]);
     }
 
     updateJump(deltaTime) {
@@ -157,7 +156,7 @@ class Endboss extends MovableObject {
     showAnimationFrame(images, elapsed, frameDuration, loop = false) {
         const frame = Math.floor(elapsed / frameDuration);
         const index = loop ? frame % images.length : Math.min(frame, images.length - 1);
-        this.img = this.characterImageCache[images[index]];
+        this.loadImage(images[index]);
     }
 
     hasFinishedDeathAnimation() {

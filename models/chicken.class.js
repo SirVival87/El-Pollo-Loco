@@ -23,9 +23,8 @@ class Chicken extends MovableObject {
             `img/3_enemies_chicken/${type.spriteFolder}/1_walk/${frame}_w.png`
         );
         const images = type.deadImage ? [...this.WALKING_IMAGES, type.deadImage] : this.WALKING_IMAGES;
-        this.loadImagesArray(images);
-        this.img = this.characterImageCache[this.WALKING_IMAGES[0]];
-        this.animate();
+        DrawableObject.preloadImages(images);
+        this.loadImage(this.WALKING_IMAGES[0]);
     }
 
     die() {
@@ -34,27 +33,20 @@ class Chicken extends MovableObject {
 
         this.energy = 0;
         this.offset.top = 33;
-        this.img = this.characterImageCache[deadImage];
-        this.stop();
+        this.loadImage(deadImage);
     }
 
-    animate() {
-        this.startInterval(() => {
-            this.x += this.speed * this.direction;
+    update(deltaTime) {
+        if (this.isDead()) return;
 
-            if (this.x <= this.leftBorder) {
-                this.direction = 1;
-                this.otherDirection = true;
-            }
+        this.x += this.speed * this.direction;
+        if (this.x <= this.leftBorder) {
+            this.direction = 1;
+        } else if (this.x >= this.rightBorder) {
+            this.direction = -1;
+        }
 
-            if (this.x >= this.rightBorder) {
-                this.direction = -1;
-                this.otherDirection = false;
-            }
-        }, 1000 / 60);
-
-        this.startInterval(() => {
-            this.playAnimation(this.WALKING_IMAGES);
-        }, 300);
+        this.otherDirection = this.direction === 1;
+        this.playAnimation(this.WALKING_IMAGES, deltaTime, 0.3);
     }
 }

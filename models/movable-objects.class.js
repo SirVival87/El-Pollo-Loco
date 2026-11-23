@@ -1,14 +1,16 @@
 class MovableObject extends DrawableObject {
-    currentImageIndex = 0;
+    static maxEnergy = 100;
+
+    animationImages = null;
+    animationElapsed = 0;
     speed = 0.3;
     otherDirection = false;
     speedY = 0;
     acceleration = 5;
     groundY;
-    energy = 100;
+    energy = this.maxEnergy;
     lastHit = -Infinity;
     hitCooldown = 1000;
-    timers = [];
     contactDamage = 20;
 
     moveRight() {
@@ -18,30 +20,26 @@ class MovableObject extends DrawableObject {
 
 
     moveLeft() {
-            this.x -= this.speed;
-            this.otherDirection = true;
+        this.x -= this.speed;
+        this.otherDirection = true;
     }
 
 
-    playAnimation(images) {
-        let i = this.currentImageIndex % images.length;
-        let path = images[i];
-        this.img = this.characterImageCache[path];
-        this.currentImageIndex++;
+    get maxEnergy() {
+        return this.constructor.maxEnergy;
     }
 
+    playAnimation(images, deltaTime, frameDuration, loop = true) {
+        if (this.animationImages === images) {
+            this.animationElapsed += deltaTime;
+        } else {
+            this.animationImages = images;
+            this.animationElapsed = 0;
+        }
 
-    startInterval(callback, delay) {
-        this.timers.push(setInterval(callback, delay));
-    }
-
-    stop() {
-        this.timers.forEach(timer => clearInterval(timer));
-        this.timers.length = 0;
-    }
-
-    applyGravity() {
-        this.startInterval(() => this.updateGravity(), 1000 / 25);
+        const frame = Math.floor((this.animationElapsed + 1e-9) / frameDuration);
+        const index = loop ? frame % images.length : Math.min(frame, images.length - 1);
+        this.loadImage(images[index]);
     }
 
     updateGravity() {
@@ -74,21 +72,22 @@ class MovableObject extends DrawableObject {
     }
 
     hit(damage) {
-    const now = performance.now();
+        const now = performance.now();
+        if (!Number.isFinite(damage) || damage <= 0 ||
+            this.isDead() || now - this.lastHit < this.hitCooldown) {
+            return false;
+        }
 
-    if (this.isDead() || now - this.lastHit < this.hitCooldown) {
-        return;
+        this.energy = Math.max(0, this.energy - damage);
+        this.lastHit = now;
+        return true;
     }
 
-    this.energy = Math.max(0, this.energy - damage);
-    this.lastHit = now;
-}
+    isHurt() {
+        return performance.now() - this.lastHit < 600;
+    }
 
-isHurt() {
-    return performance.now() - this.lastHit < 600;
-}
-
-isDead() {
-        return this.energy == 0;
-}
+    isDead() {
+        return this.energy <= 0;
+    }
 }

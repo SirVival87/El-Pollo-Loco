@@ -16,20 +16,17 @@ class ThrowableObject extends MovableObject {
     velocityY = -380;
     gravity = 1350;
 
-    static loadSprites() {
-        const loader = new DrawableObject();
-        loader.loadImagesArray([...this.rotationImages, ...this.splashImages]);
-        return loader.characterImageCache;
+    static preloadSprites() {
+        DrawableObject.preloadImages([...this.rotationImages, ...this.splashImages]);
     }
 
-    constructor(x, y, direction, bottle, imageCache) {
+    constructor(x, y, direction, bottle) {
         super();
         this.x = x;
         this.y = y;
         this.velocityX = direction * 650;
         this.sourceBottle = bottle;
         this.damage = bottle.damage;
-        this.characterImageCache = imageCache;
     }
 
     get isSplashing() {
@@ -79,7 +76,7 @@ class ThrowableObject extends MovableObject {
         const { frameDuration, rotationImages, splashImages } = ThrowableObject;
         if (this.isSplashing) {
             const index = Math.min(Math.floor(this.splashTime / frameDuration), splashImages.length - 1);
-            const image = this.characterImageCache[splashImages[index]];
+            const image = DrawableObject.getImage(splashImages[index]);
             if (image.naturalWidth > 0) {
                 ctx.drawImage(image, 70, 29, 354, 355, this.x - 18, this.y - 18, 80, 80);
             }
@@ -87,7 +84,7 @@ class ThrowableObject extends MovableObject {
         }
 
         const index = Math.floor(this.flightTime / frameDuration) % rotationImages.length;
-        const image = this.characterImageCache[rotationImages[index]];
+        const image = DrawableObject.getImage(rotationImages[index]);
         if (image.naturalWidth > 0) {
             ctx.drawImage(image, 54, 54, 292, 300, this.x, this.y, this.width, this.height);
         }

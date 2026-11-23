@@ -1,7 +1,6 @@
 class Character extends MovableObject {
     x = 60;
-    y = 35; // soll 235
-    img;
+    y = 35;
     height = 200;
     width = 100;
     offset = { left: 12, top: 77, right: 14, bottom: 10 };
@@ -24,18 +23,6 @@ class Character extends MovableObject {
         'img/2_character_pepe/1_idle/idle/I-8.png',
         'img/2_character_pepe/1_idle/idle/I-9.png',
         'img/2_character_pepe/1_idle/idle/I-10.png',
-    ];
-    LONGIDLE_IMAGES = [
-        'img/2_character_pepe/1_idle/long_idle/I-11.png',
-        'img/2_character_pepe/1_idle/long_idle/I-12.png',
-        'img/2_character_pepe/1_idle/long_idle/I-13.png',
-        'img/2_character_pepe/1_idle/long_idle/I-14.png',
-        'img/2_character_pepe/1_idle/long_idle/I-15.png',
-        'img/2_character_pepe/1_idle/long_idle/I-16.png',
-        'img/2_character_pepe/1_idle/long_idle/I-17.png',
-        'img/2_character_pepe/1_idle/long_idle/I-18.png',
-        'img/2_character_pepe/1_idle/long_idle/I-19.png',
-        'img/2_character_pepe/1_idle/long_idle/I-20.png',
     ];
     JUMP_IMAGES = [
         'img/2_character_pepe/3_jump/J-31.png',
@@ -66,6 +53,7 @@ class Character extends MovableObject {
     speed = 5;
     groundY = 235;
     leftBoundary = -720;
+    gravityElapsed = 0;
     bottles = [];
     coinCount = 0;
 
@@ -74,93 +62,82 @@ class Character extends MovableObject {
     }
 
     constructor() {
-        super().loadImage('img/2_character_pepe/2_walk/W-21.png');
-        this.loadImagesArray(this.WALKING_IMAGES);
-        this.loadImagesArray(this.IDLE_IMAGES);
-        this.loadImagesArray(this.LONGIDLE_IMAGES);
-        this.loadImagesArray(this.JUMP_IMAGES);
-        this.loadImagesArray(this.HURT_IMAGES);
-        this.loadImagesArray(this.DEAD_IMAGES);
-        this.animate();
-        this.applyGravity();
+        super();
+        DrawableObject.preloadImages([
+            ...this.WALKING_IMAGES,
+            ...this.IDLE_IMAGES,
+            ...this.JUMP_IMAGES,
+            ...this.HURT_IMAGES,
+            ...this.DEAD_IMAGES,
+        ]);
+        this.loadImage(this.WALKING_IMAGES[0]);
     }
 
+    updateMovement() {
+        if (!this.world || this.world.win !== null || this.isDead()) return;
 
-deathFrameIndex = 0;
+        const { keyboard, level, audio } = this.world;
+        const previousX = this.x;
 
-animate() {
-    this.startInterval(() => this.updateMovement(), 1000 / 60);
-    this.startInterval(() => this.updateAnimation(), 200);
-}
+        if ((keyboard.consumeTap("right") || keyboard.isPressed("right")) && this.x < level.level_end_x) {
+            this.moveRight();
+        }
 
-updateMovement() {
-    if (!this.world || this.world.win !== null || this.isDead()) return;
+        if ((keyboard.consumeTap("left") || keyboard.isPressed("left")) && this.x > this.leftBoundary) {
+            this.moveLeft();
+        }
 
-    const { keyboard, level, audio } = this.world;
-    const previousX = this.x;
+        this.world.camera_x = -this.x + 125;
 
-    if ((keyboard.consumeTap("right") || keyboard.isPressed("right")) && this.x < level.level_end_x) {
-        this.moveRight();
+        if (keyboard.isPressedOnce("up") && !this.isAboveGround()) {
+            this.jump();
+            audio?.play('jump');
+        } else if (this.x !== previousX && !this.isAboveGround() && this.speedY === 0) {
+            audio?.play('sandStep');
+        }
     }
 
-    if ((keyboard.consumeTap("left") || keyboard.isPressed("left")) && this.x > this.leftBoundary) {
-        this.moveLeft();
+    updatePhysics(deltaTime) {
+        const gravityStep = 1 / 25;
+        this.gravityElapsed += deltaTime;
+        if (this.gravityElapsed + 1e-9 < gravityStep) return;
+
+        this.gravityElapsed -= gravityStep;
+        this.updateGravity();
     }
-
-    this.world.camera_x = -this.x + 125;
-
-    if (keyboard.isPressedOnce("up") && !this.isAboveGround()) {
-        this.jump();
-        audio?.play('jump');
-    } else if (this.x !== previousX && !this.isAboveGround() && this.speedY === 0) {
-        audio?.play('sandStep');
-    }
-
-    this.world.checkCollisions();
-}
 
     updateGravity() {
         const previousFeet = this.getCollisionBounds().bottom;
         super.updateGravity();
 
-        const feet = this.getCollisionBounds().bottom;
-        if (feet > previousFeet) {
+        if (this.getCollisionBounds().bottom > previousFeet) {
             this.world?.checkChickenStomp(previousFeet);
         }
-        if (feet !== previousFeet) {
-            this.world?.checkCollisions();
-        }
     }
 
-hasFinishedDeathAnimation() {
-    const lastImage = this.DEAD_IMAGES[this.DEAD_IMAGES.length - 1];
-    return this.img === this.characterImageCache[lastImage];
-}
+    hasFinishedDeathAnimation() {
+        const lastImage = this.DEAD_IMAGES.at(-1);
+        return this.img === DrawableObject.getImage(lastImage);
+    }
 
-updateAnimation() {
+    updateAnimation(deltaTime) {
+        const frameDuration = 0.2;
         if (this.isDead()) {
-        const path = this.DEAD_IMAGES[this.deathFrameIndex];
-        this.img = this.characterImageCache[path];
-        this.deathFrameIndex = Math.min(
-            this.deathFrameIndex + 1,
-            this.DEAD_IMAGES.length - 1
-        );
-        return;
-    }
+            this.playAnimation(this.DEAD_IMAGES, deltaTime, frameDuration, false);
+            return;
+        }
         if (this.isHurt()) {
-    this.playAnimation(this.HURT_IMAGES);
-    return;
-    }
+            this.playAnimation(this.HURT_IMAGES, deltaTime, frameDuration);
+            return;
+        }
+        if (this.isAboveGround()) {
+            this.playAnimation(this.JUMP_IMAGES, deltaTime, frameDuration);
+            return;
+        }
 
-    const keyboard = this.world?.keyboard;
-    const isWalking = keyboard?.isPressed("right") || keyboard?.isPressed("left");
-
-    if (this.isAboveGround()) {
-        this.playAnimation(this.JUMP_IMAGES);
-    } else if (isWalking) {
-        this.playAnimation(this.WALKING_IMAGES);
-    } else {
-        this.playAnimation(this.IDLE_IMAGES);
+        const keyboard = this.world?.keyboard;
+        const isWalking = keyboard?.isPressed("right") || keyboard?.isPressed("left");
+        const images = isWalking ? this.WALKING_IMAGES : this.IDLE_IMAGES;
+        this.playAnimation(images, deltaTime, frameDuration);
     }
-}
 }
