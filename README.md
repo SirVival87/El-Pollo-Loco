@@ -25,6 +25,10 @@ Sammle Münzen und Flaschen. Normale Hühner lassen sich mit einer Flasche oder 
 - **styles/** enthält die Stylesheets für Spielfläche, Steuerung und Dialoge.
 - **img/** und **fonts/** enthalten die Grafiken und Schriften.
 
+## Musik
+
+Die Hintergrundmusik ist [Mexico Mexican Mariachi Music von ikoliks_aj](https://pixabay.com/music/latin-mexico-mexican-mariachi-music-468180/) und wird unter der [Pixabay Content License](https://pixabay.com/service/license-summary/) im Spiel verwendet.
+
 ## Grafiken und Schriften
 
 - Figuren, Spielflächen und Spielgrafiken kommen aus den bereitgestellten Unterrichtsmaterialien.

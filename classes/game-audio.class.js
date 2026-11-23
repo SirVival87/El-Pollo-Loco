@@ -1,6 +1,8 @@
 class GameAudio {
     enabled = true;
     volume = 100;
+    musicVolume = 50;
+    roundActive = false;
     storageKey = 'el-pollo-loco-audio';
     paused = false;
     lastPlayed = new Map();
@@ -24,8 +26,8 @@ class GameAudio {
         sandStep: {
             interval: 0.19,
             noise: [
-                { start: 720, end: 390, duration: 0.095, volume: 0.55, attack: 0.015 },
-                { start: 2350, end: 880, delay: 0.025, duration: 0.08, volume: 0.28 },
+                { start: 720, end: 390, duration: 0.095, volume: 2.2, attack: 0.015 },
+                { start: 2350, end: 880, delay: 0.025, duration: 0.08, volume: 1.12 },
             ],
         },
         throw: {
@@ -87,11 +89,15 @@ class GameAudio {
     };
 
     /** Liest Lautstärke und Tonstatus aus dem lokalen Speicher. */
-    constructor() {
+    constructor(music) {
+        this.music = music;
         try {
             const preferences = JSON.parse(localStorage.getItem(this.storageKey));
             if (typeof preferences?.enabled === 'boolean') this.enabled = preferences.enabled;
-            if (Number.isFinite(preferences?.volume)) this.volume = Math.max(0, Math.min(100, preferences.volume));
+            if (Number.isFinite(preferences?.volume)) this.volume = this.clampVolume(preferences.volume);
+            if (Number.isFinite(preferences?.musicVolume)) {
+                this.musicVolume = this.clampVolume(preferences.musicVolume);
+            }
         } catch {
             // Use defaults when storage is blocked or contains invalid data.
         }
@@ -103,6 +109,7 @@ class GameAudio {
             localStorage.setItem(this.storageKey, JSON.stringify({
                 enabled: this.enabled,
                 volume: this.volume,
+                musicVolume: this.musicVolume,
             }));
         } catch {
             // Volume still works for the current session.
@@ -113,15 +120,25 @@ class GameAudio {
     unlock() {
         if (!this.enabled || !globalThis.AudioContext) return;
 
-        if (!this.context) {
-            this.context = new AudioContext();
-            this.output = this.context.createGain();
-            this.updateVolume();
-            this.output.connect(this.context.destination);
-            this.noiseBuffer = this.createNoiseBuffer();
-        }
+        if (!this.context) this.createAudioOutput();
         if (this.context.state === 'suspended') {
             this.context.resume().catch(() => {});
+        }
+    }
+
+    /** Initialisiert die Ausgänge für Effekte und Musik. */
+    createAudioOutput() {
+        this.context = new AudioContext();
+        this.output = this.context.createGain();
+        this.output.connect(this.context.destination);
+        this.updateVolume();
+        this.noiseBuffer = this.createNoiseBuffer();
+
+        // Beim direkten Start aus index.html spielt das Element die lokale Datei selbst ab.
+        if (location.protocol !== 'file:') {
+            this.musicGain = this.context.createGain();
+            this.context.createMediaElementSource(this.music).connect(this.musicGain);
+            this.musicGain.connect(this.context.destination);
         }
     }
 
@@ -130,21 +147,75 @@ class GameAudio {
         this.enabled = enabled;
         if (enabled) this.unlock();
         this.updateVolume();
+        this.syncMusicPlayback();
         this.savePreferences();
     }
 
     /** Setzt und speichert eine Lautstärke zwischen 0 und 100. */
     setVolume(volume) {
         if (!Number.isFinite(volume)) return;
-        this.volume = Math.max(0, Math.min(100, volume));
+        this.volume = this.clampVolume(volume);
         this.updateVolume();
         this.savePreferences();
+    }
+
+    /** Setzt und speichert die Lautstärke der Hintergrundmusik. */
+    setMusicVolume(volume) {
+        if (!Number.isFinite(volume)) return;
+        this.musicVolume = this.clampVolume(volume);
+        this.updateMusicVolume();
+        this.savePreferences();
+    }
+
+    /** Begrenzt die Lautstärke auf den Wertebereich der Regler. */
+    clampVolume(volume) {
+        return Math.max(0, Math.min(100, volume));
+    }
+
+    /** Bereitet den Ton für eine neue Runde vor und startet die Musik von vorn. */
+    startRound() {
+        this.roundActive = true;
+        this.paused = false;
+        this.music.currentTime = 0;
+        this.unlock();
+        this.updateVolume();
+        this.syncMusicPlayback();
+    }
+
+    /** Stoppt die Hintergrundmusik am Ende der Runde. */
+    endRound() {
+        this.roundActive = false;
+        this.setPaused(false);
+        this.music.currentTime = 0;
     }
 
     /** Stellt die Audioausgabe während einer Spielpause stumm. */
     setPaused(paused) {
         this.paused = paused;
+        if (!paused && this.roundActive) this.unlock();
         this.updateVolume();
+        this.syncMusicPlayback();
+    }
+
+    /** Startet oder pausiert die Musik entsprechend dem Spiel- und Tonstatus. */
+    syncMusicPlayback() {
+        this.updateMusicVolume();
+        if (!this.enabled || !this.roundActive || this.paused) {
+            this.music.pause();
+            return;
+        }
+        if (this.music.paused) this.music.play().catch(() => {});
+    }
+
+    /** Überträgt die gewünschte Musiklautstärke auf den aktiven Audioausgang. */
+    updateMusicVolume() {
+        const volume = this.musicVolume / 100;
+        if (this.musicGain) {
+            this.musicGain.gain.value = volume;
+        } else {
+            this.music.volume = volume;
+            this.music.muted = volume === 0;
+        }
     }
 
     /** Überträgt Lautstärke, Tonstatus und Pause auf die Audioausgabe. */

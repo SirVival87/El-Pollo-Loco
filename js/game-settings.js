@@ -6,6 +6,8 @@ const settingsDialog = document.getElementById('settings-dialog');
 const impressumDialog = document.getElementById('impressum-dialog');
 const volumeInput = document.getElementById('volume-input');
 const volumeValue = document.getElementById('volume-value');
+const musicVolumeInput = document.getElementById('music-volume-input');
+const musicVolumeValue = document.getElementById('music-volume-value');
 const giveUpButton = document.getElementById('give-up-button');
 
 /** Schaltet den Spielton über das Symbol um. */
@@ -25,6 +27,12 @@ function updateSoundButton() {
 function updateVolume() {
     gameAudio.setVolume(Number(volumeInput.value));
     volumeValue.value = gameAudio.volume + ' %';
+}
+
+/** Übernimmt und speichert die Lautstärke der Hintergrundmusik. */
+function updateMusicVolume() {
+    gameAudio.setMusicVolume(Number(musicVolumeInput.value));
+    musicVolumeValue.value = gameAudio.musicVolume + ' %';
 }
 
 /** Öffnet die Einstellungen und pausiert eine gegebenenfalls laufende Runde. */
@@ -110,13 +118,21 @@ function exitFallbackFullscreen(event) {
 function connectGameSettings() {
     giveUpButton.addEventListener('click', returnToStart);
     settingsButton.addEventListener('click', openSettings);
-    volumeInput.value = gameAudio.volume;
-    volumeValue.value = gameAudio.volume + ' %';
-    volumeInput.addEventListener('input', updateVolume);
+    connectVolumeControls();
     /** Bindet das Impressum und das Schließen beider Dialoge. */
     connectDialogs();
     /** Bindet Ton- und Vollbildsteuerung an die Werkzeugleiste. */
     connectToolbar();
+}
+
+/** Zeigt die gespeicherten Lautstärken an und bindet beide Regler. */
+function connectVolumeControls() {
+    volumeInput.value = gameAudio.volume;
+    volumeValue.value = gameAudio.volume + ' %';
+    volumeInput.addEventListener('input', updateVolume);
+    musicVolumeInput.value = gameAudio.musicVolume;
+    musicVolumeValue.value = gameAudio.musicVolume + ' %';
+    musicVolumeInput.addEventListener('input', updateMusicVolume);
 }
 
 function connectDialogs() {

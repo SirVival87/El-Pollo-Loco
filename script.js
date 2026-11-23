@@ -1,7 +1,7 @@
 let world;
 const keyboard = new Keyboard(acceptGameAction);
 const canvas = document.getElementById('canvas');
-const gameAudio = new GameAudio();
+const gameAudio = new GameAudio(document.getElementById('background-music'));
 const startScreen = document.getElementById('start-screen');
 const startButton = document.getElementById('start-button');
 const restartButton = document.getElementById('restart-button');
@@ -16,8 +16,7 @@ function startGame() {
     startScreen.hidden = true;
     endActions.hidden = true;
     pauseIndicator.hidden = true;
-    gameAudio.setPaused(false);
-    gameAudio.unlock();
+    gameAudio.startRound();
     world = new World(canvas, keyboard, showEndActions, gameAudio, showPauseState);
     setPlayButtonsEnabled(true);
     canvas.focus({ preventScroll: true });
@@ -25,6 +24,7 @@ function startGame() {
 
 /** Zeigt die Aktionen der beendeten Runde an. */
 function showEndActions() {
+    gameAudio.endRound();
     pauseIndicator.hidden = true;
     keyboard.reset();
     setPlayButtonsEnabled(false);
@@ -41,7 +41,7 @@ function returnToStart() {
     startScreen.hidden = false;
     endActions.hidden = true;
     pauseIndicator.hidden = true;
-    gameAudio.setPaused(false);
+    gameAudio.endRound();
     setPlayButtonsEnabled(false);
     startButton.focus({ preventScroll: true });
 }
