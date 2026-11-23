@@ -9,20 +9,30 @@ function createChickens(amount, levelEndX, ChickenType = Chicken) {
 
     for (let i = 0; i < amount; i++) {
         const x = getRandomChickenX(minX, maxX, characterStartX, safeDistance);
+        if (x === null) break;
         chickens.push(new ChickenType(x, levelEndX));
     }
 
     return chickens;
 }
 
-function getRandomChickenX(minX, maxX, characterStartX, safeDistance) {
-    let x;
+function getRandomChickenX(minX, maxX, playerX, safeDistance) {
+    if (minX > maxX) return null;
 
-    do {
-        x = minX + Math.random() * (maxX - minX);
-    } while (Math.abs(x - characterStartX) < safeDistance);
+    const leftEnd = Math.min(maxX, playerX - safeDistance);
+    const rightStart = Math.max(minX, playerX + safeDistance);
+    const leftWidth = Math.max(0, leftEnd - minX);
+    const rightWidth = Math.max(0, maxX - rightStart);
+    const availableWidth = leftWidth + rightWidth;
 
-    return x;
+    if (availableWidth === 0) {
+        if (Math.abs(minX - playerX) >= safeDistance) return minX;
+        if (Math.abs(maxX - playerX) >= safeDistance) return maxX;
+        return null;
+    }
+
+    const offset = Math.random() * availableWidth;
+    return offset < leftWidth ? minX + offset : rightStart + (offset - leftWidth);
 }
 
 const bottlePositions = [440, 2500, 5000, 7500, LEVEL_END_X - 740];

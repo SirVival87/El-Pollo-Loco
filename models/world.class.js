@@ -26,7 +26,6 @@ class World {
         this.onGameEnd = onGameEnd;
         this.audio = audio;
         this.setWorld();
-        this.collisionTimer = this.checkCollisions();
         this.draw();
     }
 
@@ -35,15 +34,13 @@ class World {
     }
 
     checkCollisions() {
-        return setInterval(() => {
-            if (this.win !== null) return;
+        if (this.win !== null || this.character.isDead()) return;
 
-            this.level.enemies.forEach(enemy => {
-                if (!enemy.isDead() && this.character.isColliding(enemy)) {
-                    this.hitCharacter(enemy);
-                }
-            });
-        }, 200);
+        for (const enemy of this.level.enemies) {
+            if (!enemy.isDead() && this.character.isColliding(enemy)) {
+                this.hitCharacter(enemy);
+            }
+        }
     }
 
     draw(timestamp = 0) {
@@ -68,7 +65,6 @@ class World {
 
     stop() {
         cancelAnimationFrame(this.animationFrame);
-        clearInterval(this.collisionTimer);
         this.levelTimers.forEach(timer => clearTimeout(timer));
         this.levelTimers.clear();
         this.character.stop();
@@ -283,7 +279,7 @@ class World {
 
         this.scheduleLevelChange(() => {
             const x = getRandomChickenX(0, this.level.level_end_x, this.character.x, 300);
-            this.level.enemies.push(new Chicken(x, this.level.level_end_x));
+            if (x !== null) this.level.enemies.push(new Chicken(x, this.level.level_end_x));
         }, 10_000);
     }
 
@@ -308,17 +304,20 @@ class World {
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.ctx.translate(this.camera_x, 0); // 0 = verschiebung der y-Achse die muss mit angegeben werden
+        this.ctx.save();
+        try {
+            this.ctx.translate(this.camera_x, 0);
+            this.addObjectsToMap(this.level.backgroundObjects);
+            this.addObjectsToMap(this.level.clouds);
+            this.level.bottles.forEach(bottle => bottle.draw(this.ctx));
+            this.level.coins.forEach(coin => coin.draw(this.ctx));
+            this.addToMap(this.character);
+            this.addObjectsToMap(this.level.enemies);
+            this.thrownBottles.forEach(bottle => bottle.draw(this.ctx));
+        } finally {
+            this.ctx.restore();
+        }
 
-        this.addObjectsToMap(this.level.backgroundObjects);
-        this.addObjectsToMap(this.level.clouds);
-        this.level.bottles.forEach(bottle => bottle.draw(this.ctx));
-        this.level.coins.forEach(coin => coin.draw(this.ctx));
-        this.addToMap(this.character);
-        this.addObjectsToMap(this.level.enemies);
-        this.thrownBottles.forEach(bottle => bottle.draw(this.ctx));
-
-        this.ctx.translate(-this.camera_x, 0);
         this.statusBar.draw(this.ctx);
     }
 
@@ -364,11 +363,9 @@ class World {
 
     addToMap(movableObject) {
         if (movableObject.otherDirection) {
-            this.flipImage(movableObject);
-        }
-        movableObject.draw(this.ctx);
-        if (movableObject.otherDirection) {
-            this.flipImageBack(movableObject);
+            this.drawMirrored(movableObject);
+        } else {
+            movableObject.draw(this.ctx);
         }
 
         if (World.showCollisionFrames &&
@@ -378,15 +375,14 @@ class World {
         }
     }
 
-    flipImage(movableObject) {
+    drawMirrored(object) {
         this.ctx.save();
-        this.ctx.translate(movableObject.width, 0);
-        this.ctx.scale(-1, 1);
-        movableObject.x = movableObject.x * -1;
-    }
-
-    flipImageBack(movableObject) {
-        movableObject.x = movableObject.x * -1;
-        this.ctx.restore();
+        try {
+            this.ctx.translate(2 * object.x + object.width, 0);
+            this.ctx.scale(-1, 1);
+            object.draw(this.ctx);
+        } finally {
+            this.ctx.restore();
+        }
     }
 };

@@ -115,13 +115,20 @@ updateMovement() {
     } else if (this.x !== previousX && !this.isAboveGround() && this.speedY === 0) {
         audio?.play('sandStep');
     }
+
+    this.world.checkCollisions();
 }
 
     updateGravity() {
         const previousFeet = this.getCollisionBounds().bottom;
         super.updateGravity();
-        if (this.getCollisionBounds().bottom > previousFeet) {
+
+        const feet = this.getCollisionBounds().bottom;
+        if (feet > previousFeet) {
             this.world?.checkChickenStomp(previousFeet);
+        }
+        if (feet !== previousFeet) {
+            this.world?.checkCollisions();
         }
     }
 

@@ -1,6 +1,5 @@
 class Keyboard {
   pressed = new Set();
-  wasPressed = new Set();
   heldControls = new Map();
   tappedControls = new Set();
   controls = {
@@ -13,13 +12,19 @@ class Keyboard {
 
   constructor() {
     document.addEventListener("keydown", (event) => {
-      if (event.code === 'Space' && event.target?.closest?.('button')) return;
-      this.pressed.add(event.code);
+      const { code, repeat, target } = event;
+      if (code === 'Space' && target?.closest?.('button')) return;
+      if (repeat || this.pressed.has(code)) return;
+
+      const action = Object.keys(this.controls).find(name => this.controls[name].includes(code));
+      if (!action) return;
+
+      this.pressed.add(code);
+      this.tapControl(action);
     });
 
     document.addEventListener("keyup", (event) => {
       this.pressed.delete(event.code);
-      this.wasPressed.delete(event.code);
     });
 
     globalThis.addEventListener('blur', () => this.reset());
@@ -28,7 +33,6 @@ class Keyboard {
 
   reset() {
     this.pressed.clear();
-    this.wasPressed.clear();
     this.heldControls.clear();
     this.tappedControls.clear();
   }
@@ -58,15 +62,6 @@ class Keyboard {
 
 
   isPressedOnce(action) {
-    if (this.consumeTap(action)) return true;
-
-    const key = this.controls[action]?.find((code) => this.pressed.has(code));
-
-    if (!key || this.wasPressed.has(key)) {
-      return false;
-    }
-
-    this.wasPressed.add(key);
-    return true;
+    return this.consumeTap(action);
   }
 }
