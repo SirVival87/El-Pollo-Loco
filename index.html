@@ -37,12 +37,20 @@
                         <button class="game-button" id="start-button" type="button">Start</button>
                     </div>
                 </div>
-                <button class="game-button restart-button" id="restart-button" type="button" hidden>Neustart</button>
+                <div class="end-actions" id="end-actions" hidden>
+                    <button class="game-button" id="restart-button" type="button">Neustart</button>
+                    <button class="game-button" id="home-button" type="button">Zurück zum Start</button>
+                </div>
                 <div class="pause-indicator" id="pause-indicator" role="status" hidden>
                     <strong>Pause</strong>
                     <span>Bewegen zum Fortsetzen</span>
                 </div>
                 <div class="game-controls">
+                    <button class="game-button" id="settings-button" type="button" aria-label="Einstellungen" aria-haspopup="dialog" title="Einstellungen">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-1.7-5.6h3.4l.5 2.3 1.7 1 2.2-.7 1.7 2.9-1.7 1.6v2l1.7 1.6-1.7 3-2.2-.8-1.7 1-.5 2.3h-3.4l-.5-2.3-1.7-1-2.2.8-1.7-3L5.9 12v-2L4.2 8.4l1.7-2.9 2.2.7 1.7-1z" transform="translate(0 1)"/>
+                        </svg>
+                    </button>
                     <button class="game-button" id="sound-button" type="button" aria-label="Spielton" aria-pressed="true" title="Spielton ausschalten">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M11 5 6 9H3v6h3l5 4z"/>
@@ -57,6 +65,36 @@
                         </svg>
                     </button>
                 </div>
+                <dialog class="game-dialog" id="settings-dialog" aria-labelledby="settings-title">
+                    <form method="dialog" class="dialog-close-form">
+                        <button class="game-button dialog-close" aria-label="Einstellungen schließen">×</button>
+                    </form>
+                    <h2 id="settings-title">Einstellungen</h2>
+                    <ol class="game-instructions" aria-label="Spielanleitung">
+                        <li>Sammle Münzen und Flaschen auf deinem Weg.</li>
+                        <li>Weiche den kleinen Hühnern aus. Normale Hühner besiegst du mit einem Sprung oder einer Flasche.</li>
+                        <li>Triff den Boss dreimal mit einer Flasche, während er am Boden ist, um zu gewinnen.</li>
+                    </ol>
+                    <dl class="controls-guide">
+                        <dt>Laufen</dt><dd><kbd>A</kbd> / <kbd>D</kbd> oder <kbd>←</kbd> / <kbd>→</kbd></dd>
+                        <dt>Springen</dt><dd><kbd>W</kbd>, <kbd>↑</kbd> oder <kbd>Leertaste</kbd></dd>
+                        <dt>Werfen</dt><dd><kbd>E</kbd> oder <kbd>F</kbd></dd>
+                    </dl>
+                    <label class="volume-label" for="volume-input">Lautstärke <output id="volume-value" for="volume-input">100 %</output></label>
+                    <input id="volume-input" type="range" min="0" max="100" value="100">
+                    <div class="settings-actions">
+                        <button class="game-button" id="give-up-button" type="button" hidden>Aufgeben</button>
+                        <a id="impressum-link" href="#impressum-dialog">Impressum</a>
+                    </div>
+                </dialog>
+                <dialog class="game-dialog" id="impressum-dialog" aria-labelledby="impressum-title">
+                    <form method="dialog" class="dialog-close-form">
+                        <button class="game-button dialog-close" aria-label="Impressum schließen">×</button>
+                    </form>
+                    <h2 id="impressum-title">Impressum</h2>
+                    <p>El Pollo Loco ist ein privates Lern- und Portfolio-Projekt.</p>
+                    <p>Projekt und Kontakt: <a href="https://github.com/SirVival87/El-Pollo-Loco">El Pollo Loco auf GitHub</a> und <a href="https://github.com/SirVival87">SirVival87</a>.</p>
+                </dialog>
             </div>
             <div class="play-controls" role="group" aria-label="Spielsteuerung">
                 <div class="play-control-group" role="group" aria-label="Laufen">

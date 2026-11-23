@@ -1,5 +1,7 @@
 class GameAudio {
     enabled = true;
+    volume = 100;
+    storageKey = 'el-pollo-loco-audio';
     paused = false;
     lastPlayed = new Map();
 
@@ -84,6 +86,27 @@ class GameAudio {
         },
     };
 
+    constructor() {
+        try {
+            const preferences = JSON.parse(localStorage.getItem(this.storageKey));
+            if (typeof preferences?.enabled === 'boolean') this.enabled = preferences.enabled;
+            if (Number.isFinite(preferences?.volume)) this.volume = Math.max(0, Math.min(100, preferences.volume));
+        } catch {
+            // Use defaults when storage is blocked or contains invalid data.
+        }
+    }
+
+    savePreferences() {
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify({
+                enabled: this.enabled,
+                volume: this.volume,
+            }));
+        } catch {
+            // Volume still works for the current session.
+        }
+    }
+
     unlock() {
         if (!this.enabled || !globalThis.AudioContext) return;
 
@@ -103,6 +126,14 @@ class GameAudio {
         this.enabled = enabled;
         if (enabled) this.unlock();
         this.updateVolume();
+        this.savePreferences();
+    }
+
+    setVolume(volume) {
+        if (!Number.isFinite(volume)) return;
+        this.volume = Math.max(0, Math.min(100, volume));
+        this.updateVolume();
+        this.savePreferences();
     }
 
     setPaused(paused) {
@@ -111,7 +142,7 @@ class GameAudio {
     }
 
     updateVolume() {
-        if (this.output) this.output.gain.value = this.enabled && !this.paused ? 0.2 : 0;
+        if (this.output) this.output.gain.value = this.enabled && !this.paused ? 0.2 * this.volume / 100 : 0;
     }
 
     createNoiseBuffer() {

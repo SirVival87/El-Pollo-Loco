@@ -8,6 +8,13 @@ const gameAudio = new GameAudio();
 const startScreen = document.getElementById('start-screen');
 const startButton = document.getElementById('start-button');
 const restartButton = document.getElementById('restart-button');
+const endActions = document.getElementById('end-actions');
+const settingsButton = document.getElementById('settings-button');
+const settingsDialog = document.getElementById('settings-dialog');
+const impressumDialog = document.getElementById('impressum-dialog');
+const volumeInput = document.getElementById('volume-input');
+const volumeValue = document.getElementById('volume-value');
+const giveUpButton = document.getElementById('give-up-button');
 const pauseIndicator = document.getElementById('pause-indicator');
 const playButtons = document.querySelectorAll('[data-game-action]');
 
@@ -15,28 +22,65 @@ function startGame() {
     world?.stop();
     keyboard.reset();
     startScreen.hidden = true;
-    restartButton.hidden = true;
+    endActions.hidden = true;
     pauseIndicator.hidden = true;
     gameAudio.setPaused(false);
     gameAudio.unlock();
-    world = new World(canvas, keyboard, showRestartButton, gameAudio);
+    world = new World(canvas, keyboard, showEndActions, gameAudio, showPauseState);
     playButtons.forEach(button => { button.disabled = false; });
     canvas.focus({ preventScroll: true });
 }
 
-function showRestartButton() {
+function showEndActions() {
     pauseIndicator.hidden = true;
     keyboard.reset();
     playButtons.forEach(button => { button.disabled = true; });
-    restartButton.hidden = false;
+    endActions.hidden = false;
     restartButton.focus({ preventScroll: true });
 }
 
 function toggleSound(event) {
     gameAudio.setEnabled(!gameAudio.enabled);
+    updateSoundButton();
+    focusGameAfterClick(event);
+}
+
+function updateSoundButton() {
     soundButton.setAttribute('aria-pressed', String(gameAudio.enabled));
     soundButton.title = gameAudio.enabled ? 'Spielton ausschalten' : 'Spielton einschalten';
-    focusGameAfterClick(event);
+}
+
+function updateVolume() {
+    gameAudio.setVolume(Number(volumeInput.value));
+    volumeValue.value = gameAudio.volume + ' %';
+}
+
+function openSettings() {
+    if (world && !world.stopped) pauseGame();
+    giveUpButton.hidden = !world || world.stopped;
+    settingsDialog.showModal();
+}
+
+function returnToStart() {
+    world?.stop();
+    world = undefined;
+    keyboard.reset();
+    settingsDialog.close();
+    startScreen.hidden = false;
+    endActions.hidden = true;
+    pauseIndicator.hidden = true;
+    gameAudio.setPaused(false);
+    playButtons.forEach(button => { button.disabled = true; });
+    startButton.focus({ preventScroll: true });
+}
+
+function closeOnBackdrop(dialog) {
+    dialog.addEventListener('click', event => {
+        if (event.target !== dialog) return;
+        const { left, top, right, bottom } = dialog.getBoundingClientRect();
+        if (event.clientX < left || event.clientX > right ||
+            event.clientY < top || event.clientY > bottom) dialog.close();
+    });
 }
 
 function updateFullscreenButton() {
@@ -80,12 +124,16 @@ function focusGameAfterClick(event) {
 function pauseGame() {
     if (!world || world.stopped) return;
 
-    keyboard.reset();
     world.setPaused(true);
-    pauseIndicator.hidden = false;
+}
+
+function showPauseState(paused) {
+    if (paused) keyboard.reset();
+    pauseIndicator.hidden = !paused;
 }
 
 function acceptGameAction(action) {
+    if (settingsDialog.open || impressumDialog.open) return false;
     if (!world?.paused) return true;
     if (document.hidden || !document.hasFocus() ||
         (action !== 'left' && action !== 'right' && action !== 'up')) {
@@ -93,13 +141,13 @@ function acceptGameAction(action) {
     }
 
     world.setPaused(false);
-    pauseIndicator.hidden = true;
     return true;
 }
 
 function connectPlayButton(button) {
     const action = button.dataset.gameAction;
     const holdToMove = action === 'left' || action === 'right';
+    button.addEventListener('contextmenu', event => event.preventDefault());
 
     button.addEventListener('pointerdown', event => {
         if (event.button !== 0 || button.disabled || !acceptGameAction(action)) return;
@@ -136,6 +184,21 @@ function connectPlayButton(button) {
 playButtons.forEach(connectPlayButton);
 startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', startGame);
+document.getElementById('home-button').addEventListener('click', returnToStart);
+giveUpButton.addEventListener('click', returnToStart);
+settingsButton.addEventListener('click', openSettings);
+volumeInput.value = gameAudio.volume;
+volumeValue.value = gameAudio.volume + ' %';
+volumeInput.addEventListener('input', updateVolume);
+document.getElementById('impressum-link').addEventListener('click', event => {
+    event.preventDefault();
+    settingsDialog.close();
+    impressumDialog.showModal();
+});
+impressumDialog.addEventListener('close', () => settingsDialog.showModal());
+closeOnBackdrop(settingsDialog);
+closeOnBackdrop(impressumDialog);
+updateSoundButton();
 soundButton.addEventListener('click', toggleSound);
 fullscreenButton.addEventListener('click', toggleFullscreen);
 document.addEventListener('fullscreenchange', updateFullscreenButton);
@@ -144,6 +207,7 @@ document.addEventListener('visibilitychange', () => {
     if (document.hidden) pauseGame();
 });
 document.addEventListener('keydown', event => {
+    if (settingsDialog.open || impressumDialog.open) return;
     if (event.key === 'Escape' && gameStage.classList.contains('viewport-fullscreen')) {
         gameStage.classList.remove('viewport-fullscreen');
         updateFullscreenButton();

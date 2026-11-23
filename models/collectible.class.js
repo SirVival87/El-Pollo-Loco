@@ -34,12 +34,5 @@ class SalsaBottle extends Collectible {
             width: SalsaBottle.width,
             height: SalsaBottle.height,
         });
-        this.spawnX = x;
-        this.spawnY = y;
-    }
-
-    returnToSpawn() {
-        this.x = this.spawnX;
-        this.y = this.spawnY;
     }
 }

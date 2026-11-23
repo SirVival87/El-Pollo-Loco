@@ -56,7 +56,7 @@ body {
 }
 
 .game-stage {
-    --play-controls-height: 78px;
+    --play-controls-height: 0px;
     --available-height: calc(var(--viewport-height) - 120px);
     --canvas-width-limit: calc((var(--available-height) - var(--play-controls-height)) * 1.5);
     position: relative;
@@ -155,8 +155,29 @@ canvas {
     transform: translateY(3px);
 }
 
-.restart-button {
+.end-actions {
+    position: absolute;
     bottom: 6%;
+    left: 50%;
+    display: flex;
+    gap: 8px;
+    width: max-content;
+    max-width: 100%;
+    transform: translateX(-50%);
+}
+
+.end-actions .game-button,
+.game-dialog .game-button {
+    position: static;
+    transform: none;
+    padding-inline: clamp(8px, 2vw, 23px);
+    font-size: clamp(1.12rem, 3vw, 1.65rem);
+    white-space: nowrap;
+}
+
+.end-actions .game-button:active,
+.game-dialog .game-button:active {
+    transform: translateY(3px);
 }
 
 .pause-indicator {
@@ -187,6 +208,24 @@ canvas {
 .game-viewport {
     position: relative;
     width: 100%;
+    container-type: inline-size;
+}
+
+@container (max-width: 460px) {
+    .start-intro {
+        top: 10px;
+        left: 10px;
+        transform: none;
+    }
+
+    .start-intro .game-button {
+        padding-inline: 11px;
+        font-size: 1.35rem;
+    }
+
+    .game-controls {
+        gap: 5px;
+    }
 }
 
 .game-stage:is(:fullscreen, .viewport-fullscreen) {
@@ -256,7 +295,7 @@ body:has(.viewport-fullscreen) {
 }
 
 .play-controls {
-    display: flex;
+    display: none;
     justify-content: space-between;
     box-sizing: border-box;
     width: 100%;
@@ -332,8 +371,17 @@ body:has(.viewport-fullscreen) {
     }
 }
 
-@media (orientation: landscape) and (pointer: coarse),
-       (orientation: landscape) and (max-height: 520px) {
+@media (any-pointer: coarse) {
+    .game-stage {
+        --play-controls-height: 78px;
+    }
+
+    .play-controls {
+        display: flex;
+    }
+}
+
+@media (orientation: landscape) and (any-pointer: coarse) {
     body {
         --page-padding-block: 4px;
         gap: 4px;
@@ -400,4 +448,80 @@ body:has(.viewport-fullscreen) {
     .play-control-label {
         display: none;
     }
+}
+
+
+.game-dialog {
+    box-sizing: border-box;
+    width: min(440px, calc(100% - 24px));
+    max-height: calc(var(--viewport-height) - var(--safe-top) - var(--safe-bottom) - 24px);
+    margin: auto;
+    padding: 20px;
+    border: 2px solid #ffd061;
+    border-radius: 14px;
+    background: #3e2519;
+    color: #fff2c4;
+    box-shadow: 0 12px 38px #0009;
+    font: 1.08rem / 1.35 Boogaloo, sans-serif;
+}
+
+.game-dialog::backdrop {
+    background: #160d08b5;
+}
+
+.game-dialog h2 {
+    margin: 0 50px 10px 0;
+    color: #ffda71;
+    font-weight: normal;
+}
+
+.game-dialog a {
+    color: #ffdc7f;
+}
+
+.dialog-close-form {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin: 0;
+}
+
+.dialog-close-form .dialog-close {
+    width: 44px;
+    padding: 0;
+}
+
+.game-instructions {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.controls-guide {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 3px 12px;
+    margin: 14px 0;
+}
+
+.controls-guide dd {
+    margin: 0;
+}
+
+.volume-label,
+.settings-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+#volume-input {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0 0 12px;
+    accent-color: #ffd061;
+}
+
+.settings-actions {
+    justify-content: flex-end;
 }

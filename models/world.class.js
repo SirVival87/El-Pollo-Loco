@@ -25,11 +25,12 @@ class World {
     };
 
 
-    constructor(canvas, keyboard, onGameEnd = () => {}, audio) {
+    constructor(canvas, keyboard, onGameEnd = () => {}, audio, onPauseChange = () => {}) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
         this.onGameEnd = onGameEnd;
+        this.onPauseChange = onPauseChange;
         this.audio = audio;
         this.setWorld();
         ThrowableObject.preloadSprites();
@@ -81,10 +82,12 @@ class World {
                 actor.lastHit += pauseDuration;
             }
             this.pausedAt = null;
+            this.character.idleElapsed = 0;
         }
 
         this.lastFrameTime = null;
         this.audio?.setPaused?.(paused);
+        this.onPauseChange(paused);
     }
 
     stop() {
@@ -162,7 +165,7 @@ class World {
 
         this.frameAccumulator += elapsed;
         const step = World.simulationStep;
-        while (this.frameAccumulator + 1e-9 >= step) {
+        while (!this.paused && this.frameAccumulator + 1e-9 >= step) {
             this.frameAccumulator -= step;
             this.update(step);
         }
@@ -188,6 +191,10 @@ class World {
         this.updateActiveBottle(deltaTime);
         this.character.updateAnimation(deltaTime);
         this.boss?.updateAnimation(deltaTime);
+
+        if (this.win === null && this.character.idleElapsed + 1e-9 >= 15) {
+            this.setPaused(true);
+        }
     }
 
     updateLevel(deltaTime) {
@@ -205,6 +212,7 @@ class World {
         if (coins.length) this.audio?.play('coin');
         if (bottles.length) this.audio?.play('pickup');
         if (this.keyboard.isPressedOnce('action')) {
+            this.character.idleElapsed = 0;
             this.throwBottle();
         }
     }
@@ -257,7 +265,10 @@ class World {
 
         if (bottle.isSplashing) {
             bottle.update(deltaTime);
-            if (bottle.hasFinishedSplash) this.activeBottle = null;
+            if (bottle.hasFinishedSplash) {
+                this.activeBottle = null;
+                if (this.win === null) this.spawnBottleNearCharacter();
+            }
             return;
         }
         if (this.win !== null) return;
@@ -281,6 +292,16 @@ class World {
             return true;
         }
 
+        const chicken = this.level.enemies.find(enemy =>
+            enemy instanceof Chicken && !(enemy instanceof SmallChicken) &&
+            !enemy.isDead() && projectile.isColliding(enemy)
+        );
+        if (chicken) {
+            this.defeatChicken(chicken);
+            this.destroyBottle(projectile);
+            return true;
+        }
+
         if (!this.boss || this.boss.isDead() || !projectile.isColliding(this.boss)) return false;
 
         if (this.boss.isJumping) {
@@ -295,11 +316,14 @@ class World {
     destroyBottle(projectile) {
         projectile.splash();
         this.audio?.play('splash');
-        this.scheduleLevelChange(() => {
-            projectile.sourceBottle.returnToSpawn();
-            this.level.bottles.push(projectile.sourceBottle);
-        }, 3000);
         this.updateGameResult();
+    }
+
+    spawnBottleNearCharacter() {
+        const { right } = this.character.getCollisionBounds();
+        const maxReachableX = this.level.level_end_x + this.character.width / 2;
+        const x = Math.min(right + 85, maxReachableX);
+        this.level.bottles.push(new SalsaBottle(x));
     }
 
     checkChickenStomp(previousFeet) {

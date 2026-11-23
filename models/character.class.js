@@ -57,6 +57,7 @@ class Character extends MovableObject {
     groundY = 235;
     leftBoundary = -720;
     gravityElapsed = 0;
+    idleElapsed = 0;
     bottles = [];
     coinCount = 0;
 
@@ -92,8 +93,10 @@ class Character extends MovableObject {
         }
 
         this.world.camera_x = -this.x + 125;
+        if (this.x !== previousX) this.idleElapsed = 0;
 
         if (keyboard.isPressedOnce("up") && !this.isAboveGround()) {
+            this.idleElapsed = 0;
             this.jump();
             audio?.play('jump');
         } else if (this.x !== previousX && !this.isAboveGround() && this.speedY === 0) {
@@ -137,23 +140,19 @@ class Character extends MovableObject {
     }
 
     updateAnimation(deltaTime) {
-        const frameDuration = 0.2;
-        if (this.isDead()) {
-            this.playAnimation(this.DEAD_IMAGES, deltaTime, frameDuration, false);
-            return;
-        }
-        if (this.isHurt()) {
-            this.playAnimation(this.HURT_IMAGES, deltaTime, frameDuration);
-            return;
-        }
-        if (this.isAboveGround()) {
-            this.playAnimation(this.JUMP_IMAGES, deltaTime, frameDuration);
-            return;
-        }
+        const images = this.getAnimationImages();
+        this.idleElapsed = images === this.IDLE_IMAGES ? this.idleElapsed + deltaTime : 0;
+        const frameDuration = images === this.JUMP_IMAGES ? 0.1 : 0.2;
+        this.playAnimation(images, deltaTime, frameDuration, images !== this.DEAD_IMAGES);
+    }
+
+    getAnimationImages() {
+        if (this.isDead()) return this.DEAD_IMAGES;
+        if (this.isHurt()) return this.HURT_IMAGES;
+        if (this.isAboveGround()) return this.JUMP_IMAGES;
 
         const keyboard = this.world?.keyboard;
         const isWalking = keyboard?.isPressed("right") || keyboard?.isPressed("left");
-        const images = isWalking ? this.WALKING_IMAGES : this.IDLE_IMAGES;
-        this.playAnimation(images, deltaTime, frameDuration);
+        return isWalking ? this.WALKING_IMAGES : this.IDLE_IMAGES;
     }
 }
