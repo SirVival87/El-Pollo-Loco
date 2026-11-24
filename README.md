@@ -14,7 +14,7 @@ Ein 2D-Jump-and-Run als JavaScript-Portfolio-Projekt mit HTML5 Canvas, responsiv
 
 Die Bildschirmtasten erscheinen bei Touch-Eingabe auf Handy- und Tablet-Größen. Auf Handys und Tablets liegen beide Tastengruppen unter der Spielfläche. Die Laufpfeile sind links, Springen und Werfen sind rechts. Die Werkzeugleiste enthält Pause, Einstellungen und Ton sowie auf dem Desktop den Vollbildschalter.
 
-Sammle Münzen und Flaschen. Flaschen besiegen beide Hühnertypen. Ein Sprung von oben besiegt ein normales Huhn, kostet Pepe bei einem kleinen Huhn aber Leben. Der Endboss ist am Ende des Levels. Triff ihn mit Flaschen, wenn er am Boden ist. Bei 400 bis unter 800 Pixeln Abstand schickt er alle drei Sekunden zwei Hühner und ein Küken in deine Richtung.
+Sammle Münzen und Flaschen. Flaschen besiegen beide Hühnertypen. Ein Sprung von oben besiegt ein normales Huhn, kostet Pepe bei einem kleinen Huhn aber Leben. Der Endboss ist am Ende des Levels. Triff ihn mit Flaschen, wenn er am Boden ist. Bei 100 bis 600 Pixeln Abstand schickt er alle zwei Sekunden zwei Hühner und ein Küken in deine Richtung.
 
 ## Projektstruktur
 

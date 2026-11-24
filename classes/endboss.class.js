@@ -167,20 +167,20 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Schickt alle drei Sekunden Helfer los, solange Pepe 400 bis unter 800 Pixel entfernt ist.
+     * Schickt alle zwei Sekunden Helfer los, solange Pepe 100 bis 600 Pixel entfernt ist.
      * @param {number} characterX - Pepes horizontale Position.
      * @param {Level} level - Level, in das die Helfer eingefügt werden.
      * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
      */
     updateHelpers(characterX, level, deltaTime) {
         const distance = Math.abs(characterX - this.x);
-        if (this.isDead() || distance < 400 || distance >= 800) {
+        if (this.isDead() || distance < 100 || distance > 600) {
             this.helperSpawnElapsed = 0;
             return;
         }
 
         this.helperSpawnElapsed += deltaTime;
-        if (this.helperSpawnElapsed + 1e-9 < 3) return;
+        if (this.helperSpawnElapsed + 1e-9 < 2) return;
 
         this.helperSpawnElapsed = 0;
         this.spawnHelpers(characterX, level);
@@ -193,12 +193,12 @@ class Endboss extends MovableObject {
      */
     spawnHelpers(characterX, level) {
         const direction = characterX < this.x ? -1 : 1;
-        const origin = direction < 0 ? this.x : Math.min(this.x + this.width, characterX - 160);
-        const types = [Chicken, Chicken, SmallChicken];
-        types.forEach((ChickenType, index) => {
-            const edge = origin + direction * (20 + index * 44);
-            const x = direction < 0 ? edge - ChickenType.size : edge;
-            const helper = new ChickenType(x, level.levelEndX);
+        const distance = Math.abs(characterX - this.x);
+        const origin = direction < 0 ? this.x : this.x + Math.min(this.width, distance / 2);
+        const spacing = Math.min(44, distance / 8);
+        [Chicken, Chicken, SmallChicken].forEach((ChickenType, index) => {
+            const centerX = origin + direction * spacing * (index + 1);
+            const helper = new ChickenType(centerX - ChickenType.size / 2, level.levelEndX);
             helper.bossHelper = true;
             helper.direction = direction;
             helper.otherDirection = direction === 1;
