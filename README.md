@@ -28,7 +28,7 @@ Sammle Münzen und Flaschen. Flaschen besiegen beide Hühnertypen. Ein Sprung vo
 
 ## Musik
 
-Die Hintergrundmusik ist [Mexico Mexican Mariachi Music von ikoliks_aj](https://pixabay.com/music/latin-mexico-mexican-mariachi-music-468180/) und wird unter der [Pixabay Content License](https://pixabay.com/service/license-summary/) im Spiel verwendet.
+Im Spiel laufen [Latino Mexican Salsa Music von MFCC](https://pixabay.com/music/folk-latino-mexican-salsa-music-350270/) und im Bosskampf [bossfight thingie von VRBANANA360](https://pixabay.com/music/instrumental-bossfight-thingie-573499/). Beide Titel werden unter der [Pixabay Content License](https://pixabay.com/service/license-summary/) verwendet.
 
 ## Grafiken und Schriften
 

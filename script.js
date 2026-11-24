@@ -51,6 +51,7 @@ function returnToStart() {
     startScreen.hidden = false;
     endActions.hidden = true;
     pauseIndicator.hidden = true;
+    gameAudio.setBossMusic(false);
     gameAudio.setPaused(false);
     setRoundControlsEnabled(false);
     startButton.focus({ preventScroll: true });
@@ -129,6 +130,7 @@ function startAudioFromInteraction() {
 
 /** Starts audio and requests native fullscreen on mobile devices. */
 function prepareRoundPlayback() {
+    gameAudio.setBossMusic(false);
     gameAudio.startPlayback();
     if (mobileLandscape.matches && !document.fullscreenElement) void enterFullscreen();
 }

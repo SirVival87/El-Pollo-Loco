@@ -6,6 +6,7 @@ class World {
     character = new Character();
     level = createLevel1();
     boss = this.level.enemies.find(enemy => enemy instanceof Endboss);
+    bossEncounter = new BossEncounter(this);
     canvas;
     keyboard;
     cameraX = 0;
@@ -109,6 +110,7 @@ class World {
         this.stopped = true;
         cancelAnimationFrame(this.animationFrame);
         this.levelTimers.clear();
+        this.bossEncounter.hide();
     }
 
     /** Determines whether the player won or lost once either side is defeated. */
@@ -180,6 +182,7 @@ class World {
         this.updateGameResult();
         if (this.win === null) this.updateLevel(deltaTime);
         this.bottleController.updateActiveBottle(deltaTime);
+        this.bossEncounter.update(deltaTime);
         this.updateAnimations(deltaTime);
         this.pauseIfIdle();
     }
@@ -394,5 +397,4 @@ class World {
             if (object.x + object.width <= left) object.x += loopWidth;
         }
     }
-
 }

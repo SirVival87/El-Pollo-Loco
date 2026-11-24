@@ -16,6 +16,7 @@ class GameAudio {
      * @param {HTMLAudioElement} music - Media element for background music. */
     constructor(music) {
         this.music = music;
+        this.normalMusic = music.getAttribute('src');
         try {
             this.restorePreferences(JSON.parse(localStorage.getItem(this.storageKey)));
         } catch {
@@ -131,9 +132,23 @@ class GameAudio {
         this.syncMusicPlayback();
     }
 
+    /**
+     * Switches between the regular music and the boss track.
+     * @param {boolean} active - Whether the boss fight is underway.
+     */
+    setBossMusic(active) {
+        const track = active ? this.music.dataset.bossTrack : this.normalMusic;
+        if (!track || track === this.music.getAttribute('src')) return;
+
+        this.music.pause();
+        this.music.src = track;
+        this.syncMusicPlayback();
+    }
+
     /** Plays the result sound and gives it priority over the music.
      * @param {boolean} won - Whether the round was won. */
     playResult(won) {
+        this.setBossMusic(false);
         this.setPaused(false);
         const name = won ? 'victory' : 'gameOver';
         if (this.canPlayEffects() && this.volume > 0 && this.context?.state === 'running') {

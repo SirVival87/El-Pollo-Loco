@@ -22,6 +22,7 @@
     <script src="./classes/status-bar.class.js" defer></script>
     <script src="./classes/world-renderer.class.js" defer></script>
     <script src="./classes/bottle-controller.class.js" defer></script>
+    <script src="./classes/boss-encounter.class.js" defer></script>
     <script src="./classes/world.class.js" defer></script>
     <script src="./js/sound-cues.js" defer></script>
     <script src="./classes/game-audio.class.js" defer></script>
@@ -86,6 +87,14 @@
                         </svg>
                     </button>
                 </div>
+                <section class="boss-hud" id="boss-hud" aria-label="Bosskampf" hidden>
+                    <img src="img/4_enemie_boss_chicken/2_alert/G5.png" alt="">
+                    <div>
+                        <label for="boss-health">Boss</label>
+                        <progress id="boss-health" max="100" value="100">100 %</progress>
+                    </div>
+                    <p class="boss-countdown">Besiege den Boss! Verbleibende Zeit: <span id="boss-time" role="timer">60 s</span></p>
+                </section>
                 <dialog class="game-dialog" id="settings-dialog" aria-labelledby="settings-title">
                     <header class="settings-header">
                         <h2 id="settings-title">Einstellungen</h2>
@@ -167,6 +176,6 @@
         <h2 id="imprint-heading">Impressum</h2>
         <iframe src="templates/impressum.html#overlay" title="Anbieter und Kontakt" loading="lazy"></iframe>
     </dialog>
-    <audio id="background-music" src="audio/mexico-mexican-mariachi-music.mp3" preload="none" loop></audio>
+    <audio id="background-music" src="audio/mfcc-latino-mexican-salsa-music-350270.mp3" data-boss-track="audio/vrbanana360-bossfight-thingie-573499.mp3" preload="none" loop></audio>
 </body>
 </html>
