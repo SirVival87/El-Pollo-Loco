@@ -14,12 +14,14 @@ class BottleController {
     throwBottle() {
         if (!this.canThrowBottle()) return;
 
-        const direction = this.world.character.otherDirection ? -1 : 1;
-        const { left, top, right, bottom } = this.world.character.getCollisionBounds();
+        const { character } = this.world;
+        const direction = character.otherDirection ? -1 : 1;
+        const { left, top, right, bottom } = character.getCollisionBounds();
         const x = direction === 1 ? right : left - ThrowableObject.size;
         const y = (top + bottom - ThrowableObject.size) / 2;
-        const bottle = this.world.character.bottles.pop();
-        this.activeBottle = new ThrowableObject(x, y, direction, bottle);
+        const bottle = character.bottles.pop();
+        const airborne = character.isAboveGround() || character.speedY > 0;
+        this.activeBottle = new ThrowableObject(x, y, direction, bottle, airborne);
         this.world.audio?.play('throw');
     }
 

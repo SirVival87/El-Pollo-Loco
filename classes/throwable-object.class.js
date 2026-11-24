@@ -1,6 +1,7 @@
 /** Fliegende Flasche mit einer Flugbahn und Splash-Animation. */
 class ThrowableObject extends MovableObject {
     static size = 44;
+    static baseThrowSpeed = 650;
     static frameDuration = 0.075;
     static rotationImages = [1, 2, 3, 4].map(frame =>
         `img/6_salsa_bottle/bottle_rotation/${frame}_bottle_rotation.png`
@@ -28,12 +29,14 @@ class ThrowableObject extends MovableObject {
      * @param {number} y - Startposition auf der vertikalen Weltachse.
      * @param {number} direction - Wurfrichtung. 1 steht für rechts, -1 für links.
      * @param {SalsaBottle} bottle - Geworfene Flasche mit ihrem Schadenswert.
+     * @param {boolean} [airborne=false] - Ob Pepe beim Wurf gerade in der Luft ist oder abspringt.
      */
-    constructor(x, y, direction, bottle) {
+    constructor(x, y, direction, bottle, airborne = false) {
         super();
         this.x = x;
         this.y = y;
-        this.velocityX = direction * 650;
+        const rangeFactor = airborne ? 2 / 3 : 0.5;
+        this.velocityX = direction * ThrowableObject.baseThrowSpeed * rangeFactor;
         this.sourceBottle = bottle;
         this.damage = bottle.damage;
     }
@@ -77,7 +80,7 @@ class ThrowableObject extends MovableObject {
      */
     reflect(target) {
         this.isReflected = true;
-        this.velocityX *= -1;
+        this.velocityX = -Math.sign(this.velocityX) * ThrowableObject.baseThrowSpeed;
 
         const targetX = (target.left + target.right) / 2;
         const targetY = (target.top + target.bottom) / 2;

@@ -143,11 +143,12 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Gibt die zufällige Wartezeit bis zum nächsten Angriff in Sekunden zurück.
-     * @returns {number} Wartezeit in Sekunden zwischen 2 und 5.
+     * Berechnet die Patrouillenzeit für etwa 1,74 bis 3,24 Sekunden zwischen Vorwärtssprüngen.
+     * @returns {number} Wartezeit nach dem Rücksprung in Sekunden.
      */
     getJumpDelay() {
-        return 2 + Math.random() * 3;
+        const intervalBetweenAttacks = 1.74 + Math.random() * 1.5;
+        return Math.max(0, intervalBetweenAttacks - this.returnJumpAt - this.jumpDuration);
     }
 
     /**
