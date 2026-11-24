@@ -39,19 +39,8 @@
 }
 
 .game-instructions {
-    margin: 0;
+    margin: 0 0 12px;
     padding-left: 20px;
-}
-
-.controls-guide {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 3px 12px;
-    margin: 14px 0;
-}
-
-.controls-guide dd {
-    margin: 0;
 }
 
 .volume-label,
@@ -71,4 +60,11 @@
 
 .settings-actions {
     justify-content: flex-end;
+}
+
+.imprint-dialog iframe {
+    display: block;
+    width: 100%;
+    height: min(360px, calc(var(--viewport-height) - var(--safe-top) - var(--safe-bottom) - 112px));
+    border: 0;
 }

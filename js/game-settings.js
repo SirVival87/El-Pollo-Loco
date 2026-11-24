@@ -3,6 +3,7 @@ const fullscreenButton = document.getElementById('fullscreen-button');
 const soundButton = document.getElementById('sound-button');
 const settingsButton = document.getElementById('settings-button');
 const settingsDialog = document.getElementById('settings-dialog');
+const imprintDialog = document.getElementById('imprint-dialog');
 const volumeInput = document.getElementById('volume-input');
 const volumeValue = document.getElementById('volume-value');
 const musicVolumeInput = document.getElementById('music-volume-input');
@@ -114,7 +115,7 @@ function focusGameAfterClick(event) {
  * @param {KeyboardEvent} event - Tastendruck, der auf Escape geprüft wird.
  */
 function exitFallbackFullscreen(event) {
-    if (settingsDialog.open || event.key !== 'Escape' ||
+    if (settingsDialog.open || imprintDialog.open || event.key !== 'Escape' ||
         !gameStage.classList.contains('viewport-fullscreen')) return;
     gameStage.classList.remove('viewport-fullscreen');
     updateFullscreenButton();
@@ -126,6 +127,8 @@ function connectGameSettings() {
     settingsButton.addEventListener('click', openSettings);
     connectVolumeControls();
     closeOnBackdrop(settingsDialog);
+    closeOnBackdrop(imprintDialog);
+    document.querySelectorAll('[data-impressum]').forEach(link => link.addEventListener('click', openImprint));
     connectToolbar();
 }
 
@@ -146,4 +149,15 @@ function connectToolbar() {
     fullscreenButton.addEventListener('click', toggleFullscreen);
     document.addEventListener('fullscreenchange', updateFullscreenButton);
     document.addEventListener('keydown', exitFallbackFullscreen);
+}
+
+/**
+ * Öffnet das statische Impressum als Overlay. Der Link bleibt als Seitenaufruf verfügbar.
+ * @param {MouseEvent} event - Klick auf einen Impressum-Link.
+ */
+function openImprint(event) {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    pauseGame();
+    if (!imprintDialog.open) imprintDialog.showModal();
 }

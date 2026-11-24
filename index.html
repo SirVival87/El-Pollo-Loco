@@ -41,7 +41,7 @@
 
                         <button class="game-button" id="start-button" type="button">Start</button>
                     </div>
-                    <a class="start-impressum" href="templates/impressum.html" target="_blank" rel="noopener">Impressum</a>
+                    <a class="start-impressum" href="templates/impressum.html" data-impressum aria-haspopup="dialog">Impressum</a>
                 </div>
                 <div class="end-actions" id="end-actions" hidden>
                     <button class="game-button" id="restart-button" type="button">Neustart</button>
@@ -49,9 +49,15 @@
                 </div>
                 <div class="pause-indicator" id="pause-indicator" role="status" hidden>
                     <strong>Pause</strong>
-                    <span>Bewegen zum Fortsetzen</span>
+                    <span>Bewegen oder ▶ drücken</span>
                 </div>
                 <div class="game-controls">
+                    <button class="game-button" id="pause-button" type="button" aria-label="Pause" aria-pressed="false" title="Spiel pausieren" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path class="icon-default" d="M9 5H7v14h2zM17 5h-2v14h2z"/>
+                            <path class="icon-pressed" d="m8 5 12 7-12 7z"/>
+                        </svg>
+                    </button>
                     <button class="game-button" id="settings-button" type="button" aria-label="Einstellungen" aria-haspopup="dialog" title="Einstellungen">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M 10.25 4.40 10.52 2.11 13.48 2.11 13.75 4.40
@@ -90,18 +96,13 @@
                         <li>Flaschen besiegen beide Hühnertypen. Spring nur auf normale Hühner.</li>
                         <li>Triff den Boss dreimal mit einer Flasche, während er am Boden ist, um zu gewinnen.</li>
                     </ol>
-                    <dl class="controls-guide">
-                        <dt>Laufen</dt><dd><kbd>A</kbd> / <kbd>D</kbd> oder <kbd>←</kbd> / <kbd>→</kbd></dd>
-                        <dt>Springen</dt><dd><kbd>W</kbd>, <kbd>↑</kbd> oder <kbd>Leertaste</kbd></dd>
-                        <dt>Werfen</dt><dd><kbd>E</kbd> oder <kbd>F</kbd></dd>
-                    </dl>
                     <label class="volume-label" for="volume-input">Soundeffekte <output id="volume-value" for="volume-input">50 %</output></label>
                     <input id="volume-input" class="volume-input" type="range" min="0" max="100" value="50">
                     <label class="volume-label" for="music-volume-input">Hintergrundmusik <output id="music-volume-value" for="music-volume-input">50 %</output></label>
                     <input id="music-volume-input" class="volume-input" type="range" min="0" max="100" value="50">
                     <div class="settings-actions">
                         <button class="game-button" id="give-up-button" type="button" hidden>Aufgeben</button>
-                        <a id="impressum-link" href="templates/impressum.html" target="_blank" rel="noopener">Impressum</a>
+                        <a id="impressum-link" href="templates/impressum.html" data-impressum aria-haspopup="dialog">Impressum</a>
                     </div>
                 </dialog>
             </div>
@@ -111,15 +112,11 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="m13 6-6 6 6 6m-6-6h13"/>
                         </svg>
-                        <span class="play-control-label">Links</span>
-                        <span class="play-control-keys" aria-hidden="true"><kbd>A</kbd><kbd>←</kbd></span>
                     </button>
                     <button class="game-button play-control" type="button" data-game-action="right" aria-label="Rechts laufen" aria-keyshortcuts="D ArrowRight" disabled>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="m11 6 6 6-6 6m6-6H4"/>
                         </svg>
-                        <span class="play-control-label">Rechts</span>
-                        <span class="play-control-keys" aria-hidden="true"><kbd>D</kbd><kbd>→</kbd></span>
                     </button>
                 </div>
                 <div class="play-control-group" role="group" aria-label="Springen und Werfen">
@@ -127,15 +124,11 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="m6 9 6-6 6 6m-6-6v14M5 21h14"/>
                         </svg>
-                        <span class="play-control-label">Springen</span>
-                        <span class="play-control-keys" aria-hidden="true"><kbd>W</kbd><kbd>↑</kbd><kbd title="Leertaste">␣</kbd></span>
                     </button>
                     <button class="game-button play-control" type="button" data-game-action="action" aria-label="Flasche werfen" aria-keyshortcuts="E F" disabled>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M15 3h4m-4 0v4l-3 3v7a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-7l-3-3V3M3 11h5m-6 4h5m-3 4h4"/>
                         </svg>
-                        <span class="play-control-label">Werfen</span>
-                        <span class="play-control-keys" aria-hidden="true"><kbd>E</kbd><kbd>F</kbd></span>
                     </button>
                 </div>
             </div>
@@ -148,8 +141,15 @@
         </svg>
         <h2 id="rotation-title">Bitte drehe dein Gerät</h2>
         <p>El Pollo Loco wird im Querformat gespielt.</p>
-        <a href="templates/impressum.html" target="_blank" rel="noopener">Impressum</a>
+        <a href="templates/impressum.html" data-impressum aria-haspopup="dialog">Impressum</a>
     </section>
+    <dialog class="game-dialog imprint-dialog" id="imprint-dialog" aria-labelledby="imprint-heading">
+        <form method="dialog" class="dialog-close-form">
+            <button class="game-button dialog-close" aria-label="Impressum schließen" autofocus>×</button>
+        </form>
+        <h2 id="imprint-heading">Impressum</h2>
+        <iframe src="templates/impressum.html#overlay" title="Anbieter und Kontakt" loading="lazy"></iframe>
+    </dialog>
     <audio id="background-music" src="audio/mexico-mexican-mariachi-music.mp3" preload="none" loop></audio>
 </body>
 </html>
