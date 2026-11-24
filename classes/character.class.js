@@ -179,7 +179,9 @@ class Character extends MovableObject {
     updateAnimation(deltaTime) {
         const images = this.getAnimationImages();
         this.idleElapsed = images === this.IDLE_IMAGES ? this.idleElapsed + deltaTime : 0;
-        const frameDuration = images === this.JUMP_IMAGES ? 0.1 : Character.standardFrameDuration;
+        let frameDuration = Character.standardFrameDuration;
+        if (images === this.WALKING_IMAGES) frameDuration = 0.16;
+        else if (images === this.JUMP_IMAGES) frameDuration = 0.1;
         this.playAnimation(images, deltaTime, frameDuration, images !== this.DEAD_IMAGES);
     }
 

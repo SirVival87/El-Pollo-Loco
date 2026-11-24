@@ -43,6 +43,38 @@
     padding-left: 20px;
 }
 
+.controls-guide {
+    margin: 12px 0;
+    padding: 8px 0;
+    border-block: 1px solid #ffda7166;
+}
+
+.controls-guide h3 {
+    margin: 0 0 4px;
+    color: #ffda71;
+    font-size: 1.1em;
+    font-weight: normal;
+}
+
+.controls-guide dl {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 3px 12px;
+    margin: 0;
+}
+
+.controls-guide dd {
+    margin: 0;
+}
+
+.controls-guide kbd {
+    white-space: nowrap;
+}
+
+.controls-guide p {
+    margin: 6px 0 0;
+}
+
 .volume-label,
 .settings-actions {
     display: flex;
