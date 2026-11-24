@@ -5,7 +5,7 @@ class Endboss extends MovableObject {
     height = 300;
     width = 300;
     groundY = 140;
-    offset = { left: 12, top: 46, right: 8, bottom: 10 };
+    offset = { left: 25, top: 55, right: 16, bottom: 12 };
     hitCooldown = 0;
     patrolDistance = 200;
     patrolSpeed = 160;
