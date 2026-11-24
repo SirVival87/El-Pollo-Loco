@@ -126,6 +126,15 @@
         width: 100%;
     }
 
+    .game-stage:not(:has(.play-control:enabled)) {
+        --thumb-row: 0px;
+    }
+
+    .game-stage:not(:has(.play-control:enabled)) .play-controls,
+    .game-controls #pause-button:disabled {
+        display: none;
+    }
+
     .play-control {
         min-height: 48px;
     }
