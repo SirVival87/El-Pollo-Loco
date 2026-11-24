@@ -11,8 +11,8 @@ const musicVolumeValue = document.getElementById('music-volume-value');
 const giveUpButton = document.getElementById('give-up-button');
 
 /**
- * Schaltet den Spielton über das Symbol um.
- * @param {MouseEvent} event - Aktivierung des Ton-Buttons.
+ * Toggles game audio from the toolbar.
+ * @param {MouseEvent} event - Activation of the sound button.
  */
 function toggleSound(event) {
     gameAudio.setEnabled(!gameAudio.enabled);
@@ -20,25 +20,25 @@ function toggleSound(event) {
     focusGameAfterClick(event);
 }
 
-/** Synchronisiert Status und Beschriftung des Ton-Symbols. */
+/** Updates the sound button state and label. */
 function updateSoundButton() {
     soundButton.setAttribute('aria-pressed', String(gameAudio.enabled));
     soundButton.title = gameAudio.enabled ? 'Spielton ausschalten' : 'Spielton einschalten';
 }
 
-/** Übernimmt den Reglerwert und zeigt die aktuelle Lautstärke an. */
+/** Applies the slider value and displays the current sound-effect volume. */
 function updateVolume() {
     gameAudio.setVolume(Number(volumeInput.value));
     volumeValue.value = gameAudio.volume + ' %';
 }
 
-/** Übernimmt und speichert die Lautstärke der Hintergrundmusik. */
+/** Applies and saves the background music volume. */
 function updateMusicVolume() {
     gameAudio.setMusicVolume(Number(musicVolumeInput.value));
     musicVolumeValue.value = gameAudio.musicVolume + ' %';
 }
 
-/** Öffnet die Einstellungen und pausiert eine gegebenenfalls laufende Runde. */
+/** Opens settings and pauses a round if one is running. */
 function openSettings() {
     if (world && !world.stopped) pauseGame();
     giveUpButton.hidden = !world || world.stopped;
@@ -46,8 +46,8 @@ function openSettings() {
 }
 
 /**
- * Schließt den Dialog bei einem Klick außerhalb seiner sichtbaren Fläche.
- * @param {HTMLDialogElement} dialog - Modaler Dialog, der außerhalb seiner Box geschlossen werden soll.
+ * Closes the dialog when the user clicks outside it.
+ * @param {HTMLDialogElement} dialog - Modal dialog that closes when the user clicks outside it.
  */
 function closeOnBackdrop(dialog) {
     dialog.addEventListener('click', event => {
@@ -58,7 +58,7 @@ function closeOnBackdrop(dialog) {
     });
 }
 
-/** Synchronisiert das Vollbild-Symbol mit dem aktuellen Modus. */
+/** Updates the fullscreen button to match the current mode. */
 function updateFullscreenButton() {
     const active = document.fullscreenElement === gameStage ||
         gameStage.classList.contains('viewport-fullscreen');
@@ -67,9 +67,9 @@ function updateFullscreenButton() {
 }
 
 /**
- * Wechselt zwischen Fenster- und Vollbildansicht.
- * @param {MouseEvent} event - Aktivierung des Vollbild-Buttons.
- * @returns {Promise<void>} Wird nach dem Moduswechsel und der Aktualisierung des Buttons erfüllt.
+ * Switches between windowed and fullscreen modes.
+ * @param {MouseEvent} event - Activation of the fullscreen button.
+ * @returns {Promise<void>} Resolves after switching modes and updating the button.
  */
 async function toggleFullscreen(event) {
     if (gameStage.classList.contains('viewport-fullscreen')) {
@@ -85,8 +85,8 @@ async function toggleFullscreen(event) {
 }
 
 /**
- * Versucht natives Vollbild und nutzt bei Bedarf das Seitenlayout als Ersatz.
- * @returns {Promise<void>} Wird nach dem Wechsel in natives Vollbild oder das CSS-Ersatzlayout erfüllt.
+ * Requests native fullscreen and falls back to the CSS layout if needed.
+ * @returns {Promise<void>} Resolves after entering native fullscreen or the CSS fallback.
  */
 async function enterFullscreen() {
     if (document.fullscreenEnabled) {
@@ -101,8 +101,8 @@ async function enterFullscreen() {
 }
 
 /**
- * Gibt der Spielfläche nach einem Zeigerklick den Tastaturfokus zurück.
- * @param {MouseEvent} event - Klickereignis zur Unterscheidung von Zeiger- und Tastaturaktivierung.
+ * Returns keyboard focus to the canvas after a pointer click.
+ * @param {MouseEvent} event - Click event used to distinguish pointer and keyboard activation.
  */
 function focusGameAfterClick(event) {
     if (event.detail > 0 && world?.win === null) {
@@ -111,8 +111,8 @@ function focusGameAfterClick(event) {
 }
 
 /**
- * Beendet das Vollbild-Ersatzlayout mit Escape.
- * @param {KeyboardEvent} event - Tastendruck, der auf Escape geprüft wird.
+ * Exits the CSS fullscreen fallback when Escape is pressed.
+ * @param {KeyboardEvent} event - Keyboard event checked for Escape.
  */
 function exitFallbackFullscreen(event) {
     if (settingsDialog.open || imprintDialog.open || event.key !== 'Escape' ||
@@ -121,7 +121,7 @@ function exitFallbackFullscreen(event) {
     updateFullscreenButton();
 }
 
-/** Initialisiert die Einstellungen mit den gespeicherten Audiowerten. */
+/** Initializes settings with the saved audio preferences. */
 function connectGameSettings() {
     giveUpButton.addEventListener('click', returnToStart);
     settingsButton.addEventListener('click', openSettings);
@@ -132,7 +132,7 @@ function connectGameSettings() {
     connectToolbar();
 }
 
-/** Zeigt die gespeicherten Lautstärken an und bindet beide Regler. */
+/** Displays the saved volume values and connects both sliders. */
 function connectVolumeControls() {
     volumeInput.value = gameAudio.volume;
     volumeValue.value = gameAudio.volume + ' %';
@@ -142,7 +142,7 @@ function connectVolumeControls() {
     musicVolumeInput.addEventListener('input', updateMusicVolume);
 }
 
-/** Bindet Ton- und Vollbildsteuerung an die Werkzeugleiste. */
+/** Connects the sound and fullscreen toolbar controls. */
 function connectToolbar() {
     updateSoundButton();
     soundButton.addEventListener('click', toggleSound);
@@ -152,8 +152,8 @@ function connectToolbar() {
 }
 
 /**
- * Öffnet das statische Impressum als Overlay. Der Link bleibt als Seitenaufruf verfügbar.
- * @param {MouseEvent} event - Klick auf einen Impressum-Link.
+ * Opens the static legal notice as an overlay and keeps the page available through the link.
+ * @param {MouseEvent} event - Click on a legal-notice link.
  */
 function openImprint(event) {
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;

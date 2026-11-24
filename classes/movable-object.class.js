@@ -1,4 +1,4 @@
-/** Ergänzt Zeichenobjekte um Bewegung, Animation, Treffer und Energie. */
+/** Adds movement, animation, damage, and energy to drawable objects. */
 class MovableObject extends DrawableObject {
     static maxEnergy = 100;
 
@@ -14,14 +14,14 @@ class MovableObject extends DrawableObject {
     hitCooldown = 1000;
     contactDamage = 20;
 
-    /** Bewegt das Objekt nach rechts und passt die Blickrichtung an. */
+    /** Moves the object right and updates its facing direction. */
     moveRight() {
         this.x += this.speed;
         this.otherDirection = false;
     }
 
 
-    /** Bewegt das Objekt nach links und passt die Blickrichtung an. */
+    /** Moves the object left and updates its facing direction. */
     moveLeft() {
         this.x -= this.speed;
         this.otherDirection = true;
@@ -29,19 +29,19 @@ class MovableObject extends DrawableObject {
 
 
     /**
-     * Gibt die maximale Energie des jeweiligen Objekttyps zurück.
-     * @returns {number} Maximale Energie des jeweiligen Objekttyps.
+     * Returns the maximum energy for this object type.
+     * @returns {number} Maximum energy for this object type.
      */
     get maxEnergy() {
         return this.constructor.maxEnergy;
     }
 
     /**
-     * Wählt nach Spielzeit ein Bild der aktuellen Animation.
-     * @param {string[]} images - Bildpfade in Wiedergabereihenfolge.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
-     * @param {number} frameDuration - Anzeigedauer je Bild in Sekunden.
-     * @param {boolean} [loop=true] - Ob die Bildfolge wiederholt werden soll.
+     * Selects the current animation frame based on elapsed game time.
+     * @param {string[]} images - Image paths in playback order.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
+     * @param {number} frameDuration - Display time per frame in seconds.
+     * @param {boolean} [loop=true] - Whether to loop the frame sequence.
      */
     playAnimation(images, deltaTime, frameDuration, loop = true) {
         if (this.animationImages === images) {
@@ -56,7 +56,7 @@ class MovableObject extends DrawableObject {
         this.loadImage(images[index]);
     }
 
-    /** Aktualisiert Fallgeschwindigkeit und Position bis zum Aufsetzen. */
+    /** Updates falling speed and position until the object lands. */
     updateGravity() {
         if (this.isAboveGround() || this.speedY > 0) {
             this.y -= this.speedY;
@@ -71,23 +71,23 @@ class MovableObject extends DrawableObject {
 
 
     /**
-     * Prüft, ob sich das Objekt oberhalb seiner Bodenposition befindet.
-     * @returns {boolean} Ob die Y-Koordinate oberhalb der Bodenposition liegt.
+     * Checks whether the object is above its ground position.
+     * @returns {boolean} Whether its Y coordinate is above the ground position.
      */
     isAboveGround() {
         return this.y < this.groundY;
     }
 
 
-    /** Setzt die vertikale Startgeschwindigkeit des Sprungs. */
+    /** Sets the initial vertical speed of a jump. */
     jump() {
         this.speedY = 30;
     }
 
     /**
-     * Prüft die Kollisionsrechtecke beider Objekte auf Überschneidung.
-     * @param {DrawableObject} movableObject - Objekt mit einer oder mehreren Hitboxen.
-     * @returns {boolean} Ob mindestens ein Paar von Rechtecken überlappt.
+     * Checks both objects' collision rectangles for overlap.
+     * @param {DrawableObject} movableObject - Object with one or more hitboxes.
+     * @returns {boolean} Whether at least one pair of rectangles overlaps.
      */
     isColliding(movableObject) {
         const otherBoxes = movableObject.getCollisionBoxes();
@@ -98,9 +98,9 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Zieht gültigen Schaden außerhalb der Trefferpause ab.
-     * @param {number} damage - Abzuziehende Energie.
-     * @returns {boolean} Ob der Treffer Energie abgezogen hat.
+     * Applies valid damage outside the hit cooldown.
+     * @param {number} damage - Amount of energy to subtract.
+     * @returns {boolean} Whether the hit reduced energy.
      */
     hit(damage) {
         const now = performance.now();
@@ -115,16 +115,16 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Prüft, ob die Zeitspanne für die Trefferanimation läuft.
-     * @returns {boolean} Ob seit dem letzten Treffer weniger als 600 Millisekunden vergangen sind.
+     * Checks whether the hit animation window is active.
+     * @returns {boolean} Whether less than 600 milliseconds have passed since the last hit.
      */
     isHurt() {
         return performance.now() - this.lastHit < 600;
     }
 
     /**
-     * Prüft, ob die Energie aufgebraucht ist.
-     * @returns {boolean} Ob die Energie auf null gefallen ist.
+     * Checks whether the object has run out of energy.
+     * @returns {boolean} Whether energy has dropped to zero.
      */
     isDead() {
         return this.energy <= 0;

@@ -1,97 +1,97 @@
-/** @file Gemeinsame JSDoc-Typen für Eingaben, Spielzustand und Audio. */
+/** @file Shared JSDoc types for input, game state, and audio. */
 
 /**
- * Eine Spielaktion. Zulässige Werte sind `left`, `right`, `up` und `action`.
+ * Game action. Supported values are `left`, `right`, `up`, and `action`.
  * @typedef {string} GameAction
  */
 
 /**
- * Auslöser einer gehaltenen Bildschirmaktion.
+ * Input source holding an on-screen action.
  * @typedef {(number|HTMLButtonElement)} ControlSource
  */
 
 /**
- * Entscheidet, ob die Spielwelt eine Eingabe verarbeitet.
+ * Decides whether the game world processes a given action.
  * @callback AcceptGameAction
- * @param {GameAction} action - Angefragte Spielaktion.
- * @returns {boolean} Ob die Aktion angenommen wurde.
+ * @param {GameAction} action - Requested game action.
+ * @returns {boolean} Whether the game accepted the action.
  */
 
 /**
- * Entscheidet, ob eine bestimmte Bildschirmtaste die zugehörige Aktion auslösen darf.
+ * Decides whether a specific on-screen button can trigger its action.
  * @callback ActionAvailabilityCheck
- * @returns {boolean} Ob die Taste und die Spielaktion freigegeben sind.
+ * @returns {boolean} Whether the button and its action are available.
  */
 
 /**
- * Benachrichtigt die Oberfläche nach dem ersten gezeichneten Endbildschirm.
+ * Notifies the interface when the end screen is first drawn.
  * @callback GameEndCallback
- * @param {boolean} won - Ob die Runde gewonnen wurde.
+ * @param {boolean} won - Whether the round was won.
  */
 
 /**
- * Benachrichtigt die Oberfläche, wenn der Pausenzustand wechselt.
+ * Notifies the interface when the pause state changes.
  * @callback PauseChangeCallback
- * @param {boolean} paused - Ob die Spielwelt jetzt pausiert.
+ * @param {boolean} paused - Whether the game world is now paused.
  */
 
 /**
- * Führt ein Ereignis bei Erreichen seiner geplanten Levelzeit aus.
+ * Runs an event when its scheduled level time is reached.
  * @callback LevelChangeCallback
  */
 
 /**
- * Achsenparallele Hitbox in Weltkoordinaten.
+ * Axis-aligned hitbox in world coordinates.
  * @typedef {Object} CollisionBounds
- * @property {number} left - X-Koordinate der linken Kante.
- * @property {number} top - Y-Koordinate der oberen Kante.
- * @property {number} right - X-Koordinate der rechten Kante.
- * @property {number} bottom - Y-Koordinate der unteren Kante.
+ * @property {number} left - X coordinate of the left edge.
+ * @property {number} top - Y coordinate of the top edge.
+ * @property {number} right - X coordinate of the right edge.
+ * @property {number} bottom - Y coordinate of the bottom edge.
  */
 
 /**
- * Einrückungen eines Kollisionsrechtecks vom Rand des Sprites.
+ * Insets from the sprite edges to a collision rectangle.
  * @typedef {Object} CollisionOffsets
- * @property {number} left - Einrückung vom linken Rand in Pixeln.
- * @property {number} top - Einrückung vom oberen Rand in Pixeln.
- * @property {number} right - Einrückung vom rechten Rand in Pixeln.
- * @property {number} bottom - Einrückung vom unteren Rand in Pixeln.
+ * @property {number} left - Inset from the left edge in pixels.
+ * @property {number} top - Inset from the top edge in pixels.
+ * @property {number} right - Inset from the right edge in pixels.
+ * @property {number} bottom - Inset from the bottom edge in pixels.
  */
 
 /**
- * Bildausschnitt und Anzeigegröße eines Sammelobjekts.
+ * Source region and display size of a collectible sprite.
  * @typedef {Object} CollectibleSprite
- * @property {string} path - Relativer Pfad zur Sprite-Datei.
- * @property {number[]} source - Quellrechteck in Bildpixeln mit X, Y, Breite und Höhe.
- * @property {number} width - Anzeigebreite in Pixeln.
- * @property {number} height - Anzeigehöhe in Pixeln.
+ * @property {string} path - Relative path to the sprite file.
+ * @property {number[]} source - Source rectangle in image pixels as X, Y, width, and height.
+ * @property {number} width - Display width in pixels.
+ * @property {number} height - Display height in pixels.
  */
 
 /**
- * Im Browser gespeicherte Audioeinstellungen.
+ * Audio preferences stored in the browser.
  * @typedef {Object} AudioPreferences
- * @property {boolean} [enabled] - Ob der Spielton aktiviert ist.
- * @property {number} [volume] - Einstellung für Soundeffekte zwischen 0 und 100.
- * @property {number} [musicVolume] - Einstellung für Hintergrundmusik zwischen 0 und 100.
- * @property {number} [volumeScale] - Version der Skala zur Umrechnung älterer Einstellungen.
+ * @property {boolean} [enabled] - Whether game audio is enabled.
+ * @property {number} [volume] - Sound-effect volume setting from 0 to 100.
+ * @property {number} [musicVolume] - Background music volume setting from 0 to 100.
+ * @property {number} [volumeScale] - Scale version used to convert older preferences.
  */
 
 /**
- * Eine synthetisierte Tonspur oder gefilterte Rauschspur.
+ * Synthesized tone layer or filtered noise layer.
  * @typedef {Object} SoundLayer
- * @property {number} start - Startfrequenz in Hertz.
- * @property {number} end - Endfrequenz in Hertz.
- * @property {number} duration - Dauer in Sekunden.
- * @property {number} volume - Spitzenwert der Verstärkung vor dem Effektregler.
- * @property {number} [delay=0] - Verzögerung ab dem Beginn des Effekts in Sekunden.
- * @property {number} [attack=0.004] - Einschwingzeit der Verstärkung in Sekunden.
- * @property {OscillatorType} [shape=triangle] - Wellenform einer Tonspur.
+ * @property {number} start - Start frequency in hertz.
+ * @property {number} end - End frequency in hertz.
+ * @property {number} duration - Duration in seconds.
+ * @property {number} volume - Peak gain before the sound-effect volume control.
+ * @property {number} [delay=0] - Delay from the start of the effect, in seconds.
+ * @property {number} [attack=0.004] - Gain attack time in seconds.
+ * @property {OscillatorType} [shape=triangle] - Waveform of a tone layer.
  */
 
 /**
- * Synthetisierter Soundeffekt mit einer oder mehreren Spuren.
+ * Synthesized sound effect with one or more layers.
  * @typedef {Object} SoundCue
- * @property {SoundLayer[]} [tones] - Tonspuren des Effekts.
- * @property {SoundLayer[]} [noise] - Rauschspuren des Effekts.
- * @property {number} [interval] - Mindestabstand zwischen Wiedergaben in Sekunden.
+ * @property {SoundLayer[]} [tones] - Tone layers in the effect.
+ * @property {SoundLayer[]} [noise] - Noise layers in the effect.
+ * @property {number} [interval] - Minimum time between plays in seconds.
  */

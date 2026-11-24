@@ -1,5 +1,5 @@
 /**
- * Alle synthetisierten Effekte und ihre Ton- und Rauschspuren.
+ * Catalog of synthesized effects and their tone and noise layers.
  * @type {Object<string, SoundCue>}
  */
 const soundCues = {

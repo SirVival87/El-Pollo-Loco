@@ -14,7 +14,7 @@ const rotationNotice = document.getElementById('rotation-notice');
 const portraitMode = matchMedia('(orientation: portrait) and (pointer: coarse) and (max-width: 1080px) and (max-height: 1440px)');
 const playButtons = document.querySelectorAll('[data-game-action]');
 
-/** Startet eine neue Runde und setzt die Eingaben zurück. */
+/** Starts a new round and resets input. */
 function startGame() {
     if (portraitMode.matches) return;
     world?.stop();
@@ -30,8 +30,8 @@ function startGame() {
 }
 
 /**
- * Zeigt die Aktionen der beendeten Runde an und spielt den passenden Effektsound.
- * @param {boolean} won - Ob die Runde gewonnen wurde.
+ * Shows the end-of-round actions and plays the corresponding sound effect.
+ * @param {boolean} won - Whether the round was won.
  */
 function showEndActions(won) {
     gameAudio.playResult(won);
@@ -42,7 +42,7 @@ function showEndActions(won) {
     restartButton.focus({ preventScroll: true });
 }
 
-/** Beendet die Runde und stellt den Startbildschirm wieder her. */
+/** Ends the round and returns to the start screen. */
 function returnToStart() {
     world?.stop();
     world = undefined;
@@ -56,7 +56,7 @@ function returnToStart() {
     startButton.focus({ preventScroll: true });
 }
 
-/** Pausiert eine laufende Spielrunde. */
+/** Pauses the current round. */
 function pauseGame() {
     if (!world || world.stopped) return;
 
@@ -65,8 +65,8 @@ function pauseGame() {
 }
 
 /**
- * Synchronisiert Pausenanzeige und Eingabestatus mit der Spielwelt.
- * @param {boolean} paused - Ob das Spiel pausiert.
+ * Keeps the pause indicator and input state in sync with the game world.
+ * @param {boolean} paused - Whether the game is paused.
  */
 function showPauseState(paused) {
     if (paused) keyboard.reset();
@@ -75,9 +75,9 @@ function showPauseState(paused) {
 }
 
 /**
- * Prüft Eingaben und setzt eine pausierte Runde bei Bewegung fort.
- * @param {GameAction} action - Name der Spielaktion.
- * @returns {boolean} Ob die Aktion im aktuellen Spielzustand zugelassen ist.
+ * Checks input and resumes a paused round on movement.
+ * @param {GameAction} action - Name of the game action.
+ * @returns {boolean} Whether the action is allowed in the current game state.
  */
 function acceptGameAction(action) {
     if (portraitMode.matches || settingsDialog.open || imprintDialog.open) return false;
@@ -92,8 +92,8 @@ function acceptGameAction(action) {
 }
 
 /**
- * Aktiviert oder sperrt Touch- und Pause-Tasten.
- * @param {boolean} enabled - Ob die Bildschirmsteuerung bedienbar sein soll.
+ * Enables or disables the touch and pause buttons.
+ * @param {boolean} enabled - Whether the on-screen controls should be usable.
  */
 function setRoundControlsEnabled(enabled) {
     playButtons.forEach(button => { button.disabled = !enabled; });
@@ -101,7 +101,7 @@ function setRoundControlsEnabled(enabled) {
     updatePauseButton(Boolean(enabled && world?.paused));
 }
 
-/** Aktualisiert Spiel und Audio nach dem Drehen eines Mobilgeräts. */
+/** Updates the game and audio when the mobile device rotates. */
 function updateOrientation() {
     const blocked = portraitMode.matches;
     gameAudio.setOrientationBlocked(blocked);
@@ -115,27 +115,27 @@ function updateOrientation() {
     rotationNotice.focus({ preventScroll: true });
 }
 
-/** Pausiert die Runde beim Verlassen des Tabs und passt die Audioausgabe an. */
+/** Pauses the round when the tab becomes hidden and updates audio playback. */
 function updatePageVisibility() {
     if (document.hidden) pauseGame();
     gameAudio.updateVolume();
     gameAudio.syncMusicPlayback();
 }
 
-/** Wiederholt den Musikstart nach einer Nutzeraktion, wenn Autoplay blockiert wurde. */
+/** Retries music playback after a user interaction if autoplay was blocked. */
 function startAudioFromInteraction() {
     if (!portraitMode.matches) gameAudio.startPlayback();
 }
 
-/** Startet die Audioausgabe und fordert auf Mobilgeräten natives Vollbild an. */
+/** Starts audio and requests native fullscreen on mobile devices. */
 function prepareRoundPlayback() {
     gameAudio.startPlayback();
     if (mobileLandscape.matches && !document.fullscreenElement) void enterFullscreen();
 }
 
 /**
- * Aktualisiert das Pause-Symbol und seine Beschreibung.
- * @param {boolean} paused - Ob die Runde gerade pausiert.
+ * Updates the pause button icon and label.
+ * @param {boolean} paused - Whether the round is currently paused.
  */
 function updatePauseButton(paused) {
     pauseButton.setAttribute('aria-pressed', String(paused));
@@ -143,8 +143,8 @@ function updatePauseButton(paused) {
 }
 
 /**
- * Wechselt per Werkzeugleiste zwischen Pause und laufendem Spiel.
- * @param {MouseEvent} event - Klick auf die Pause-Taste.
+ * Toggles the round between paused and running from the toolbar.
+ * @param {MouseEvent} event - Click on the pause button.
  */
 function toggleGamePause(event) {
     if (pauseButton.disabled || portraitMode.matches || settingsDialog.open || imprintDialog.open) return;
@@ -153,7 +153,7 @@ function toggleGamePause(event) {
     focusGameAfterClick(event);
 }
 
-/** Passt die sichtbare Weltbreite im mobilen Querformat an die Leinwand an. */
+/** Adjusts the visible world width to fit the canvas in mobile landscape mode. */
 function updateCanvasWidth() {
     const { clientWidth, clientHeight, height } = canvas;
     if (!clientWidth || !clientHeight) return;

@@ -1,11 +1,11 @@
 const LEVEL_END_X = 720 * 15;
 
 /**
- * Platziert Hühner des gewählten Typs außerhalb von Pepes Startbereich.
- * @param {number} amount - Gewünschte Anzahl Hühner.
- * @param {number} levelEndX - Rechte Levelgrenze in Weltkoordinaten.
- * @param {Function} [ChickenType=Chicken] - Konstruktor für den gewünschten Hühnertyp.
- * @returns {Chicken[]} Erstellte Hühner außerhalb des Sicherheitsabstands.
+ * Places chickens of the selected type outside Pepe's starting area.
+ * @param {number} amount - Requested number of chickens.
+ * @param {number} levelEndX - Right level boundary in world coordinates.
+ * @param {Function} [ChickenType=Chicken] - Constructor for the requested chicken type.
+ * @returns {Chicken[]} Chickens placed outside the safe distance.
  */
 function createChickens(amount, levelEndX, ChickenType = Chicken) {
     const chickens = [];
@@ -22,12 +22,12 @@ function createChickens(amount, levelEndX, ChickenType = Chicken) {
 }
 
 /**
- * Liefert eine zulässige zufällige Position oder null, falls es keine gibt.
- * @param {number} minX - Linke Grenze in Weltkoordinaten.
- * @param {number} maxX - Rechte Grenze in Weltkoordinaten.
- * @param {number} playerX - Aktuelle oder vorgesehene horizontale Position von Pepe.
- * @param {number} safeDistance - Mindestabstand zu Pepe in Pixeln.
- * @returns {?number} Zulässige X-Position oder null, falls keine Stelle verfügbar ist.
+ * Returns a valid random position or null if no position is available.
+ * @param {number} minX - Left boundary in world coordinates.
+ * @param {number} maxX - Right boundary in world coordinates.
+ * @param {number} playerX - Current or expected horizontal position of Pepe.
+ * @param {number} safeDistance - Minimum distance from Pepe in pixels.
+ * @returns {?number} Valid X coordinate or null if no position is available.
  */
 function getRandomChickenX(minX, maxX, playerX, safeDistance) {
     if (minX > maxX) return null;
@@ -63,8 +63,8 @@ const sceneryTiles = [[-720, 2], [0, 1], [720, 2], [1440, 1]];
 const groundLayers = ['3_third_layer', '2_second_layer', '1_first_layer'];
 
 /**
- * Erstellt eine neue Instanz des ersten Levels mit frischen Spielobjekten.
- * @returns {Level} Erstes Level mit frischen Spielobjekten.
+ * Creates a new first level with fresh game objects.
+ * @returns {Level} First level with fresh game objects.
  */
 function createLevel1() {
     return new Level(
@@ -78,8 +78,8 @@ function createLevel1() {
 }
 
 /**
- * Erstellt die Gegner des ersten Levels.
- * @returns {Array<(Chicken|Endboss)>} Normale Hühner, kleine Hühner und der Boss.
+ * Creates the enemies for the first level.
+ * @returns {Array<(Chicken|Endboss)>} Regular chickens, small chickens, and the boss.
  */
 function createLevel1Enemies() {
     return [
@@ -90,8 +90,8 @@ function createLevel1Enemies() {
 }
 
 /**
- * Erstellt Wolken aus der Kachelkonfiguration.
- * @returns {Cloud[]} Wolken an den konfigurierten Kachelpositionen.
+ * Creates clouds from the tile configuration.
+ * @returns {Cloud[]} Clouds at the configured tile positions.
  */
 function createClouds() {
     return sceneryTiles.map(([x, variant]) => new Cloud(
@@ -100,8 +100,8 @@ function createClouds() {
 }
 
 /**
- * Erstellt für jede Kachelposition die Hintergrundebenen in Zeichenreihenfolge.
- * @returns {BackgroundObject[]} Hintergrundkacheln in Zeichenreihenfolge.
+ * Creates the background layers for each tile position in draw order.
+ * @returns {BackgroundObject[]} Background tiles in draw order.
  */
 function createBackground() {
     return sceneryTiles.flatMap(([x, variant]) => [

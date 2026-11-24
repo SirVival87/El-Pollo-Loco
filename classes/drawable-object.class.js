@@ -1,4 +1,4 @@
-/** Basisklasse für Canvas-Bilder, Bildcache und Kollisionsrechtecke. */
+/** Base class for canvas sprites, image caching, and collision rectangles. */
 class DrawableObject {
     static imageCache = new Map();
 
@@ -10,9 +10,9 @@ class DrawableObject {
     offset = { left: 0, top: 0, right: 0, bottom: 0 };
 
     /**
-     * Gibt das zwischengespeicherte Bild zurück oder lädt es beim ersten Zugriff.
-     * @param {string} path - Relativer Bildpfad als Schlüssel im Cache.
-     * @returns {HTMLImageElement} Zwischengespeichertes Bild, das gegebenenfalls noch lädt.
+     * Returns the cached image, loading it on first access.
+     * @param {string} path - Relative image path used as the cache key.
+     * @returns {HTMLImageElement} Cached image, which may still be loading.
      */
     static getImage(path) {
         if (!DrawableObject.imageCache.has(path)) {
@@ -24,33 +24,33 @@ class DrawableObject {
     }
 
     /**
-     * Startet das Laden der angegebenen Bilder.
-     * @param {string[]} paths - Zu ladende Bildpfade.
+     * Starts loading the supplied images.
+     * @param {string[]} paths - Image paths to load.
      */
     static preloadImages(paths) {
         paths.forEach(path => DrawableObject.getImage(path));
     }
 
     /**
-     * Setzt das aktuelle Bild des Objekts.
-     * @param {string} path - Relativer Pfad zum aktuellen Bild.
+     * Sets the sprite currently displayed by the object.
+     * @param {string} path - Relative path to the current image.
      */
     loadImage(path) {
         this.img = DrawableObject.getImage(path);
     }
 
     /**
-     * Zeichnet das aktuelle Bild an seiner Weltposition.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * Draws the current image at its world position.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
      */
     draw(ctx) {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     }
 
     /**
-     * Berechnet die Kollisionsgrenzen mit Berücksichtigung der Blickrichtung.
-     * @param {CollisionOffsets} [offset=this.offset] - Einrückungen der Hitbox im Sprite.
-     * @returns {CollisionBounds} Kanten der Hitbox in Weltkoordinaten.
+     * Calculates collision bounds for the current facing direction.
+     * @param {CollisionOffsets} [offset=this.offset] - Hitbox insets within the sprite.
+     * @returns {CollisionBounds} Hitbox edges in world coordinates.
      */
     getCollisionBounds(offset = this.offset) {
         const { left, top, right, bottom } = offset;
@@ -62,14 +62,14 @@ class DrawableObject {
         };
     }
 
-    /** @returns {CollisionBounds[]} Kollisionsrechtecke des Objekts in Weltkoordinaten. */
+    /** @returns {CollisionBounds[]} Collision rectangles for the object in world coordinates. */
     getCollisionBoxes() {
         return [this.getCollisionBounds()];
     }
 
     /**
-     * Zeichnet alle Kollisionsrahmen des Objekts für die Fehlersuche.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * Draws every collision rectangle for debugging.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
      */
     drawFrame(ctx) {
         ctx.beginPath();

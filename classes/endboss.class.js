@@ -1,4 +1,4 @@
-/** Bossgegner mit Patrouille, Sprungangriff, schnellen Läufen und eigener Todesanimation. */
+/** Boss enemy with patrols, a jumping attack, fast charges, and a death animation. */
 class Endboss extends MovableObject {
     x = 720;
     y = 140;
@@ -6,7 +6,7 @@ class Endboss extends MovableObject {
     width = 300;
     groundY = 140;
     /**
-     * Sprite-Einrückungen für Kopf und Körper.
+     * Sprite insets for the head and body.
      * @type {CollisionOffsets[]}
      */
     static collisionOffsets = [
@@ -62,8 +62,8 @@ class Endboss extends MovableObject {
     ]
 
     /**
-     * Setzt die Startposition des Bosses und lädt seine Sprites.
-     * @param {number} [x=720] - Start- und Bezugspunkt der Patrouille in Weltkoordinaten.
+     * Sets the boss's starting position and loads its sprites.
+     * @param {number} [x=720] - Starting position and patrol origin in world coordinates.
      */
     constructor(x = 720) {
         super();
@@ -78,14 +78,14 @@ class Endboss extends MovableObject {
         this.loadImage(this.WALKING_IMAGES[0]);
     }
 
-    /** @returns {CollisionBounds[]} Trefferflächen für Kopf und Körper in Weltkoordinaten. */
+    /** @returns {CollisionBounds[]} Head and body hitboxes in world coordinates. */
     getCollisionBoxes() {
         return Endboss.collisionOffsets.map(offset => this.getCollisionBounds(offset));
     }
 
     /**
-     * Aktualisiert den Wechsel zwischen Patrouille und Sprungangriff.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Advances the transition between patrolling and the jumping attack.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateJump(deltaTime) {
         const previousElapsed = this.jumpElapsed;
@@ -100,7 +100,7 @@ class Endboss extends MovableObject {
         this.updateAttackPose();
     }
 
-    /** Steuert den Vorwärtssprung und danach den Angriff am Boden. */
+    /** Controls the forward jump and the ground attack that follows it. */
     updateAttackPose() {
         if (this.jumpElapsed < this.jumpDuration) {
             this.otherDirection = false;
@@ -112,8 +112,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Lässt den Boss vom Landepunkt bis zum Wendepunkt weiterlaufen.
-     * @param {number} elapsed - Zeit seit der Landung in Sekunden.
+     * Moves the boss from the landing point to the turnaround point.
+     * @param {number} elapsed - Time since landing, in seconds.
      */
     updateGroundAttack(elapsed) {
         const landingX = this.attackStartX - this.jumpDistance;
@@ -127,9 +127,9 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Lässt den Boss zum Ausgangspunkt zurückrennen und beendet den Angriff.
-     * @param {number} turnX - X-Koordinate des Wendepunkts.
-     * @param {number} elapsed - Seit dem Wenden verstrichene Zeit in Sekunden.
+     * Runs the boss back to the attack's starting point and ends the attack.
+     * @param {number} turnX - X coordinate of the turnaround point.
+     * @param {number} elapsed - Time since turning around, in seconds.
      */
     updateReturnRun(turnX, elapsed) {
         this.otherDirection = true;
@@ -143,8 +143,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Bewegt den Boss auf seiner Patrouillenstrecke hin und zurück.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Moves the boss back and forth along its patrol route.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updatePatrol(deltaTime) {
         const roundTrip = this.patrolDistance * 2;
@@ -155,8 +155,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Berechnet die Patrouillenzeit für etwa 3,48 bis 6,48 Sekunden zwischen Vorwärtssprüngen.
-     * @returns {number} Wartezeit nach der Rückkehr in Sekunden.
+     * Calculates the patrol time for roughly 3.48 to 6.48 seconds between forward jumps.
+     * @returns {number} Time to wait after returning, in seconds.
      */
     getJumpDelay() {
         const intervalBetweenAttacks = 3.48 + Math.random() * 3;
@@ -167,10 +167,10 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Schickt alle zwei Sekunden Helfer los, solange Pepe 100 bis 600 Pixel entfernt ist.
-     * @param {number} characterX - Pepes horizontale Position.
-     * @param {Level} level - Level, in das die Helfer eingefügt werden.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Spawns reinforcements every two seconds while Pepe is 100 to 600 pixels away.
+     * @param {number} characterX - Pepe's horizontal position.
+     * @param {Level} level - Level to receive the spawned helpers.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateHelpers(characterX, level, deltaTime) {
         const distance = Math.abs(characterX - this.x);
@@ -187,9 +187,9 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Platziert zwei normale Hühner und ein Küken auf der Seite, auf der Pepe steht.
-     * @param {number} characterX - Pepes horizontale Position.
-     * @param {Level} level - Level, in das die Helfer eingefügt werden.
+     * Spawns regular and small chickens on Pepe's side of the boss.
+     * @param {number} characterX - Pepe's horizontal position.
+     * @param {Level} level - Level to receive the spawned helpers.
      */
     spawnHelpers(characterX, level) {
         const direction = characterX < this.x ? -1 : 1;
@@ -207,10 +207,10 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Positioniert den Boss auf seinem Sprungbogen.
-     * @param {number} progress - Fortschritt des Sprungbogens zwischen 0 und 1.
-     * @param {number} startX - Horizontale Startposition in Weltkoordinaten.
-     * @param {number} distance - Vorzeichenbehaftete Sprungweite in Pixeln.
+     * Positions the boss along its jump arc.
+     * @param {number} progress - Progress along the jump arc, between 0 and 1.
+     * @param {number} startX - Horizontal starting position in world coordinates.
+     * @param {number} distance - Signed horizontal jump distance in pixels.
      */
     setJumpPose(progress, startX, distance) {
         this.isJumping = true;
@@ -219,8 +219,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Setzt den Boss an der angegebenen Stelle auf den Boden.
-     * @param {number} x - Horizontale Landeposition in Weltkoordinaten.
+     * Places the boss on the ground at the specified position.
+     * @param {number} x - Horizontal landing position in world coordinates.
      */
     setGroundPose(x) {
         this.isJumping = false;
@@ -229,8 +229,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Zeigt abhängig vom Zustand die passende Animation des Bosses.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Displays the boss animation that matches its current state.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateAnimation(deltaTime) {
         if (this.isDead()) {
@@ -246,8 +246,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Spielt die Todesbilder bis zum letzten Bild einmal ab.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Plays the death animation once through its final frame.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateDeathAnimation(deltaTime) {
         this.deathElapsed = this.deathElapsed === null ? 0 : this.deathElapsed + deltaTime;
@@ -255,12 +255,12 @@ class Endboss extends MovableObject {
         this.showAnimationFrame(this.DEAD_IMAGES, this.deathElapsed, frameDuration);
     }
 
-    /** Wählt das Bild für die aktuelle Phase des Vorwärtssprungs. */
+    /** Selects the frame for the current point in the forward jump. */
     updateAttackAnimation() {
         this.showAnimationFrame(this.ATTACK_IMAGES, this.jumpElapsed, this.jumpDuration / this.ATTACK_IMAGES.length);
     }
 
-    /** Spielt während des Angriffs schnellere Laufbilder als bei der Patrouille. */
+    /** Plays the walking frames faster during an attack than during a patrol. */
     updateGroundAnimation() {
         const running = this.attackStartX !== null;
         const elapsed = running ? this.jumpElapsed - this.jumpDuration : this.patrolTravel / this.patrolSpeed;
@@ -268,11 +268,11 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Berechnet das Sprite aus der verstrichenen Animationszeit.
-     * @param {string[]} images - Bildpfade in Wiedergabereihenfolge.
-     * @param {number} elapsed - Fortschritt der Animation in Sekunden.
-     * @param {number} frameDuration - Anzeigedauer je Bild in Sekunden.
-     * @param {boolean} [loop=false] - Ob die Bildfolge wiederholt werden soll.
+     * Selects an animation frame based on elapsed time.
+     * @param {string[]} images - Image paths in playback order.
+     * @param {number} elapsed - Elapsed animation time in seconds.
+     * @param {number} frameDuration - Display time per frame in seconds.
+     * @param {boolean} [loop=false] - Whether to loop the frame sequence.
      */
     showAnimationFrame(images, elapsed, frameDuration, loop = false) {
         const frame = Math.floor(elapsed / frameDuration);
@@ -281,8 +281,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Prüft, ob die vorgesehene Dauer der Todesanimation abgelaufen ist.
-     * @returns {boolean} Ob die Dauer der Todesanimation abgelaufen ist.
+     * Checks whether the boss's death animation has run for its full duration.
+     * @returns {boolean} Whether the death animation has finished.
      */
     hasFinishedDeathAnimation() {
         return this.deathElapsed >= this.deathDuration;

@@ -1,10 +1,10 @@
-/** Zeichenbares Sammelobjekt mit einem festgelegten Sprite-Ausschnitt. */
+/** Drawable collectible with a specified sprite region. */
 class Collectible extends DrawableObject {
     /**
-     * Setzt Position, Bild und Ausschnitt des Sammelobjekts.
-     * @param {number} x - Linke Kante in Weltkoordinaten.
-     * @param {number} y - Obere Kante in Weltkoordinaten.
-     * @param {CollectibleSprite} sprite - Bildpfad, Bildausschnitt und Anzeigegröße.
+     * Sets the collectible's position, image, and source region.
+     * @param {number} x - Left edge in world coordinates.
+     * @param {number} y - Top edge in world coordinates.
+     * @param {CollectibleSprite} sprite - Image path, source region, and display dimensions.
      */
     constructor(x, y, sprite) {
         super();
@@ -17,8 +17,8 @@ class Collectible extends DrawableObject {
     }
 
     /**
-     * Zeichnet den für das Sammelobjekt festgelegten Bildausschnitt.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * Draws the configured source region for the collectible.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
      */
     draw(ctx) {
         if (this.img.naturalWidth === 0) return;
@@ -30,7 +30,7 @@ class Collectible extends DrawableObject {
     }
 }
 
-/** Einsammelbare Salsa-Flasche mit einem festen Schadenswert. */
+/** Collectible salsa bottle with a fixed damage value. */
 class SalsaBottle extends Collectible {
     static damage = 35;
     static width = 26;
@@ -40,9 +40,9 @@ class SalsaBottle extends Collectible {
     damage = SalsaBottle.damage;
 
     /**
-     * Platziert eine Flasche standardmäßig auf dem Sand.
-     * @param {number} x - Linke Kante in Weltkoordinaten.
-     * @param {number} [y] - Obere Kante in Weltkoordinaten. Standardmäßig steht die Flasche auf dem Sand.
+     * Places a bottle on the sand by default.
+     * @param {number} x - Left edge in world coordinates.
+     * @param {number} [y] - Top edge in world coordinates. The bottle rests on the sand by default.
      */
     constructor(x, y = SalsaBottle.groundY - SalsaBottle.height) {
         super(x, y, {

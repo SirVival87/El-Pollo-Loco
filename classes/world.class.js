@@ -1,4 +1,4 @@
-/** Koordiniert Spielschleife, Kollisionen, Levelzeit und Ergebnis. */
+/** Coordinates the game loop, collisions, level time, and round result. */
 class World {
     static showCollisionFrames = false;
     static simulationStep = 1 / 60;
@@ -20,12 +20,12 @@ class World {
     lastFrameTime = null;
     frameAccumulator = 0;
     /**
-     * Verbindet Spielwelt, Eingaben, Audio und Rendering und startet die Schleife.
-     * @param {HTMLCanvasElement} canvas - Leinwand der Spielwelt.
-     * @param {Keyboard} keyboard - Eingabestatus für die Spielsteuerung.
-     * @param {GameEndCallback} [onGameEnd] - Wird nach dem ersten gezeichneten Endbildschirm aufgerufen.
-     * @param {GameAudio} [audio] - Optionale Ausgabe für die Spielgeräusche.
-     * @param {PauseChangeCallback} [onPauseChange] - Wird bei einem Wechsel des Pausenstatus aufgerufen.
+     * Wires up the game world, input, audio, and rendering, then starts the loop.
+     * @param {HTMLCanvasElement} canvas - Canvas used to draw the game world.
+     * @param {Keyboard} keyboard - Input state used to control the game.
+     * @param {GameEndCallback} [onGameEnd] - Called after the end screen has been drawn for the first time.
+     * @param {GameAudio} [audio] - Optional audio output for the game.
+     * @param {PauseChangeCallback} [onPauseChange] - Called when the pause state changes.
      */
     constructor(canvas, keyboard, onGameEnd = () => {}, audio, onPauseChange = () => {}) {
         this.renderer = new WorldRenderer(canvas);
@@ -39,7 +39,7 @@ class World {
         this.draw();
     }
 
-    /** Verarbeitet Kontakte zwischen Pepe und lebenden Gegnern. */
+    /** Handles contact between Pepe and living enemies. */
     checkCollisions() {
         if (this.win !== null || this.character.isDead()) return;
 
@@ -51,8 +51,8 @@ class World {
     }
 
     /**
-     * Führt einen Animationsframe aus und schließt eine beendete Runde ab.
-     * @param {number} [timestamp] - Zeitstempel von requestAnimationFrame in Millisekunden. Beim ersten Aufruf fehlt er.
+     * Runs an animation frame and finalizes the round when it has ended.
+     * @param {number} [timestamp] - Timestamp from requestAnimationFrame in milliseconds. Omitted on the first call.
      */
     draw(timestamp) {
         if (this.stopped) return;
@@ -69,16 +69,16 @@ class World {
     }
 
     /**
-     * Zeigt an, ob die Simulation derzeit pausiert.
-     * @returns {boolean} Ob die Simulation gerade pausiert.
+     * Indicates whether the simulation is currently paused.
+     * @returns {boolean} Whether the simulation is currently paused.
      */
     get paused() {
         return this.pausedAt !== null;
     }
 
     /**
-     * Hält die Simulation an oder setzt sie samt pausierten Trefferzeiten fort.
-     * @param {boolean} paused - Ob das Spiel pausiert.
+     * Pauses or resumes the simulation while preserving hit timing.
+     * @param {boolean} paused - Whether the game is paused.
      */
     setPaused(paused) {
         if (this.stopped || this.paused === paused) return;
@@ -94,7 +94,7 @@ class World {
         this.onPauseChange(paused);
     }
 
-    /** Verschiebt die Trefferzeiten um die Dauer der Pause. */
+    /** Shifts hit timestamps by the pause duration. */
     resumeActors() {
         const pauseDuration = performance.now() - this.pausedAt;
         for (const actor of [this.character, ...this.level.enemies]) {
@@ -104,14 +104,14 @@ class World {
         this.character.idleElapsed = 0;
     }
 
-    /** Beendet die Spielschleife und entfernt ausstehende Levelereignisse. */
+    /** Stops the game loop and clears pending level events. */
     stop() {
         this.stopped = true;
         cancelAnimationFrame(this.animationFrame);
         this.levelTimers.clear();
     }
 
-    /** Ermittelt Sieg oder Niederlage, sobald eine Figur besiegt ist. */
+    /** Determines whether the player won or lost once either side is defeated. */
     updateGameResult() {
         if (this.win !== null) return;
 
@@ -123,8 +123,8 @@ class World {
     }
 
     /**
-     * Wartet auf die relevanten Todes- und Splash-Animationen.
-     * @returns {boolean} Ob der Spielausgang und die erforderlichen Animationen abgeschlossen sind.
+     * Waits for the relevant death and splash animations.
+     * @returns {boolean} Whether the result is known and all required animations have finished.
      */
     shouldShowEndScreen() {
         if (this.win === null) return false;
@@ -137,8 +137,8 @@ class World {
     }
 
     /**
-     * Verteilt die Zeit seit dem letzten Frame auf Simulation oder Pausenanimation.
-     * @param {number} timestamp - Zeitstempel von requestAnimationFrame in Millisekunden.
+     * Applies the time since the previous frame to the simulation or pause animation.
+     * @param {number} timestamp - Timestamp from requestAnimationFrame in milliseconds.
      */
     advanceSimulation(timestamp) {
         const elapsed = this.lastFrameTime === null ?
@@ -154,8 +154,8 @@ class World {
     }
 
     /**
-     * Arbeitet volle Simulationsschritte ab, bis die Zeit aufgebraucht ist oder das Spiel pausiert.
-     * @param {number} elapsed - Seit der letzten Aktualisierung verstrichene Zeit in Sekunden.
+     * Runs complete simulation steps until time runs out or the game pauses.
+     * @param {number} elapsed - Time elapsed since the previous update, in seconds.
      */
     runSimulationSteps(elapsed) {
         this.frameAccumulator += elapsed;
@@ -167,8 +167,8 @@ class World {
     }
 
     /**
-     * Führt einen Simulationsschritt in definierter Reihenfolge aus.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Runs a simulation step in the prescribed order.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     update(deltaTime) {
         if (this.paused || this.stopped) return;
@@ -185,8 +185,8 @@ class World {
     }
 
     /**
-     * Aktualisiert die Bewegung von Pepe, Hühnern und Boss.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Updates the movement of Pepe, the chickens, and the boss.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateActors(deltaTime) {
         this.character.updateMovement();
@@ -197,15 +197,15 @@ class World {
     }
 
     /**
-     * Führt die zustandsabhängigen Animationen von Pepe und Boss weiter.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Advances Pepe's and the boss's animations for their current states.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateAnimations(deltaTime) {
         this.character.updateAnimation(deltaTime);
         this.boss?.updateAnimation(deltaTime);
     }
 
-    /** Pausiert die Spielwelt mit Schlafgeräusch nach 15 Sekunden Untätigkeit. */
+    /** Pauses the game with a sleeping sound after 15 seconds of inactivity. */
     pauseIfIdle() {
         if (this.win === null && this.character.idleElapsed + 1e-9 >= 15) {
             this.setPaused(true);
@@ -214,8 +214,8 @@ class World {
     }
 
     /**
-     * Aktualisiert Kulisse, Sammelobjekte und Wurfeingabe.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Updates scenery and collectibles and processes throw input.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateLevel(deltaTime) {
         this.levelTime += deltaTime;
@@ -231,7 +231,7 @@ class World {
         }
     }
 
-    /** Überträgt berührte Münzen und Flaschen in Pepes Anzeige und Inventar. */
+    /** Adds touched coins and bottles to Pepe's counters and inventory. */
     collectNearbyItems() {
         const coins = this.collectItems(this.level.coins);
         const bottles = this.collectItems(this.level.bottles);
@@ -242,8 +242,8 @@ class World {
     }
 
     /**
-     * Aktualisiert die Bossbewegung und spielt Geräusche in der Nähe der Leinwand.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Updates the boss, its reinforcements, and its sounds near the viewport.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateBoss(deltaTime) {
         if (!this.boss) return;
@@ -261,8 +261,8 @@ class World {
     }
 
     /**
-     * Prüft, ob der Boss auf oder kurz neben der Leinwand liegt.
-     * @returns {boolean} Ob der Boss horizontal im Sichtbereich oder höchstens 80 Pixel daneben liegt.
+     * Checks whether the boss is inside or just outside the viewport.
+     * @returns {boolean} Whether the boss is horizontally visible or at most 80 pixels outside the viewport.
      */
     isBossNearViewport() {
         const screenX = this.boss.x + this.cameraX;
@@ -270,8 +270,8 @@ class World {
     }
 
     /**
-     * Wendet Kontaktschaden an und spielt das Geräusch des Gegners.
-     * @param {(Chicken|Endboss)} enemy - Gegner, dessen Kontaktschaden angewendet wird.
+     * Applies contact damage and plays the enemy's impact sound.
+     * @param {(Chicken|Endboss)} enemy - Enemy that deals contact damage.
      */
     hitCharacter(enemy) {
         if (!this.character.hit(enemy.contactDamage)) return;
@@ -282,8 +282,8 @@ class World {
     }
 
     /**
-     * Verarbeitet eine Landung auf einem normalen oder kleinen Huhn.
-     * @param {number} previousFeet - Y-Koordinate von Pepes Füßen vor dem Fallschritt.
+     * Handles Pepe landing on a regular or small chicken.
+     * @param {number} previousFeet - Y coordinate of Pepe's feet before the fall step.
      */
     checkChickenStomp(previousFeet) {
         if (this.win !== null || this.character.isDead()) return;
@@ -301,11 +301,11 @@ class World {
     }
 
     /**
-     * Prüft anhand der vorherigen Fußposition, ob Pepe ein Huhn von oben trifft.
-     * @param {(Chicken|Endboss)} enemy - Gegner, der auf einen Sprungtreffer geprüft wird.
-     * @param {CollisionBounds} player - Aktuelle Hitbox von Pepe.
-     * @param {number} previousFeet - Y-Koordinate von Pepes Füßen vor dem Fallschritt.
-     * @returns {boolean} Ob Pepe von oben auf ein lebendes Huhn trifft.
+     * Uses the previous foot position to check for a stomp from above.
+     * @param {(Chicken|Endboss)} enemy - Enemy being checked for a stomp.
+     * @param {CollisionBounds} player - Pepe's current hitbox.
+     * @param {number} previousFeet - Y coordinate of Pepe's feet before the fall step.
+     * @returns {boolean} Whether Pepe landed on a living chicken from above.
      */
     wasStomped(enemy, player, previousFeet) {
         if (!(enemy instanceof Chicken) || enemy.isDead()) return false;
@@ -316,8 +316,8 @@ class World {
     }
 
     /**
-     * Zeigt den Tod eines Huhns und plant Entfernen und Wiedererscheinen.
-     * @param {Chicken} chicken - Besiegtes Huhn.
+     * Shows a chicken's death, schedules its removal, and respawns regular level chickens.
+     * @param {Chicken} chicken - Defeated chicken.
      */
     defeatChicken(chicken) {
         chicken.die();
@@ -327,8 +327,8 @@ class World {
     }
 
     /**
-     * Entfernt das angegebene Huhn aus der Gegnerliste.
-     * @param {Chicken} chicken - Huhn, das aus der Gegnerliste entfernt wird.
+     * Removes the specified chicken from the enemy list.
+     * @param {Chicken} chicken - Chicken to remove from the enemy list.
      */
     removeChicken(chicken) {
         const index = this.level.enemies.indexOf(chicken);
@@ -336,8 +336,8 @@ class World {
     }
 
     /**
-     * Platziert ein Huhn desselben Typs mit sicherem Abstand zu Pepe.
-     * @param {Function} ChickenType - Konstruktor des besiegten Hühnertyps.
+     * Spawns a chicken of the same type at a safe distance from Pepe.
+     * @param {Function} ChickenType - Constructor for the defeated chicken type.
      */
     respawnChicken(ChickenType) {
         const { enemies, levelEndX } = this.level;
@@ -346,15 +346,15 @@ class World {
     }
 
     /**
-     * Plant ein Ereignis relativ zur laufenden Levelzeit.
-     * @param {LevelChangeCallback} callback - Auszuführendes Levelereignis.
-     * @param {number} delayMs - Wartezeit in Millisekunden laufender Spielzeit.
+     * Schedules an event relative to the current level time.
+     * @param {LevelChangeCallback} callback - Level event to run.
+     * @param {number} delayMs - Delay in milliseconds of active game time.
      */
     scheduleLevelChange(callback, delayMs) {
         this.levelTimers.add({ callback, dueAt: this.levelTime + delayMs / 1000 });
     }
 
-    /** Führt die fälligen Ereignisse der Levelzeit aus. */
+    /** Runs the level events that are due. */
     runLevelTimers() {
         for (const timer of this.levelTimers) {
             if (timer.dueAt > this.levelTime + 1e-9) continue;
@@ -365,9 +365,9 @@ class World {
     }
 
     /**
-     * Entfernt berührte Sammelobjekte aus der Liste und gibt sie zurück.
-     * @param {Collectible[]} items - Veränderbare Liste der Sammelobjekte.
-     * @returns {Collectible[]} Berührte und aus der Liste entfernte Objekte.
+     * Removes collectibles that Pepe touches and returns them.
+     * @param {Collectible[]} items - Mutable list of collectibles.
+     * @returns {Collectible[]} Collectibles that Pepe touched and that were removed from the list.
      */
     collectItems(items) {
         const collected = [];
@@ -380,9 +380,9 @@ class World {
     }
 
     /**
-     * Richtet die wiederholten Kulissenkacheln an der linken Kamerakante aus.
-     * @param {DrawableObject[]} objects - Zu wiederholende Kulissenkacheln.
-     * @param {number} loopWidth - Breite eines vollständigen Kachelzyklus in Pixeln.
+     * Aligns repeating scenery tiles with the left edge of the camera.
+     * @param {DrawableObject[]} objects - Scenery tiles to repeat.
+     * @param {number} loopWidth - Width of one full tile loop in pixels.
      */
     wrapScenery(objects, loopWidth) {
         if (loopWidth === 0) return;

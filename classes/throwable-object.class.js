@@ -1,4 +1,4 @@
-/** Fliegende Flasche mit einer Flugbahn und Splash-Animation. */
+/** Thrown bottle with a flight path and splash animation. */
 class ThrowableObject extends MovableObject {
     static size = 44;
     static baseThrowSpeed = 650;
@@ -18,18 +18,18 @@ class ThrowableObject extends MovableObject {
     velocityY = -380;
     gravity = 1350;
 
-    /** Lädt die Bilder für Rotation und Splash vor. */
+    /** Preloads the rotation and splash frames. */
     static preloadSprites() {
         DrawableObject.preloadImages([...this.rotationImages, ...this.splashImages]);
     }
 
     /**
-     * Erstellt das Projektil aus einer eingesammelten Flasche.
-     * @param {number} x - Startposition auf der horizontalen Weltachse.
-     * @param {number} y - Startposition auf der vertikalen Weltachse.
-     * @param {number} direction - Wurfrichtung. 1 steht für rechts, -1 für links.
-     * @param {SalsaBottle} bottle - Geworfene Flasche mit ihrem Schadenswert.
-     * @param {boolean} [airborne=false] - Ob Pepe beim Wurf gerade in der Luft ist oder abspringt.
+     * Creates the projectile from a collected bottle.
+     * @param {number} x - Starting position along the horizontal world axis.
+     * @param {number} y - Starting position along the vertical world axis.
+     * @param {number} direction - Throw direction. Use 1 for right or -1 for left.
+     * @param {SalsaBottle} bottle - Thrown bottle with its damage value.
+     * @param {boolean} [airborne=false] - Whether Pepe is airborne or taking off when throwing.
      */
     constructor(x, y, direction, bottle, airborne = false) {
         super();
@@ -42,16 +42,16 @@ class ThrowableObject extends MovableObject {
     }
 
     /**
-     * Prüft, ob die Flasche gerade zerplatzt.
-     * @returns {boolean} Ob die Splash-Animation gestartet wurde.
+     * Checks whether the bottle is splashing.
+     * @returns {boolean} Whether the splash animation has started.
      */
     get isSplashing() {
         return this.splashTime !== null;
     }
 
     /**
-     * Prüft, ob das letzte Splash-Bild beendet ist.
-     * @returns {boolean} Ob alle Bilder des Splashs vollständig abgespielt sind.
+     * Checks whether the final splash frame has completed.
+     * @returns {boolean} Whether the full splash animation has played.
      */
     get hasFinishedSplash() {
         return this.isSplashing &&
@@ -59,8 +59,8 @@ class ThrowableObject extends MovableObject {
     }
 
     /**
-     * Aktualisiert Flugbahn oder Splash-Zeit.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Advances projectile flight or splash timing.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     update(deltaTime) {
         if (this.isSplashing) {
@@ -75,8 +75,8 @@ class ThrowableObject extends MovableObject {
     }
 
     /**
-     * Berechnet die Flugbahn zurück zu Pepes aktueller Position.
-     * @param {CollisionBounds} target - Hitbox, auf deren Mittelpunkt das Projektil zielt.
+     * Computes the reflected trajectory toward Pepe's current position.
+     * @param {CollisionBounds} target - Hitbox whose center the projectile aims at.
      */
     reflect(target) {
         this.isReflected = true;
@@ -92,22 +92,22 @@ class ThrowableObject extends MovableObject {
         this.velocityY = distanceY / travelTime - 0.5 * this.gravity * travelTime;
     }
 
-    /** Startet die Splash-Animation. */
+    /** Starts the splash animation. */
     splash() {
         this.splashTime = 0;
     }
 
     /**
-     * Prüft, ob die Flasche im Fallen den Boden erreicht hat.
-     * @returns {boolean} Ob das fallende Projektil den Boden erreicht hat.
+     * Checks whether the bottle has reached the ground while falling.
+     * @returns {boolean} Whether the falling projectile has reached the ground.
      */
     hasLanded() {
         return this.velocityY >= 0 && this.y + this.height >= SalsaBottle.groundY;
     }
 
     /**
-     * Zeichnet das aktuelle Rotationsbild der Flasche oder den Splash.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * Draws the current bottle rotation or splash frame.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
      */
     draw(ctx) {
         if (this.isSplashing) {
@@ -124,8 +124,8 @@ class ThrowableObject extends MovableObject {
     }
 
     /**
-     * Zeichnet das Splash-Bild für die aktuelle Animationszeit.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * Draws the splash frame for the current animation time.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
      */
     drawSplash(ctx) {
         const { frameDuration, splashImages } = ThrowableObject;

@@ -1,4 +1,4 @@
-/** Gruppiert die Kulissen, Gegner und Sammelobjekte einer Runde. */
+/** Groups the scenery, enemies, and collectibles for a round. */
 class Level {
     enemies;
     clouds;
@@ -8,13 +8,13 @@ class Level {
     coins;
 
     /**
-     * Speichert Levelobjekte und die Längen der wiederholbaren Kulissen.
-     * @param {Array<(Chicken|Endboss)>} enemies - Gegner des Levels.
-     * @param {Cloud[]} clouds - Bewegliche Wolkenkacheln.
-     * @param {BackgroundObject[]} backgroundObjects - Hintergrundkacheln in Zeichenreihenfolge.
-     * @param {number} [levelEndX] - Rechte Levelgrenze in Weltkoordinaten. Der Standard entspricht fünf Kachelbreiten.
-     * @param {SalsaBottle[]} [bottles] - Ausgelegte Flaschen. Standardmäßig leer.
-     * @param {Collectible[]} [coins] - Ausgelegte Münzen. Standardmäßig leer.
+     * Stores the level objects and calculates the widths of repeating scenery.
+     * @param {Array<(Chicken|Endboss)>} enemies - Enemies in the level.
+     * @param {Cloud[]} clouds - Moving cloud tiles.
+     * @param {BackgroundObject[]} backgroundObjects - Background tiles in draw order.
+     * @param {number} [levelEndX] - Right level boundary in world coordinates. Defaults to five tile widths.
+     * @param {SalsaBottle[]} [bottles] - Placed bottles. Defaults to an empty array.
+     * @param {Collectible[]} [coins] - Placed coins. Defaults to an empty array.
      */
     constructor(enemies, clouds, backgroundObjects, levelEndX = 720 * 5, bottles = [], coins = []) {
         this.enemies = enemies;
@@ -28,9 +28,9 @@ class Level {
     }
 
     /**
-     * Berechnet die Breite einer Kulissenschleife aus ihren unterschiedlichen Kachelpositionen.
-     * @param {DrawableObject[]} objects - Gleich breite Kacheln einer Kulisse.
-     * @returns {number} Breite eines vollständigen Kachelzyklus in Pixeln.
+     * Calculates the width of a scenery loop from its distinct tile positions.
+     * @param {DrawableObject[]} objects - Scenery tiles of equal width.
+     * @returns {number} Width of one full tile loop in pixels.
      */
     getSceneryLoopWidth(objects) {
         const tileCount = new Set(objects.map(object => object.x)).size;

@@ -1,4 +1,4 @@
-/** Schnelle Huhnvariante, die durch Flaschen besiegt werden kann. */
+/** Fast chicken variant that can be defeated by a bottle. */
 class SmallChicken extends Chicken {
     static size = 36;
     static spriteFolder = 'chicken_small';

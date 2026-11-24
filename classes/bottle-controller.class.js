@@ -1,16 +1,16 @@
-/** Verwaltet Würfe, Treffer, Splash und das Wiedererscheinen von Flaschen. */
+/** Manages bottle throws, impacts, splashes, and respawns. */
 class BottleController {
     activeBottle = null;
 
     /**
-     * Verbindet die Projektilsteuerung mit der laufenden Spielwelt.
-     * @param {World} world - Laufende Spielwelt mit Figuren, Level und Audio.
+     * Connects the projectile controller to the live game world.
+     * @param {World} world - Live game world with actors, level, and audio.
      */
     constructor(world) {
         this.world = world;
     }
 
-    /** Erzeugt ein Projektil aus einer Flasche in Pepes Inventar. */
+    /** Creates a projectile from a bottle in Pepe's inventory. */
     throwBottle() {
         if (!this.canThrowBottle()) return;
 
@@ -26,8 +26,8 @@ class BottleController {
     }
 
     /**
-     * Prüft, ob Pepe in dieser Runde eine Flasche werfen kann.
-     * @returns {boolean} Ob eine Flasche verfügbar ist und gerade geworfen werden darf.
+     * Checks whether Pepe can throw a bottle in the current round.
+     * @returns {boolean} Whether a bottle is available and can currently be thrown.
      */
     canThrowBottle() {
         return this.world.win === null && !this.world.character.isDead() &&
@@ -36,8 +36,8 @@ class BottleController {
     }
 
     /**
-     * Aktualisiert das Projektil und verarbeitet Landung oder Treffer.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Advances the projectile and handles landings or impacts.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateActiveBottle(deltaTime) {
         const bottle = this.activeBottle;
@@ -53,9 +53,9 @@ class BottleController {
     }
 
     /**
-     * Beendet den Splash und platziert bei laufendem Spiel eine Ersatzflasche.
-     * @param {ThrowableObject} bottle - Zerplatzendes Projektil.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Finishes the splash and places a replacement bottle if the round is still running.
+     * @param {ThrowableObject} bottle - Projectile currently splashing.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     advanceSplash(bottle, deltaTime) {
         bottle.update(deltaTime);
@@ -65,8 +65,8 @@ class BottleController {
     }
 
     /**
-     * Legt die unverbrauchte Flasche nach einem Fehlwurf in den Sand.
-     * @param {ThrowableObject} bottle - Gelandetes Projektil mit seiner ursprünglichen Flasche.
+     * Drops the intact bottle onto the sand after a missed throw.
+     * @param {ThrowableObject} bottle - Landed projectile and the original bottle it came from.
      */
     dropBottle(bottle) {
         const rightBoundary = this.world.level.levelEndX - SalsaBottle.width;
@@ -77,9 +77,9 @@ class BottleController {
     }
 
     /**
-     * Prüft, welches Ziel die fliegende Flasche zuerst getroffen hat.
-     * @param {ThrowableObject} projectile - Fliegende Flasche, deren Treffer geprüft wird.
-     * @returns {boolean} Ob ein Treffer oder eine Reflexion verarbeitet wurde.
+     * Checks which target the projectile hits first.
+     * @param {ThrowableObject} projectile - Bottle projectile to check for an impact.
+     * @returns {boolean} Whether an impact or reflection was handled.
      */
     checkBottleImpact(projectile) {
         if (projectile.isReflected) return this.checkReflectedBottleImpact(projectile);
@@ -95,9 +95,9 @@ class BottleController {
     }
 
     /**
-     * Prüft, ob eine reflektierte Flasche Pepe trifft.
-     * @param {ThrowableObject} projectile - Fliegende Flasche, deren Treffer geprüft wird.
-     * @returns {boolean} Ob das Projektil Pepe berührt hat.
+     * Checks whether a reflected bottle hits Pepe.
+     * @param {ThrowableObject} projectile - Bottle projectile to check for an impact.
+     * @returns {boolean} Whether the projectile touched Pepe.
      */
     checkReflectedBottleImpact(projectile) {
         if (!projectile.isColliding(this.world.character)) return false;
@@ -107,9 +107,9 @@ class BottleController {
     }
 
     /**
-     * Verarbeitet einen Flaschentreffer oder eine Reflexion am Boss.
-     * @param {ThrowableObject} projectile - Fliegende Flasche, deren Treffer geprüft wird.
-     * @returns {boolean} Ob das Projektil den lebenden Boss berührt hat.
+     * Handles a bottle hit or reflection at the boss.
+     * @param {ThrowableObject} projectile - Bottle projectile to check for an impact.
+     * @returns {boolean} Whether the projectile touched the living boss.
      */
     checkBossBottleImpact(projectile) {
         if (!this.world.boss || this.world.boss.isDead() || !projectile.isColliding(this.world.boss)) return false;
@@ -124,8 +124,8 @@ class BottleController {
     }
 
     /**
-     * Startet den Splash und prüft, ob der Treffer die Runde beendet.
-     * @param {ThrowableObject} projectile - Fliegende Flasche, deren Treffer geprüft wird.
+     * Starts the splash and checks whether the hit ended the round.
+     * @param {ThrowableObject} projectile - Bottle projectile to check for an impact.
      */
     destroyBottle(projectile) {
         projectile.splash();
@@ -133,7 +133,7 @@ class BottleController {
         this.world.updateGameResult();
     }
 
-    /** Platziert eine erreichbare Ersatzflasche rechts von Pepe. */
+    /** Places a reachable replacement bottle to Pepe's right. */
     spawnBottleNearCharacter() {
         const { right } = this.world.character.getCollisionBounds();
         const maxReachableX = this.world.level.levelEndX + this.world.character.width / 2;

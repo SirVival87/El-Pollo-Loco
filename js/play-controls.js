@@ -1,13 +1,13 @@
 /**
- * Verbindet eine Bildschirmtaste mit Zeiger- und Tastatureingaben.
- * @param {HTMLButtonElement} button - Bildschirmtaste mit einem data-game-action-Attribut.
- * @param {Keyboard} keyboard - Eingabestatus für die Spielsteuerung.
- * @param {AcceptGameAction} acceptAction - Prüft, ob das Spiel die Aktion annimmt.
+ * Connects an on-screen button to pointer and keyboard input.
+ * @param {HTMLButtonElement} button - On-screen button with a data-game-action attribute.
+ * @param {Keyboard} keyboard - Input state used to control the game.
+ * @param {AcceptGameAction} acceptAction - Checks whether the game accepts the action.
  */
 function connectPlayButton(button, keyboard, acceptAction) {
     const action = button.dataset.gameAction;
     const holdToMove = action === 'left' || action === 'right';
-    /** @returns {boolean} Ob die Bildschirmtaste diese Aktion auslösen darf. */
+    /** @returns {boolean} Whether the on-screen button can trigger this action. */
     const canUse = () => !button.disabled && acceptAction(action);
     button.addEventListener('contextmenu', event => event.preventDefault());
     connectPointerControl(button, keyboard, action, holdToMove, canUse);
@@ -18,12 +18,12 @@ function connectPlayButton(button, keyboard, acceptAction) {
 }
 
 /**
- * Verarbeitet Drücken und Loslassen einer Bildschirmtaste per Zeiger.
- * @param {HTMLButtonElement} button - Bildschirmtaste mit einem data-game-action-Attribut.
- * @param {Keyboard} keyboard - Eingabestatus für die Spielsteuerung.
- * @param {GameAction} action - Name der Spielaktion.
- * @param {boolean} holdToMove - Ob die Aktion bis zum Loslassen gehalten wird.
- * @param {ActionAvailabilityCheck} canUse - Prüft den Freigabestatus genau dieser Taste.
+ * Handles pressing and releasing an on-screen button with a pointer.
+ * @param {HTMLButtonElement} button - On-screen button with a data-game-action attribute.
+ * @param {Keyboard} keyboard - Input state used to control the game.
+ * @param {GameAction} action - Name of the game action.
+ * @param {boolean} holdToMove - Whether to hold the action until the pointer is released.
+ * @param {ActionAvailabilityCheck} canUse - Checks whether this specific button can be used.
  */
 function connectPointerControl(button, keyboard, action, holdToMove, canUse) {
     button.addEventListener('pointerdown', event => {
@@ -41,11 +41,11 @@ function connectPointerControl(button, keyboard, action, holdToMove, canUse) {
 }
 
 /**
- * Unterstützt das Halten fokussierter Richtungstasten per Tastatur.
- * @param {HTMLButtonElement} button - Bildschirmtaste mit einem data-game-action-Attribut.
- * @param {Keyboard} keyboard - Eingabestatus für die Spielsteuerung.
- * @param {GameAction} action - Name der Spielaktion.
- * @param {AcceptGameAction} acceptAction - Prüft, ob das Spiel die Aktion annimmt.
+ * Allows keyboard users to hold a focused direction button.
+ * @param {HTMLButtonElement} button - On-screen button with a data-game-action attribute.
+ * @param {Keyboard} keyboard - Input state used to control the game.
+ * @param {GameAction} action - Name of the game action.
+ * @param {AcceptGameAction} acceptAction - Checks whether the game accepts the action.
  */
 function connectHoldKeys(button, keyboard, action, acceptAction) {
     button.addEventListener('keydown', event => {
@@ -60,9 +60,9 @@ function connectHoldKeys(button, keyboard, action, acceptAction) {
 }
 
 /**
- * Prüft, ob Enter oder Leertaste eine Schaltfläche aktivieren.
- * @param {KeyboardEvent} event - Zu prüfender Tastendruck.
- * @returns {boolean} Ob Enter oder die Leertaste verwendet wurde.
+ * Checks whether Enter or Space activates a button.
+ * @param {KeyboardEvent} event - Keyboard event to check.
+ * @returns {boolean} Whether Enter or Space was used.
  */
 function isActivationKey(event) {
     return event.key === 'Enter' || event.code === 'Space';

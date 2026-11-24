@@ -1,4 +1,4 @@
-/** Mischt Soundeffekte und Hintergrundmusik und speichert beide Lautstärken. */
+/** Mixes sound effects and background music and saves their volume settings. */
 class GameAudio {
     static volumeScaleVersion = 2;
     enabled = true;
@@ -12,8 +12,8 @@ class GameAudio {
     lastPlayed = new Map();
     cues = soundCues;
 
-    /** Liest Lautstärke und Tonstatus aus dem lokalen Speicher.
-     * @param {HTMLAudioElement} music - Medienelement für die Hintergrundmusik. */
+    /** Loads volume and mute settings from local storage.
+     * @param {HTMLAudioElement} music - Media element for background music. */
     constructor(music) {
         this.music = music;
         try {
@@ -23,8 +23,8 @@ class GameAudio {
         }
     }
 
-    /** Übernimmt gespeicherte Werte und rechnet ältere Reglerpositionen um.
-     * @param {(AudioPreferences|null)} preferences - Gelesene Einstellungen oder null, wenn keine vorliegen. */
+    /** Restores saved preferences and converts older slider values.
+     * @param {(AudioPreferences|null)} preferences - Saved preferences or null when none are available. */
     restorePreferences(preferences) {
         if (!preferences) return;
         const { enabled, volume, musicVolume, volumeScale } = preferences;
@@ -34,10 +34,10 @@ class GameAudio {
         if (Number.isFinite(musicVolume)) this.musicVolume = this.restoreVolume(musicVolume, useCurrentScale);
     }
 
-    /** Ordnet einer älteren Lautstärke die passende Position auf der neuen Skala zu.
-     * @param {number} volume - Reglerposition zwischen 0 und 100.
-     * @param {boolean} useCurrentScale - Ob der gespeicherte Wert bereits die neue Skala verwendet.
-     * @returns {number} Position auf der aktuellen Lautstärkeskala. */
+    /** Converts an old volume value to the corresponding position on the new scale.
+     * @param {number} volume - Slider position from 0 to 100.
+     * @param {boolean} useCurrentScale - Whether the stored value already uses the current scale.
+     * @returns {number} Position on the current volume scale. */
     restoreVolume(volume, useCurrentScale) {
         const percentage = this.clampVolume(volume);
         if (useCurrentScale) return percentage;
@@ -45,7 +45,7 @@ class GameAudio {
         return Math.round(position);
     }
 
-    /** Speichert die aktuelle Lautstärke und den Tonstatus. */
+    /** Saves the current volume and mute settings. */
     savePreferences() {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify({
@@ -59,7 +59,7 @@ class GameAudio {
         }
     }
 
-    /** Initialisiert die Audioausgabe nach einer Benutzereingabe. */
+    /** Initializes audio output after a user interaction. */
     unlock() {
         if (!this.enabled || !globalThis.AudioContext) return;
         if (!this.context) this.createAudioOutput();
@@ -68,7 +68,7 @@ class GameAudio {
         }
     }
 
-    /** Initialisiert die Ausgänge für Effekte und Musik. */
+    /** Initializes the outputs for sound effects and music. */
     createAudioOutput() {
         this.context = new AudioContext();
         this.output = this.context.createGain();
@@ -80,7 +80,7 @@ class GameAudio {
         if (location.protocol !== 'file:') this.connectMusicOutput();
     }
 
-    /** Bindet die Musik an einen eigenen Audioausgang mit regelbarer Lautstärke. */
+    /** Routes music to a separate output with independent volume control. */
     connectMusicOutput() {
         this.musicGain = this.context.createGain();
         this.context.createMediaElementSource(this.music).connect(this.musicGain);
@@ -90,8 +90,8 @@ class GameAudio {
         this.updateMusicVolume();
     }
 
-    /** Schaltet den Spielton dauerhaft ein oder aus.
-     * @param {boolean} enabled - Ob Musik und Soundeffekte aktiviert sein sollen. */
+    /** Enables or disables game audio and saves the preference.
+     * @param {boolean} enabled - Whether music and sound effects should be enabled. */
     setEnabled(enabled) {
         this.enabled = enabled;
         if (enabled) this.unlock();
@@ -100,8 +100,8 @@ class GameAudio {
         this.savePreferences();
     }
 
-    /** Setzt und speichert eine Lautstärke zwischen 0 und 100.
-     * @param {number} volume - Reglerposition zwischen 0 und 100. */
+    /** Sets and saves the sound-effect volume on a scale from 0 to 100.
+     * @param {number} volume - Slider position from 0 to 100. */
     setVolume(volume) {
         if (!Number.isFinite(volume)) return;
         this.volume = this.clampVolume(volume);
@@ -109,8 +109,8 @@ class GameAudio {
         this.savePreferences();
     }
 
-    /** Setzt und speichert die Lautstärke der Hintergrundmusik.
-     * @param {number} volume - Reglerposition zwischen 0 und 100. */
+    /** Sets and saves the background music volume.
+     * @param {number} volume - Slider position from 0 to 100. */
     setMusicVolume(volume) {
         if (!Number.isFinite(volume)) return;
         this.musicVolume = this.clampVolume(volume);
@@ -118,21 +118,21 @@ class GameAudio {
         this.savePreferences();
     }
 
-    /** Begrenzt die Lautstärke auf den Wertebereich der Regler.
-     * @param {number} volume - Zu begrenzender Reglerwert.
-     * @returns {number} Auf den Bereich von 0 bis 100 begrenzter Wert. */
+    /** Clamps a volume value to the slider range.
+     * @param {number} volume - Slider value to clamp.
+     * @returns {number} Value clamped to the range from 0 to 100. */
     clampVolume(volume) {
         return Math.max(0, Math.min(100, volume));
     }
 
-    /** Nutzt eine Benutzereingabe, um die Audioausgabe freizuschalten. */
+    /** Unlocks audio playback using a user interaction. */
     startPlayback() {
         this.unlock();
         this.syncMusicPlayback();
     }
 
-    /** Spielt den passenden Endsound und gibt ihm Vorrang vor der Musik.
-     * @param {boolean} won - Ob die Runde gewonnen wurde. */
+    /** Plays the result sound and gives it priority over the music.
+     * @param {boolean} won - Whether the round was won. */
     playResult(won) {
         this.setPaused(false);
         const name = won ? 'victory' : 'gameOver';
@@ -142,8 +142,8 @@ class GameAudio {
         this.play(name);
     }
 
-    /** Schaltet die Musik für die Laufzeit des Endsignals stumm.
-     * @param {string} name - Name des Endsignals mit Tonspuren. Zulässig sind victory und gameOver. */
+    /** Mutes the music for the duration of the result sound.
+     * @param {string} name - Result sound with tone layers. Accepted values are victory and gameOver. */
     muteMusicDuringCue(name) {
         const duration = Math.max(...this.cues[name].tones.map(tone => (tone.delay ?? 0) + tone.duration));
         clearTimeout(this.resultMusicTimer);
@@ -154,15 +154,15 @@ class GameAudio {
         this.updateMusicVolume();
     }
 
-    /** @param {boolean} blocked - Ob die Drehaufforderung die Audioausgabe sperrt. */
+    /** @param {boolean} blocked - Whether the rotate-device prompt blocks audio playback. */
     setOrientationBlocked(blocked) {
         this.orientationBlocked = blocked;
         this.updateVolume();
         this.syncMusicPlayback();
     }
 
-    /** Stellt die Audioausgabe während einer Spielpause stumm.
-     * @param {boolean} paused - Ob das Spiel pausiert. */
+    /** Updates audio playback when the game is paused or resumed.
+     * @param {boolean} paused - Whether the game is paused. */
     setPaused(paused) {
         this.paused = paused;
         if (!paused && this.context?.state === 'suspended') this.unlock();
@@ -172,8 +172,8 @@ class GameAudio {
     }
 
     /**
-     * Schaltet den separaten Ausgang für die Schlafgeräusche frei oder stumm.
-     * @param {boolean} sleeping - Ob Pepe durch Untätigkeit eingeschlafen ist.
+     * Enables or mutes the separate output for sleeping sounds.
+     * @param {boolean} sleeping - Whether Pepe has fallen asleep from inactivity.
      */
     setSleeping(sleeping) {
         this.sleeping = sleeping;
@@ -181,7 +181,7 @@ class GameAudio {
         this.updateVolume();
     }
 
-    /** Startet oder pausiert die Musik entsprechend dem Spiel- und Tonstatus. */
+    /** Starts or pauses music according to the game state and audio settings. */
     syncMusicPlayback() {
         this.updateMusicVolume();
         if (!this.enabled || this.paused || this.orientationBlocked || document.hidden) {
@@ -191,7 +191,7 @@ class GameAudio {
         if (this.music.paused) this.music.play().catch(() => {});
     }
 
-    /** Überträgt die gewünschte Musiklautstärke auf den aktiven Audioausgang. */
+    /** Applies the configured music volume to the active audio output. */
     updateMusicVolume() {
         const volume = this.resultMusicTimer === null ? this.getVolumeGain(this.musicVolume) : 0;
         if (this.musicGain) {
@@ -202,17 +202,17 @@ class GameAudio {
         }
     }
 
-    /** @returns {boolean} Ob Tonstatus, Sichtbarkeit, Ausrichtung und Pause Soundeffekte erlauben. */
+    /** @returns {boolean} Whether audio settings, page visibility, orientation, and pause state allow sound effects. */
     canPlayEffects() {
         return this.canPlayAudio() && !this.paused;
     }
 
-    /** @returns {boolean} Ob der aktuelle Seiten- und Tonstatus eine Audioausgabe erlaubt. */
+    /** @returns {boolean} Whether the current page state and audio settings allow playback. */
     canPlayAudio() {
         return this.enabled && !this.orientationBlocked && !document.hidden;
     }
 
-    /** Überträgt Lautstärke, Tonstatus und Pause auf die Audioausgabe. */
+    /** Applies effect volume, mute, and pause state to the audio outputs. */
     updateVolume() {
         if (!this.output) return;
         const gain = 0.2 * this.getVolumeGain(this.volume);
@@ -222,15 +222,15 @@ class GameAudio {
         }
     }
 
-    /** Bildet die Reglerposition ab, sodass die Mitte der früheren Lautstärke bei 10 % entspricht.
-     * @param {number} percentage - Reglerposition zwischen 0 und 100.
-     * @returns {number} Verstärkungsfaktor zwischen 0 und 1. */
+    /** Maps the slider midpoint to the former volume of 10%.
+     * @param {number} percentage - Slider position from 0 to 100.
+     * @returns {number} Gain factor between 0 and 1. */
     getVolumeGain(percentage) {
         if (percentage <= 50) return percentage / 50 * 0.1;
         return 0.1 + (percentage - 50) / 50 * 0.9;
     }
 
-    /** @returns {AudioBuffer} Monopuffer mit einer Sekunde weißem Rauschen für die Soundeffekte. */
+    /** @returns {AudioBuffer} Mono buffer containing one second of white noise for sound effects. */
     createNoiseBuffer() {
         const { sampleRate } = this.context;
         const buffer = this.context.createBuffer(1, sampleRate, sampleRate);
@@ -241,8 +241,8 @@ class GameAudio {
         return buffer;
     }
 
-    /** Spielt einen bekannten Soundeffekt unter Berücksichtigung seiner Wiederholrate.
-     * @param {string} name - Schlüssel eines Soundeffekts im Katalog. */
+    /** Plays a registered effect and enforces its minimum playback interval.
+     * @param {string} name - Sound effect key in the catalog. */
     play(name) {
         const cue = this.cues[name];
         const output = name === 'sleep' ? this.sleepOutput : this.output;
@@ -258,10 +258,10 @@ class GameAudio {
         for (const noise of cue.noise ?? []) this.playNoise(noise, now, output);
     }
 
-    /** Spielt eine Tonspur mit gleitender Frequenz.
-     * @param {SoundLayer} layer - Parameter der Tonspur.
-     * @param {number} now - Bezugszeit des AudioContext in Sekunden.
-     * @param {AudioNode} [output] - Ziel für die Tonspur. Standardmäßig der Effektausgang. */
+    /** Plays a tone layer with a frequency sweep.
+     * @param {SoundLayer} layer - Settings for the tone layer.
+     * @param {number} now - Reference time on the audio context timeline, in seconds.
+     * @param {AudioNode} [output] - Output for the tone layer. Defaults to the effects output. */
     playTone(layer, now, output = this.output) {
         const { start, end, duration, delay = 0, shape = 'triangle' } = layer;
         const startTime = now + delay;
@@ -272,10 +272,10 @@ class GameAudio {
         this.playLayer(oscillator, oscillator, layer, startTime, undefined, output);
     }
 
-    /** Spielt eine gefilterte Rauschspur.
-     * @param {SoundLayer} layer - Parameter der gefilterten Rauschspur.
-     * @param {number} now - Bezugszeit des AudioContext in Sekunden.
-     * @param {AudioNode} [output] - Ziel für die Rauschspur. Standardmäßig der Effektausgang. */
+    /** Plays a filtered noise layer.
+     * @param {SoundLayer} layer - Settings for the filtered noise layer.
+     * @param {number} now - Reference time on the audio context timeline, in seconds.
+     * @param {AudioNode} [output] - Output for the noise layer. Defaults to the effects output. */
     playNoise(layer, now, output = this.output) {
         const { start, end, duration, delay = 0 } = layer;
         const startTime = now + delay;
@@ -291,13 +291,13 @@ class GameAudio {
         this.playLayer(source, filter, layer, startTime, offset, output);
     }
 
-    /** Startet die Audiospur und trennt ihre Knoten nach dem Abspielen.
-     * @param {AudioScheduledSourceNode} source - Abspielbarer Audioquellknoten.
-     * @param {AudioNode} tail - Ausgangsknoten der Spur vor der Lautstärkehüllkurve.
-     * @param {SoundLayer} layer - Zeit- und Lautstärkeparameter der Spur.
-     * @param {number} startTime - Startzeit auf der Zeitleiste des AudioContext in Sekunden.
-     * @param {number} [offset] - Abspielposition im Rauschpuffer in Sekunden.
-     * @param {AudioNode} [output] - Ziel für den erzeugten Sound. Standardmäßig der Effektausgang. */
+    /** Starts an audio layer and disconnects its nodes after playback.
+     * @param {AudioScheduledSourceNode} source - Audio source node that can be scheduled for playback.
+     * @param {AudioNode} tail - Last node in the layer before its gain envelope.
+     * @param {SoundLayer} layer - Timing and gain settings for the layer.
+     * @param {number} startTime - Start time on the audio context timeline, in seconds.
+     * @param {number} [offset] - Playback offset in the noise buffer, in seconds.
+     * @param {AudioNode} [output] - Output for the audio layer. Defaults to the effects output. */
     playLayer(source, tail, layer, startTime, offset, output = this.output) {
         const endTime = startTime + layer.duration;
         const envelope = this.createEnvelope(layer, startTime, endTime);
@@ -313,11 +313,11 @@ class GameAudio {
         source.stop(endTime);
     }
 
-    /** Erzeugt den Lautstärkeverlauf einer Audiospur.
-     * @param {SoundLayer} layer - Lautstärke und Einschwingzeit der Spur.
-     * @param {number} startTime - Beginn der Spur auf der Zeitleiste des AudioContext in Sekunden.
-     * @param {number} endTime - Ende der Spur auf der Zeitleiste des AudioContext in Sekunden.
-     * @returns {GainNode} Knoten mit der geplanten Lautstärkehüllkurve. */
+    /** Creates the gain envelope for an audio layer.
+     * @param {SoundLayer} layer - Peak gain and attack time for the layer.
+     * @param {number} startTime - Start of the layer on the audio context timeline, in seconds.
+     * @param {number} endTime - End of the layer on the audio context timeline, in seconds.
+     * @returns {GainNode} Gain node with the scheduled envelope. */
     createEnvelope(layer, startTime, endTime) {
         const { volume, attack = 0.004 } = layer;
         const envelope = this.context.createGain();

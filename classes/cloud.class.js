@@ -1,4 +1,4 @@
-/** Bewegliche Wolkenkachel im Hintergrund. */
+/** Moving cloud tile in the background. */
 class Cloud extends MovableObject {
     x = 80;
     y= 0;
@@ -7,9 +7,9 @@ class Cloud extends MovableObject {
     speed = 60; //px pro Second
 
     /**
-     * Setzt Bild und Startposition einer Wolke.
-     * @param {string} imagePath - Relativer Pfad zum Wolkenbild.
-     * @param {number} x - Horizontale Startposition in Weltkoordinaten.
+     * Sets the image and starting position of a cloud.
+     * @param {string} imagePath - Relative path to the cloud image.
+     * @param {number} x - Horizontal starting position in world coordinates.
      */
     constructor(imagePath, x) {
         super().loadImage(imagePath);
@@ -17,8 +17,8 @@ class Cloud extends MovableObject {
     }
 
     /**
-     * Bewegt die Wolke anhand der verstrichenen Spielzeit.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Moves the cloud based on elapsed game time.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     moveClouds(deltaTime) {
         this.x -= this.speed * deltaTime; // Adjust for frame rate

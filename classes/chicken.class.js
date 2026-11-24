@@ -1,4 +1,4 @@
-/** Normales Huhn mit Laufbewegung und einem Todesbild. */
+/** Regular chicken that can walk and has a death sprite. */
 class Chicken extends MovableObject {
     static size = 60;
     static spriteFolder = 'chicken_normal';
@@ -10,9 +10,9 @@ class Chicken extends MovableObject {
     leftBorder = -720;
     bossHelper = false;
     /**
-     * Erstellt ein Huhn mit einem Bewegungsbereich und zufälliger Laufrichtung.
-     * @param {number} [x] - Startposition in Weltkoordinaten. Ohne Angabe wird sie zufällig gewählt.
-     * @param {number} [rightBorder=1440] - Rechte Grenze des Laufbereichs in Weltkoordinaten.
+     * Creates a chicken with a patrol area and a random initial direction.
+     * @param {number} [x] - Starting position in world coordinates. Randomized when omitted.
+     * @param {number} [rightBorder=1440] - Right edge of the patrol area in world coordinates.
      */
     constructor(x = 200 + Math.random() * 500, rightBorder = 1440) {
         super();
@@ -30,8 +30,8 @@ class Chicken extends MovableObject {
     }
 
     /**
-     * Lädt die Laufbilder und das Todesbild des jeweiligen Hühnertyps.
-     * @param {Function} type - Hühnertyp mit Sprite-Ordner und optionalem Todesbild.
+     * Loads the walking frames and death sprite for this chicken type.
+     * @param {Function} type - Chicken constructor with a sprite folder and an optional death sprite.
      */
     loadSprites(type) {
         this.WALKING_IMAGES = [1, 2, 3].map(frame =>
@@ -42,7 +42,7 @@ class Chicken extends MovableObject {
         this.loadImage(this.WALKING_IMAGES[0]);
     }
 
-    /** Zeigt das Todesbild eines Huhns an, falls der Typ besiegbar ist. */
+    /** Shows the chicken's death sprite if its type can be defeated. */
     die() {
         const { deadImage, deadTopOffset } = this.constructor;
         if (!deadImage) return;
@@ -53,9 +53,9 @@ class Chicken extends MovableObject {
     }
 
     /**
-     * Bewegt das Huhn und aktualisiert seine Laufanimation.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
-     * @param {number} [targetX] - Pepes X-Position, wenn das Huhn ihm folgt.
+     * Moves the chicken and advances its walking animation.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
+     * @param {number} [targetX] - Pepe's X coordinate when the chicken is following him.
      */
     update(deltaTime, targetX) {
         if (this.isDead()) return;
@@ -68,7 +68,7 @@ class Chicken extends MovableObject {
         this.playAnimation(this.WALKING_IMAGES, deltaTime, 0.3);
     }
 
-    /** Kehrt die Laufrichtung an der Grenze des Patrouillenbereichs um. */
+    /** Reverses direction at the edge of the patrol area. */
     turnAtBoundary() {
         if (this.x <= this.leftBorder) {
             this.direction = 1;

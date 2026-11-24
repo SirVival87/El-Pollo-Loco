@@ -1,4 +1,4 @@
-/** Steuert Pepes Bewegung, Eingabereaktionen, Inventar und Animationen. */
+/** Controls Pepe's movement, input, inventory, and animations. */
 class Character extends MovableObject {
     static standardFrameDuration = 0.2;
 
@@ -65,14 +65,14 @@ class Character extends MovableObject {
     coinCount = 0;
 
     /**
-     * Gibt die Anzahl der verfügbaren Flaschen zurück.
-     * @returns {number} Verfügbare Flaschen im Inventar.
+     * Returns the number of bottles available to throw.
+     * @returns {number} Bottles available in the inventory.
      */
     get bottleCount() {
         return this.bottles.length;
     }
 
-    /** Lädt Pepes Sprites für Bewegung, Schaden und Tod vor. */
+    /** Preloads Pepe's movement, hurt, and death sprites. */
     constructor() {
         super();
         DrawableObject.preloadImages([
@@ -86,7 +86,7 @@ class Character extends MovableObject {
         this.loadImage(this.WALKING_IMAGES[0]);
     }
 
-    /** Verarbeitet Pepes Eingabe und führt die Kamera nach. */
+    /** Handles Pepe's input and follows him with the camera. */
     updateMovement() {
         if (!this.world || this.world.win !== null || this.isDead()) return;
 
@@ -98,7 +98,7 @@ class Character extends MovableObject {
         this.updateJumpInput(moved);
     }
 
-    /** Bewegt Pepe bis zur jeweiligen Levelgrenze. */
+    /** Moves Pepe up to the corresponding level boundary. */
     updateHorizontalMovement() {
         const { keyboard, level } = this.world;
         if ((keyboard.consumeTap('right') || keyboard.isPressed('right')) && this.x < level.levelEndX) {
@@ -110,8 +110,8 @@ class Character extends MovableObject {
     }
 
     /**
-     * Verarbeitet Sprünge und spielt Schritte am Boden ab.
-     * @param {boolean} moved - Ob Pepe sich im aktuellen Bewegungsschritt horizontal bewegt hat.
+     * Handles jumping and plays footsteps while on the ground.
+     * @param {boolean} moved - Whether Pepe moved horizontally during the current movement update.
      */
     updateJumpInput(moved) {
         const { keyboard, audio } = this.world;
@@ -125,8 +125,8 @@ class Character extends MovableObject {
     }
 
     /**
-     * Aktualisiert die Schwerkraft im festen Physikintervall.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Applies gravity at a fixed physics interval.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updatePhysics(deltaTime) {
         const gravityStep = 1 / 25;
@@ -137,7 +137,7 @@ class Character extends MovableObject {
         this.updateGravity();
     }
 
-    /** Prüft beim Fallen, ob Pepes Füße ein Huhn treffen. */
+    /** Checks for a chicken stomp as Pepe falls. */
     updateGravity() {
         const previousFeet = this.getCollisionBounds().bottom;
         super.updateGravity();
@@ -148,8 +148,8 @@ class Character extends MovableObject {
     }
 
     /**
-     * Zeichnet Pepe bei einer Pause mit der Long-Idle-Animation.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * Draws Pepe's long-idle animation during a pause.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
      */
     draw(ctx) {
         if (this.world?.paused && this.world.win === null && !this.isDead()) {
@@ -164,8 +164,8 @@ class Character extends MovableObject {
     }
 
     /**
-     * Prüft, ob alle Todesbilder für ihre volle Dauer angezeigt wurden.
-     * @returns {boolean} Ob die vollständige Dauer aller Todesbilder erreicht ist.
+     * Checks whether every death frame has been displayed for its full duration.
+     * @returns {boolean} Whether the full duration of the death animation has elapsed.
      */
     hasFinishedDeathAnimation() {
         const duration = this.DEAD_IMAGES.length * Character.standardFrameDuration;
@@ -173,8 +173,8 @@ class Character extends MovableObject {
     }
 
     /**
-     * Aktualisiert Pepes Bild und erfasst die Dauer seiner Untätigkeit.
-     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * Updates Pepe's sprite and tracks how long he has been idle.
+     * @param {number} deltaTime - Game time elapsed since the previous update, in seconds.
      */
     updateAnimation(deltaTime) {
         const images = this.getAnimationImages();
@@ -186,8 +186,8 @@ class Character extends MovableObject {
     }
 
     /**
-     * Wählt die Bildfolge mit der höchsten Priorität für Pepes aktuellen Zustand.
-     * @returns {string[]} Bildpfade der aktuell benötigten Animation.
+     * Selects the highest-priority animation for Pepe's current state.
+     * @returns {string[]} Image paths for the animation to display.
      */
     getAnimationImages() {
         if (this.isDead()) return this.DEAD_IMAGES;

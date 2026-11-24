@@ -1,4 +1,4 @@
-/** Sammelt Tastatur- und Bildschirmaktionen für die Spielschleife. */
+/** Collects keyboard and on-screen input for the game loop. */
 class Keyboard {
     pressed = new Set();
     heldControls = new Map();
@@ -11,8 +11,8 @@ class Keyboard {
     };
 
     /**
-     * Verbindet die Tastatur und setzt die Eingabe beim Fensterwechsel zurück.
-     * @param {AcceptGameAction} [acceptAction] - Entscheidet, ob das Spiel eine Eingabe annimmt. Standardmäßig sind alle Aktionen erlaubt.
+     * Registers keyboard input and resets it when the window loses focus.
+     * @param {AcceptGameAction} [acceptAction] - Decides whether the game accepts an action. Allows all actions by default.
      */
     constructor(acceptAction = () => true) {
         document.addEventListener('keydown', event => this.handleKeyDown(event, acceptAction));
@@ -21,9 +21,9 @@ class Keyboard {
     }
 
     /**
-     * Erfasst einen neuen Tastendruck, wenn das Spiel die Aktion annimmt.
-     * @param {KeyboardEvent} event - Tastendruck des Browsers.
-     * @param {AcceptGameAction} acceptAction - Prüft, ob das Spiel die Aktion annimmt.
+     * Records a new key press when the game accepts its action.
+     * @param {KeyboardEvent} event - Browser keydown event.
+     * @param {AcceptGameAction} acceptAction - Checks whether the game accepts the action.
      */
     handleKeyDown(event, acceptAction) {
         const { code, repeat, target } = event;
@@ -37,7 +37,7 @@ class Keyboard {
         this.tapControl(action);
     }
 
-    /** Entfernt gehaltene Tasten und ausstehende Aktionen. */
+    /** Clears held inputs and queued actions. */
     reset() {
         this.pressed.clear();
         this.heldControls.clear();
@@ -45,43 +45,43 @@ class Keyboard {
     }
 
     /**
-     * Hält eine Aktion für die angegebene Eingabequelle gedrückt.
-     * @param {GameAction} action - Name der Spielaktion.
-     * @param {ControlSource} source - Pointer-ID oder fokussierte Bildschirmtaste.
+     * Holds an action for the specified input source.
+     * @param {GameAction} action - Name of the game action.
+     * @param {ControlSource} source - Pointer ID or focused on-screen button.
      */
     holdControl(action, source) {
         this.heldControls.set(source, action);
     }
 
     /**
-     * Entfernt die gehaltene Aktion einer Eingabequelle.
-     * @param {ControlSource} source - Pointer-ID oder fokussierte Bildschirmtaste.
+     * Releases the action held by an input source.
+     * @param {ControlSource} source - Pointer ID or focused on-screen button.
      */
     releaseControl(source) {
         this.heldControls.delete(source);
     }
 
     /**
-     * Merkt eine einmalige Aktion für die nächste Aktualisierung vor.
-     * @param {GameAction} action - Name der Spielaktion.
+     * Queues a one-time action for the next update.
+     * @param {GameAction} action - Name of the game action.
      */
     tapControl(action) {
         this.tappedControls.add(action);
     }
 
     /**
-     * Liest und entfernt eine vorgemerkte Aktion.
-     * @param {GameAction} action - Name der Spielaktion.
-     * @returns {boolean} Ob eine vorgemerkte Aktion entfernt wurde.
+     * Consumes a queued action.
+     * @param {GameAction} action - Name of the game action.
+     * @returns {boolean} Whether a queued action was removed.
      */
     consumeTap(action) {
         return this.tappedControls.delete(action);
     }
 
     /**
-     * Prüft, ob die Aktion über Tastatur oder Bildschirmtaste gehalten wird.
-     * @param {GameAction} action - Name der Spielaktion.
-     * @returns {boolean} Ob die Aktion gerade gehalten wird.
+     * Checks whether an action is held on the keyboard or an on-screen button.
+     * @param {GameAction} action - Name of the game action.
+     * @returns {boolean} Whether the action is currently held.
      */
     isPressed(action) {
         for (const heldAction of this.heldControls.values()) {
@@ -91,9 +91,9 @@ class Keyboard {
     }
 
     /**
-     * Verarbeitet eine vorgemerkte Aktion einmalig.
-     * @param {GameAction} action - Name der Spielaktion.
-     * @returns {boolean} Ob eine einmalige Aktion zur Verarbeitung vorlag.
+     * Consumes a queued action once.
+     * @param {GameAction} action - Name of the game action.
+     * @returns {boolean} Whether a one-time action was pending.
      */
     isPressedOnce(action) {
         return this.consumeTap(action);

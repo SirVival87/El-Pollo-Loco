@@ -1,4 +1,4 @@
-/** Zeichnet Pepes Lebensbalken und die Zahl eingesammelter Objekte. */
+/** Draws Pepe's health bar and collectible counts. */
 class StatusBar extends DrawableObject {
     x = 16;
     y = 10;
@@ -10,8 +10,8 @@ class StatusBar extends DrawableObject {
     coinIcon = 'img/7_statusbars/3_icons/icon_coin.png';
 
     /**
-     * Bereitet die Symbole und den Lebensbalken für Pepe vor.
-     * @param {Character} character - Pepe als Quelle für Energie, Flaschen und Münzen.
+     * Prepares the icons and health bar for Pepe.
+     * @param {Character} character - Pepe as the source of health, bottle, and coin data.
      */
     constructor(character) {
         super();
@@ -22,8 +22,8 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Zeichnet den Lebensbalken und beide Sammelzähler.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * Draws the health bar and both collectible counters.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
      */
     draw(ctx) {
         this.drawHealth(ctx);
@@ -41,8 +41,8 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Zeichnet den Grundbalken und berechnet den aktuellen Füllstand.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
+     * Draws the empty bar and calculates its current fill level.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
      */
     drawHealth(ctx) {
         if (this.img.naturalWidth === 0) return;
@@ -54,10 +54,10 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Zeichnet den zum Füllstand passenden Ausschnitt der Balkengrafik.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
-     * @param {HTMLImageElement} full - Grafik des vollständig gefüllten Lebensbalkens.
-     * @param {number} healthRatio - Lebensanteil zwischen 0 und 1.
+     * Draws the portion of the fill graphic that matches Pepe's health.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
+     * @param {HTMLImageElement} full - Image of the fully filled health bar.
+     * @param {number} healthRatio - Health ratio between 0 and 1.
      */
     drawHealthFill(ctx, full, healthRatio) {
         // Horizontal bounds of the fill area in the original PNG.
@@ -73,12 +73,12 @@ class StatusBar extends DrawableObject {
     }
 
     /**
-     * Zeichnet Symbol und Anzahl und gibt die Position des nächsten Zählers zurück.
-     * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
-     * @param {string} iconPath - Pfad zum Symbol des Sammelobjekts.
-     * @param {number} count - Anzahl gesammelter Objekte.
-     * @param {number} x - Horizontale Startposition auf dem Canvas.
-     * @returns {number} X-Position für den nachfolgenden Zähler in Canvas-Pixeln.
+     * Draws a counter and returns the position of the next one.
+     * @param {CanvasRenderingContext2D} ctx - 2D rendering context for the game canvas.
+     * @param {string} iconPath - Path to the collectible icon.
+     * @param {number} count - Number of collected items.
+     * @param {number} x - Horizontal starting position on the canvas.
+     * @returns {number} X coordinate for the next counter, in canvas pixels.
      */
     drawCounter(ctx, iconPath, count, x) {
         const icon = DrawableObject.getImage(iconPath);
