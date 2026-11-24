@@ -99,7 +99,7 @@
     .game-stage:is(:fullscreen, .viewport-fullscreen) {
         --thumb-row: 72px;
         --available-height: calc(var(--viewport-height) - var(--safe-top) - var(--safe-bottom));
-        --canvas-width-limit: calc(max(0px, var(--available-height) - var(--thumb-row)) * 1.5);
+        --canvas-width-limit: calc(max(0px, var(--available-height) - var(--thumb-row)) * 4);
         display: grid;
         grid-template: "canvas" minmax(0, 1fr) "controls" var(--thumb-row) / minmax(0, 1fr);
         align-items: center;
@@ -117,6 +117,11 @@
         grid-area: canvas;
         justify-self: center;
         width: min(100%, var(--canvas-width-limit));
+        height: 100%;
+    }
+
+    .game-viewport canvas {
+        height: 100%;
     }
 
     .play-controls,

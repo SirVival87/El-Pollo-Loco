@@ -379,7 +379,7 @@ class World {
     }
 
     /**
-     * Verschiebt Kulissenkacheln außerhalb der Kamera in die nächste Wiederholung.
+     * Richtet die wiederholten Kulissenkacheln an der linken Kamerakante aus.
      * @param {DrawableObject[]} objects - Zu wiederholende Kulissenkacheln.
      * @param {number} loopWidth - Breite eines vollständigen Kachelzyklus in Pixeln.
      */
@@ -387,10 +387,10 @@ class World {
         if (loopWidth === 0) return;
 
         const left = -this.cameraX;
-        const right = left + this.canvas.width;
         for (const object of objects) {
-            if (object.x + object.width < left) object.x += loopWidth;
-            if (object.x > right) object.x -= loopWidth;
+            const cycles = Math.floor((left - object.x) / loopWidth);
+            object.x += cycles * loopWidth;
+            if (object.x + object.width <= left) object.x += loopWidth;
         }
     }
 

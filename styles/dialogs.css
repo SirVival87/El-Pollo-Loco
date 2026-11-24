@@ -46,7 +46,6 @@
 .controls-guide {
     margin: 12px 0;
     padding: 8px 0;
-    border-block: 1px solid #ffda7166;
 }
 
 .controls-guide h3 {
@@ -118,7 +117,8 @@
 
 .settings-columns {
     display: grid;
-    gap: 16px 28px;
+    --settings-column-gap: 28px;
+    gap: 16px var(--settings-column-gap);
 }
 
 .imprint-dialog > h2 {
@@ -142,6 +142,19 @@
         grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     }
 
+    .settings-columns > :last-child {
+        position: relative;
+    }
+
+    .settings-columns > :last-child::before {
+        content: "";
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: calc(var(--settings-column-gap) / -2);
+        width: 1px;
+        background: #ffda7166;
+    }
+
     .imprint-dialog {
         --imprint-height: 260px;
     }
@@ -159,7 +172,7 @@
     }
 
     .settings-columns {
-        column-gap: 14px;
+        --settings-column-gap: 14px;
     }
 
     .game-instructions {

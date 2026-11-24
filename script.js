@@ -1,6 +1,7 @@
 let world;
 const keyboard = new Keyboard(acceptGameAction);
 const canvas = document.getElementById('canvas');
+const defaultCanvasWidth = canvas.width;
 const gameAudio = new GameAudio(document.getElementById('background-music'));
 const startScreen = document.getElementById('start-screen');
 const startButton = document.getElementById('start-button');
@@ -152,6 +153,23 @@ function toggleGamePause(event) {
     focusGameAfterClick(event);
 }
 
+/** Passt die sichtbare Weltbreite im mobilen Querformat an die Leinwand an. */
+function updateCanvasWidth() {
+    const { clientWidth, clientHeight, height } = canvas;
+    if (!clientWidth || !clientHeight) return;
+
+    const width = mobileLandscape.matches ?
+        Math.round(clientWidth * height / clientHeight) : defaultCanvasWidth;
+    if (canvas.width === width) return;
+
+    canvas.width = width;
+    if (world?.stopped && world.win !== null) {
+        world.renderer.render(world);
+        world.renderer.drawEndScreen(world.win);
+    }
+}
+
+new ResizeObserver(updateCanvasWidth).observe(canvas);
 pauseButton.addEventListener('click', toggleGamePause);
 playButtons.forEach(button => connectPlayButton(button, keyboard, acceptGameAction));
 startButton.addEventListener('click', startGame);
