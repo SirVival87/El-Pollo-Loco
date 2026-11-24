@@ -85,15 +85,16 @@ class MovableObject extends DrawableObject {
     }
 
     /**
-     * Prüft, ob sich zwei Kollisionsrechtecke überlappen.
-     * @param {DrawableObject} movableObject - Objekt, dessen Kollisionsrechteck geprüft wird.
-     * @returns {boolean} Ob sich die beiden Rechtecke überlappen.
+     * Prüft die Kollisionsrechtecke beider Objekte auf Überschneidung.
+     * @param {DrawableObject} movableObject - Objekt mit einer oder mehreren Hitboxen.
+     * @returns {boolean} Ob mindestens ein Paar von Rechtecken überlappt.
      */
     isColliding(movableObject) {
-        const a = this.getCollisionBounds();
-        const b = movableObject.getCollisionBounds();
-        return a.left < b.right && a.right > b.left &&
-            a.top < b.bottom && a.bottom > b.top;
+        const otherBoxes = movableObject.getCollisionBoxes();
+        return this.getCollisionBoxes().some(a => otherBoxes.some(b =>
+            a.left < b.right && a.right > b.left &&
+            a.top < b.bottom && a.bottom > b.top
+        ));
     }
 
     /**

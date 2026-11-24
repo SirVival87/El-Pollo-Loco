@@ -50,6 +50,15 @@
  */
 
 /**
+ * Einrückungen eines Kollisionsrechtecks vom Rand des Sprites.
+ * @typedef {Object} CollisionOffsets
+ * @property {number} left - Einrückung vom linken Rand in Pixeln.
+ * @property {number} top - Einrückung vom oberen Rand in Pixeln.
+ * @property {number} right - Einrückung vom rechten Rand in Pixeln.
+ * @property {number} bottom - Einrückung vom unteren Rand in Pixeln.
+ */
+
+/**
  * Bildausschnitt und Anzeigegröße eines Sammelobjekts.
  * @typedef {Object} CollectibleSprite
  * @property {string} path - Relativer Pfad zur Sprite-Datei.

@@ -49,10 +49,11 @@ class DrawableObject {
 
     /**
      * Berechnet die Kollisionsgrenzen mit Berücksichtigung der Blickrichtung.
+     * @param {CollisionOffsets} [offset=this.offset] - Einrückungen der Hitbox im Sprite.
      * @returns {CollisionBounds} Kanten der Hitbox in Weltkoordinaten.
      */
-    getCollisionBounds() {
-        const { left, top, right, bottom } = this.offset;
+    getCollisionBounds(offset = this.offset) {
+        const { left, top, right, bottom } = offset;
         return {
             left: this.x + (this.otherDirection ? right : left),
             top: this.y + top,
@@ -61,16 +62,22 @@ class DrawableObject {
         };
     }
 
+    /** @returns {CollisionBounds[]} Kollisionsrechtecke des Objekts in Weltkoordinaten. */
+    getCollisionBoxes() {
+        return [this.getCollisionBounds()];
+    }
+
     /**
-     * Zeichnet den Kollisionsrahmen für die Fehlersuche.
+     * Zeichnet alle Kollisionsrahmen des Objekts für die Fehlersuche.
      * @param {CanvasRenderingContext2D} ctx - 2D-Zeichenkontext der Spielfläche.
      */
     drawFrame(ctx) {
-        const { left, top, right, bottom } = this.getCollisionBounds();
         ctx.beginPath();
-        ctx.lineWidth = '2';
+        ctx.lineWidth = 2;
         ctx.strokeStyle = 'blue';
-        ctx.rect(left, top, right - left, bottom - top);
+        for (const { left, top, right, bottom } of this.getCollisionBoxes()) {
+            ctx.rect(left, top, right - left, bottom - top);
+        }
         ctx.stroke();
     }
 }

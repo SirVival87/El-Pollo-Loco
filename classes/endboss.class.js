@@ -5,7 +5,14 @@ class Endboss extends MovableObject {
     height = 300;
     width = 300;
     groundY = 140;
-    offset = { left: 29, top: 58, right: 20, bottom: 12 };
+    /**
+     * Sprite-Einrückungen für Kopf und Körper.
+     * @type {CollisionOffsets[]}
+     */
+    static collisionOffsets = [
+        { left: 34, top: 58, right: 172, bottom: 145 },
+        { left: 56, top: 118, right: 38, bottom: 60 },
+    ];
     hitCooldown = 0;
     patrolDistance = 200;
     patrolSpeed = 160;
@@ -68,6 +75,11 @@ class Endboss extends MovableObject {
             ...this.DEAD_IMAGES,
         ]);
         this.loadImage(this.WALKING_IMAGES[0]);
+    }
+
+    /** @returns {CollisionBounds[]} Trefferflächen für Kopf und Körper in Weltkoordinaten. */
+    getCollisionBoxes() {
+        return Endboss.collisionOffsets.map(offset => this.getCollisionBounds(offset));
     }
 
     /**
