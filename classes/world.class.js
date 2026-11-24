@@ -248,13 +248,13 @@ class World {
     updateBoss(deltaTime) {
         if (!this.boss) return;
 
-        const { isJumping: wasJumping, patrolTravel: previousPatrol } = this.boss;
+        const { isJumping: wasJumping, x: previousX } = this.boss;
         this.boss.updateJump(deltaTime);
         if (!this.isBossNearViewport()) return;
 
-        if (this.boss.isJumping && !wasJumping && this.boss.jumpElapsed < this.boss.returnJumpAt) {
+        if (this.boss.isJumping && !wasJumping) {
             this.audio?.play('bossAttack');
-        } else if (!this.boss.isJumping && this.boss.patrolTravel !== previousPatrol) {
+        } else if (!this.boss.isJumping && this.boss.x !== previousX) {
             this.audio?.play('bossStep');
         }
     }

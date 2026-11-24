@@ -1,4 +1,4 @@
-/** Bossgegner mit Patrouille, Sprungangriff und eigener Todesanimation. */
+/** Bossgegner mit Patrouille, Sprungangriff, schnellen Läufen und eigener Todesanimation. */
 class Endboss extends MovableObject {
     x = 720;
     y = 140;
@@ -16,7 +16,9 @@ class Endboss extends MovableObject {
     deathElapsed = null;
     jumpHeight = 105;
     jumpDuration = 0.48;
-    returnJumpAt = 1;
+    chargeDistance = 200;
+    chargeSpeed = 280;
+    returnSpeed = 760;
     jumpElapsed = -this.getJumpDelay();
     isJumping = false;
     contactDamage = 100; // Damage inflicted on contact with the player
@@ -26,17 +28,6 @@ class Endboss extends MovableObject {
         'img/4_enemie_boss_chicken/1_walk/G2.png',
         'img/4_enemie_boss_chicken/1_walk/G3.png',
         'img/4_enemie_boss_chicken/1_walk/G4.png',
-    ]
-
-    ALERT_IMAGES = [
-        'img/4_enemie_boss_chicken/2_alert/G5.png',
-        'img/4_enemie_boss_chicken/2_alert/G6.png',
-        'img/4_enemie_boss_chicken/2_alert/G7.png',
-        'img/4_enemie_boss_chicken/2_alert/G8.png',
-        'img/4_enemie_boss_chicken/2_alert/G9.png',
-        'img/4_enemie_boss_chicken/2_alert/G10.png',
-        'img/4_enemie_boss_chicken/2_alert/G11.png',
-        'img/4_enemie_boss_chicken/2_alert/G12.png',
     ]
 
     ATTACK_IMAGES = [
@@ -72,7 +63,6 @@ class Endboss extends MovableObject {
         this.homeX = x;
         DrawableObject.preloadImages([
             ...this.WALKING_IMAGES,
-            ...this.ALERT_IMAGES,
             ...this.ATTACK_IMAGES,
             ...this.HURT_IMAGES,
             ...this.DEAD_IMAGES,
@@ -94,37 +84,46 @@ class Endboss extends MovableObject {
         }
 
         this.attackStartX ??= this.x;
-        this.otherDirection = false;
         this.updateAttackPose();
     }
 
-    /** Steuert den Sprung nach vorne und das Warten auf den Rücksprung. */
+    /** Steuert den Vorwärtssprung und danach den Angriff am Boden. */
     updateAttackPose() {
         if (this.jumpElapsed < this.jumpDuration) {
+            this.otherDirection = false;
             this.setJumpPose(this.jumpElapsed / this.jumpDuration, this.attackStartX, -this.jumpDistance);
             return;
         }
 
-        const forwardX = this.attackStartX - this.jumpDistance;
-        if (this.jumpElapsed < this.returnJumpAt) {
-            this.setGroundPose(forwardX);
+        this.updateGroundAttack(this.jumpElapsed - this.jumpDuration);
+    }
+
+    /**
+     * Lässt den Boss vom Landepunkt bis zum Wendepunkt weiterlaufen.
+     * @param {number} elapsed - Zeit seit der Landung in Sekunden.
+     */
+    updateGroundAttack(elapsed) {
+        const landingX = this.attackStartX - this.jumpDistance;
+        const chargeDuration = this.chargeDistance / this.chargeSpeed;
+        if (elapsed < chargeDuration) {
+            this.otherDirection = false;
+            this.setGroundPose(landingX - elapsed * this.chargeSpeed);
         } else {
-            this.updateReturnJump(forwardX);
+            this.updateReturnRun(landingX - this.chargeDistance, elapsed - chargeDuration);
         }
     }
 
     /**
-     * Steuert die Rückkehr zum Startpunkt des Angriffs.
-     * @param {number} forwardX - Horizontale Landeposition des Hinsprungs in Weltkoordinaten.
+     * Lässt den Boss zum Ausgangspunkt zurückrennen und beendet den Angriff.
+     * @param {number} turnX - X-Koordinate des Wendepunkts.
+     * @param {number} elapsed - Seit dem Wenden verstrichene Zeit in Sekunden.
      */
-    updateReturnJump(forwardX) {
-        const returnElapsed = this.jumpElapsed - this.returnJumpAt;
-        if (returnElapsed < this.jumpDuration) {
-            this.setJumpPose(returnElapsed / this.jumpDuration, forwardX, this.jumpDistance);
-            return;
-        }
+    updateReturnRun(turnX, elapsed) {
+        this.otherDirection = true;
+        const x = Math.min(this.attackStartX, turnX + elapsed * this.returnSpeed);
+        this.setGroundPose(x);
+        if (x < this.attackStartX) return;
 
-        this.setGroundPose(this.attackStartX);
         this.attackStartX = null;
         this.otherDirection = this.patrolTravel >= this.patrolDistance;
         this.jumpElapsed = -this.getJumpDelay();
@@ -143,12 +142,15 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Berechnet die Patrouillenzeit für etwa 1,74 bis 3,24 Sekunden zwischen Vorwärtssprüngen.
-     * @returns {number} Wartezeit nach dem Rücksprung in Sekunden.
+     * Berechnet die Patrouillenzeit für etwa 3,48 bis 6,48 Sekunden zwischen Vorwärtssprüngen.
+     * @returns {number} Wartezeit nach der Rückkehr in Sekunden.
      */
     getJumpDelay() {
-        const intervalBetweenAttacks = 1.74 + Math.random() * 1.5;
-        return Math.max(0, intervalBetweenAttacks - this.returnJumpAt - this.jumpDuration);
+        const intervalBetweenAttacks = 3.48 + Math.random() * 3;
+        const returnDistance = this.jumpDistance + this.chargeDistance;
+        const attackDuration = this.jumpDuration + this.chargeDistance / this.chargeSpeed +
+            returnDistance / this.returnSpeed;
+        return Math.max(0, intervalBetweenAttacks - attackDuration);
     }
 
     /**
@@ -185,10 +187,8 @@ class Endboss extends MovableObject {
             this.showAnimationFrame(this.HURT_IMAGES, sinceHit, 0.2);
         } else if (this.isJumping) {
             this.updateAttackAnimation();
-        } else if (this.jumpElapsed >= 0) {
-            this.showAnimationFrame(this.ALERT_IMAGES, this.jumpElapsed - this.jumpDuration, 0.12, true);
         } else {
-            this.showAnimationFrame(this.WALKING_IMAGES, this.patrolTravel / this.patrolSpeed, 0.15, true);
+            this.updateGroundAnimation();
         }
     }
 
@@ -202,11 +202,16 @@ class Endboss extends MovableObject {
         this.showAnimationFrame(this.DEAD_IMAGES, this.deathElapsed, frameDuration);
     }
 
-    /** Wählt das Bild für die aktuelle Phase des Sprungs. */
+    /** Wählt das Bild für die aktuelle Phase des Vorwärtssprungs. */
     updateAttackAnimation() {
-        const jumpTime = this.jumpElapsed < this.returnJumpAt ?
-            this.jumpElapsed : this.jumpElapsed - this.returnJumpAt;
-        this.showAnimationFrame(this.ATTACK_IMAGES, jumpTime, this.jumpDuration / this.ATTACK_IMAGES.length);
+        this.showAnimationFrame(this.ATTACK_IMAGES, this.jumpElapsed, this.jumpDuration / this.ATTACK_IMAGES.length);
+    }
+
+    /** Spielt während des Angriffs schnellere Laufbilder als bei der Patrouille. */
+    updateGroundAnimation() {
+        const running = this.attackStartX !== null;
+        const elapsed = running ? this.jumpElapsed - this.jumpDuration : this.patrolTravel / this.patrolSpeed;
+        this.showAnimationFrame(this.WALKING_IMAGES, elapsed, running ? 0.08 : 0.15, true);
     }
 
     /**
