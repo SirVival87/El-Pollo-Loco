@@ -87,7 +87,7 @@
         gap: 0;
         padding: 0;
         overflow: hidden;
-        background: #23140f;
+        background-color: #23140f;
     }
 
     .game-title,
@@ -108,7 +108,7 @@
         box-sizing: border-box;
         padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
         border-radius: 0;
-        background: #23140f;
+        background: #23140f var(--desert-art) center bottom / cover;
         box-shadow: none;
     }
 
@@ -129,6 +129,7 @@
         grid-area: controls;
         display: flex;
         width: 100%;
+        background: linear-gradient(#3a1b1260, #27130eaf);
     }
 
     .game-stage:not(:has(.play-control:enabled)) {

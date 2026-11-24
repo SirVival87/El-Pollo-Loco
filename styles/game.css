@@ -14,6 +14,7 @@
 
 body {
     --viewport-height: 100vh;
+    --desert-art: url('../img/9_intro_outro_screens/start/desert-sunset.webp');
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -34,7 +35,7 @@ body {
         max(var(--page-padding-inline), var(--safe-left));
     background: #18353b;
     background-image: linear-gradient(#102a37bb, #4c2119c9),
-        url('../img/9_intro_outro_screens/start/desert-sunset.png');
+        var(--desert-art);
     background-position: center;
     background-size: cover;
 }
