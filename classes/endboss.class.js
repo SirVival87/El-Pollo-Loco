@@ -196,7 +196,7 @@ class Endboss extends MovableObject {
         const distance = Math.abs(characterX - this.x);
         const origin = direction < 0 ? this.x : this.x + Math.min(this.width, distance / 2);
         const spacing = Math.min(44, distance / 8);
-        [Chicken, Chicken, SmallChicken].forEach((ChickenType, index) => {
+        [Chicken, SmallChicken].forEach((ChickenType, index) => {
             const centerX = origin + direction * spacing * (index + 1);
             const helper = new ChickenType(centerX - ChickenType.size / 2, level.levelEndX);
             helper.bossHelper = true;
