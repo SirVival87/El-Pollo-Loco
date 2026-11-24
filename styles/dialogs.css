@@ -94,9 +94,89 @@
     justify-content: flex-end;
 }
 
+:is(#settings-dialog, .imprint-dialog) {
+    --dialog-padding: clamp(12px, 3vw, 24px);
+    width: min(680px, calc(100% - 24px));
+    padding: var(--dialog-padding);
+}
+
+.settings-columns {
+    display: grid;
+    gap: 16px 28px;
+}
+
+.imprint-dialog > h2 {
+    margin-bottom: 12px;
+    font-size: 1.5rem;
+    line-height: 1.25;
+}
+
 .imprint-dialog iframe {
     display: block;
     width: 100%;
-    height: min(360px, calc(var(--viewport-height) - var(--safe-top) - var(--safe-bottom) - 112px));
+    height: min(var(--imprint-height, 350px), calc(
+        var(--viewport-height) - var(--safe-top) - var(--safe-bottom) -
+        2 * var(--dialog-padding) - 72px
+    ));
     border: 0;
+}
+
+@media (min-width: 440px) {
+    .settings-columns {
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    }
+
+    .imprint-dialog {
+        --imprint-height: 260px;
+    }
+}
+
+@media (max-height: 440px), (max-width: 439px) {
+    #settings-dialog {
+        --dialog-padding: 12px;
+        font-size: 0.95rem;
+        line-height: 1.18;
+    }
+
+    #settings-dialog > h2 {
+        margin-bottom: 8px;
+        font-size: 1.35rem;
+    }
+
+    .settings-columns {
+        column-gap: 14px;
+    }
+
+    .game-instructions {
+        margin-bottom: 6px;
+    }
+
+    .controls-guide {
+        margin: 6px 0 0;
+        padding: 5px 0;
+    }
+
+    .controls-guide dl {
+        row-gap: 2px;
+    }
+
+    .controls-guide p {
+        margin-top: 4px;
+    }
+}
+
+@media (pointer: coarse) and (max-height: 300px) {
+    #settings-dialog {
+        --dialog-padding: 10px;
+        font-size: 0.875rem;
+        line-height: 1.12;
+    }
+
+    .controls-guide {
+        padding-block: 4px;
+    }
+
+    .controls-guide dl {
+        display: none;
+    }
 }
