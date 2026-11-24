@@ -26,6 +26,7 @@ class Endboss extends MovableObject {
     chargeDistance = 200;
     chargeSpeed = 280;
     returnSpeed = 760;
+    helperSpawnElapsed = 0;
     jumpElapsed = -this.getJumpDelay();
     isJumping = false;
     contactDamage = 100; // Damage inflicted on contact with the player
@@ -163,6 +164,46 @@ class Endboss extends MovableObject {
         const attackDuration = this.jumpDuration + this.chargeDistance / this.chargeSpeed +
             returnDistance / this.returnSpeed;
         return Math.max(0, intervalBetweenAttacks - attackDuration);
+    }
+
+    /**
+     * Schickt alle drei Sekunden Helfer los, solange Pepe 400 bis unter 800 Pixel entfernt ist.
+     * @param {number} characterX - Pepes horizontale Position.
+     * @param {Level} level - Level, in das die Helfer eingefügt werden.
+     * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     */
+    updateHelpers(characterX, level, deltaTime) {
+        const distance = Math.abs(characterX - this.x);
+        if (this.isDead() || distance < 400 || distance >= 800) {
+            this.helperSpawnElapsed = 0;
+            return;
+        }
+
+        this.helperSpawnElapsed += deltaTime;
+        if (this.helperSpawnElapsed + 1e-9 < 3) return;
+
+        this.helperSpawnElapsed = 0;
+        this.spawnHelpers(characterX, level);
+    }
+
+    /**
+     * Platziert zwei normale Hühner und ein Küken auf der Seite, auf der Pepe steht.
+     * @param {number} characterX - Pepes horizontale Position.
+     * @param {Level} level - Level, in das die Helfer eingefügt werden.
+     */
+    spawnHelpers(characterX, level) {
+        const direction = characterX < this.x ? -1 : 1;
+        const origin = direction < 0 ? this.x : Math.min(this.x + this.width, characterX - 160);
+        const types = [Chicken, Chicken, SmallChicken];
+        types.forEach((ChickenType, index) => {
+            const edge = origin + direction * (20 + index * 44);
+            const x = direction < 0 ? edge - ChickenType.size : edge;
+            const helper = new ChickenType(x, level.levelEndX);
+            helper.bossHelper = true;
+            helper.direction = direction;
+            helper.otherDirection = direction === 1;
+            level.enemies.push(helper);
+        });
     }
 
     /**

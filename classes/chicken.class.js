@@ -8,6 +8,7 @@ class Chicken extends MovableObject {
     static hitboxOffset = { left: 1, top: 4, right: 2, bottom: 4 };
 
     leftBorder = -720;
+    bossHelper = false;
     /**
      * Erstellt ein Huhn mit einem Bewegungsbereich und zufälliger Laufrichtung.
      * @param {number} [x] - Startposition in Weltkoordinaten. Ohne Angabe wird sie zufällig gewählt.
@@ -54,18 +55,25 @@ class Chicken extends MovableObject {
     /**
      * Bewegt das Huhn und aktualisiert seine Laufanimation.
      * @param {number} deltaTime - Verstrichene Spielzeit seit dem letzten Schritt in Sekunden.
+     * @param {number} [targetX] - Pepes X-Position, wenn das Huhn ihm folgt.
      */
-    update(deltaTime) {
+    update(deltaTime, targetX) {
         if (this.isDead()) return;
 
+        if (targetX !== undefined && targetX !== this.x) this.direction = targetX < this.x ? -1 : 1;
         this.x += this.speed * this.direction;
+        if (targetX === undefined) this.turnAtBoundary();
+
+        this.otherDirection = this.direction === 1;
+        this.playAnimation(this.WALKING_IMAGES, deltaTime, 0.3);
+    }
+
+    /** Kehrt die Laufrichtung an der Grenze des Patrouillenbereichs um. */
+    turnAtBoundary() {
         if (this.x <= this.leftBorder) {
             this.direction = 1;
         } else if (this.x >= this.rightBorder) {
             this.direction = -1;
         }
-
-        this.otherDirection = this.direction === 1;
-        this.playAnimation(this.WALKING_IMAGES, deltaTime, 0.3);
     }
 }

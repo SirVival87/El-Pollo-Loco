@@ -191,7 +191,7 @@ class World {
     updateActors(deltaTime) {
         this.character.updateMovement();
         this.level.enemies.forEach(enemy => {
-            if (enemy instanceof Chicken) enemy.update(deltaTime);
+            if (enemy instanceof Chicken) enemy.update(deltaTime, enemy.bossHelper ? this.character.x : undefined);
         });
         this.updateBoss(deltaTime);
     }
@@ -250,6 +250,7 @@ class World {
 
         const { isJumping: wasJumping, x: previousX } = this.boss;
         this.boss.updateJump(deltaTime);
+        this.boss.updateHelpers(this.character.x, this.level, deltaTime);
         if (!this.isBossNearViewport()) return;
 
         if (this.boss.isJumping && !wasJumping) {
@@ -322,7 +323,7 @@ class World {
         chicken.die();
         this.audio?.play('chickenDeath');
         this.scheduleLevelChange(() => this.removeChicken(chicken), 2000);
-        this.scheduleLevelChange(() => this.respawnChicken(chicken.constructor), 10_000);
+        if (!chicken.bossHelper) this.scheduleLevelChange(() => this.respawnChicken(chicken.constructor), 10_000);
     }
 
     /**
