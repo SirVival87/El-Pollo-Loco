@@ -154,33 +154,10 @@
 @media (orientation: landscape) and (pointer: coarse) and (max-width: 1440px) and (max-height: 500px) {
     .game-stage,
     .game-stage:is(:fullscreen, .viewport-fullscreen) {
-        --control-rail: clamp(60px, 13vw, 110px);
-        --canvas-width-limit: calc(var(--available-height) * 1.5);
-        grid-template: "movement canvas actions" minmax(0, 1fr) / var(--control-rail) minmax(0, 1fr) var(--control-rail);
-        column-gap: 4px;
-    }
-
-    .play-controls,
-    .game-stage:is(:fullscreen, .viewport-fullscreen) .play-controls {
-        display: contents;
-    }
-
-    .play-control-group {
-        grid-template-columns: minmax(0, 1fr);
-        box-sizing: border-box;
-        width: 100%;
-        padding-inline: 6px;
-    }
-
-    .play-control-group:first-child {
-        grid-area: movement;
-    }
-
-    .play-control-group:last-child {
-        grid-area: actions;
+        --thumb-row: 62px;
     }
 
     .play-control {
-        min-height: 58px;
+        min-height: 44px;
     }
 }
